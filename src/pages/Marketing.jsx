@@ -30,7 +30,8 @@ function Marketing() {
     'Lead': '',
     'Booking': '',
     'Click': '',
-    'Ghi chú': ''
+    'Ghi chú': '',
+    '_id': ''
   });
 
   const handleNumberChange = (field, value) => {
@@ -68,7 +69,8 @@ function Marketing() {
       'Lead': m['Lead'] || '',
       'Booking': m['Booking'] || '',
       'Click': m['Click'] || '',
-      'Ghi chú': m['Ghi chú'] || ''
+      'Ghi chú': m['Ghi chú'] || '',
+      '_id': m['_id'] || ''
     });
     setIsModalOpen(true);
   };
@@ -283,7 +285,7 @@ function Marketing() {
                   <button 
                     onClick={() => {
                       if(window.confirm(`Xóa chiến dịch ${m['Tên chiến dịch']}?`)) {
-                        deleteMarketing(m['Tên chiến dịch']);
+                        deleteMarketing(m['_id']);
                       }
                     }} 
                     className="btn-cancel" 

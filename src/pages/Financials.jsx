@@ -76,7 +76,8 @@ function Financials() {
     'KH (tỷ)': '',
     'Ghi chú': '',
     'Người duyệt': '',
-    '_approver_id': ''
+    '_approver_id': '',
+    '_id': ''
   });
 
   const handleOpenAddModal = () => {
@@ -104,7 +105,8 @@ function Financials() {
       'KH (tỷ)': f['KH (tỷ)'] || '',
       'Ghi chú': f['Ghi chú'] || '',
       'Người duyệt': f['Người duyệt'] || '',
-      '_approver_id': f['_approver_id'] || ''
+      '_approver_id': f['_approver_id'] || '',
+      '_id': f['_id'] || ''
     });
     setIsModalOpen(true);
   };
@@ -332,7 +334,7 @@ function Financials() {
                       <button 
                         onClick={() => {
                           if(window.confirm(`Xóa bản ghi ${f['Hạng mục']}?`)) {
-                            deleteFinancial(f['Tháng'], f['Hạng mục']);
+                            deleteFinancial(f['_id']);
                           }
                         }} 
                         className="btn-cancel" 
