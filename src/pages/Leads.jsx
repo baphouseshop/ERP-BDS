@@ -17,7 +17,6 @@ function Leads() {
   const [filterSales, setFilterSales] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
-  const itemsPerPage = 15;
   const [sortConfig, setSortConfig] = useState({ key: '_created_at', direction: 'desc' });
 
   // Unique values for dropdowns
@@ -331,7 +330,6 @@ function Leads() {
             ⬆ Nhập Dữ liệu
           </button>
 
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <select 
             className="filter-select" 
             style={{ width: '180px', margin: 0 }}

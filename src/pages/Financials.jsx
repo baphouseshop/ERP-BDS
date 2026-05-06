@@ -221,11 +221,6 @@ function Financials() {
     return <div style={{ color: 'var(--text-muted)' }}>-</div>;
   };
 
-  // Pagination Logic
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentFinancials = financials.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(financials.length / itemsPerPage);
 
   const uniqueCategories = [...new Set(financials.map(f => f['Hạng mục']).filter(Boolean))];
 

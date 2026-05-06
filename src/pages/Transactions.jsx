@@ -13,7 +13,6 @@ function Transactions() {
   const [filterSales, setFilterSales] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
-  const itemsPerPage = 15;
   const [sortConfig, setSortConfig] = useState({ key: '_created_at', direction: 'desc' });
 
   const uniqueStatuses = [...new Set(transactions.map(t => t['Trạng thái']).filter(Boolean))];
