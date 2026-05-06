@@ -1,0 +1,16 @@
+id,full_name,email,phone,department,position,hire_date,status,salary,manager_id
+EMP001,Nguyen Van A,employee1@company.vn,986701166,Operations,Ops Coordinator,2025-05-09,Active,34382346,
+EMP002,Nguyen Van B,employee2@company.vn,985530182,IT,System Admin,2024-11-20,Active,31607548,EMP001
+EMP003,Nguyen Van C,employee3@company.vn,986872589,Marketing,Digital Marketer,2025-01-20,Active,15967530,EMP001
+EMP004,Nguyen Van D,employee4@company.vn,981971714,Marketing,Digital Marketer,2024-10-31,Active,37996347,EMP001
+EMP005,Nguyen Van E,employee5@company.vn,985397442,HR,HR Specialist,2024-03-03,Active,30353147,EMP001
+EMP006,Nguyen Van F,employee6@company.vn,985162446,IT,System Admin,2024-08-31,Active,17992737,EMP001
+EMP007,Nguyen Van G,employee7@company.vn,981143878,HR,HR Specialist,2024-12-07,Active,15647548,EMP001
+EMP008,Nguyen Van H,employee8@company.vn,984814234,Sales,Account Executive,2024-07-28,Active,30869389,EMP001
+EMP009,Nguyen Van I,employee9@company.vn,983272911,IT,System Admin,2024-06-25,Active,39379644,EMP001
+EMP010,Nguyen Van J,employee10@company.vn,981881846,Marketing,Digital Marketer,2025-01-26,Active,16377626,EMP001
+EMP011,Nguyen Van K,employee11@company.vn,983584742,HR,HR Specialist,2024-07-07,Active,20680005,EMP001
+EMP012,Nguyen Van L,employee12@company.vn,981665487,Operations,Ops Coordinator,2025-05-14,Active,16752763,EMP001
+EMP013,Nguyen Van M,employee13@company.vn,989025110,IT,System Admin,2024-02-18,Active,33439401,EMP001
+EMP014,Nguyen Van N,employee14@company.vn,982544252,Finance,Financial Analyst,2025-05-09,Active,36162391,EMP001
+EMP015,Nguyen Van O,employee15@company.vn,988636734,IT,System Admin,2025-04-14,Active,14840841,EMP001

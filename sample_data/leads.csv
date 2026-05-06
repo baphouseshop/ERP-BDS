@@ -1,0 +1,528 @@
+lead_code,received_date,full_name,phone_number_full,phone_number_hidden,source,campaign,requirement,status,agency,appointment_date,follow_up_date,notes
+L0001,2026-01-26,Customer 1,903328574,090****862,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-01-28,2026-01-31,Follow up
+L0002,2026-01-09,Customer 2,908865660,090****474,Facebook Ads,New Product Launch,Consultation,New,Internal,2026-01-11,2026-01-14,Follow up
+L0003,2026-01-17,Customer 3,902882855,090****549,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-01-19,2026-01-22,Follow up
+L0004,2026-01-14,Customer 4,903117540,090****123,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-01-16,2026-01-19,Follow up
+L0005,2026-01-08,Customer 5,908848419,090****354,Facebook Ads,New Product Launch,Consultation,Interested,Internal,2026-01-10,2026-01-13,Follow up
+L0006,2026-01-14,Customer 6,904071375,090****835,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-01-16,2026-01-19,Follow up
+L0007,2026-01-06,Customer 7,905973059,090****131,Facebook Ads,New Product Launch,Consultation,Interested,Internal,2026-01-08,2026-01-11,Follow up
+L0008,2026-01-27,Customer 8,906660143,090****366,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-29,2026-02-01,Priority
+L0009,2026-01-28,Customer 9,905445214,090****741,Facebook Ads,New Product Launch,Consultation,New,Internal,2026-01-30,2026-02-02,Follow up
+L0010,2026-01-04,Customer 10,909673998,090****142,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-01-06,2026-01-09,Follow up
+L0011,2026-01-02,Customer 11,902273180,090****320,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-01-04,2026-01-07,Follow up
+L0012,2026-01-12,Customer 12,908477146,090****829,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-01-14,2026-01-17,Follow up
+L0013,2026-01-06,Customer 13,904671239,090****600,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-01-08,2026-01-11,Follow up
+L0014,2026-01-22,Customer 14,901509378,090****402,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-01-24,2026-01-27,Follow up
+L0015,2026-01-08,Customer 15,906616258,090****391,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-10,2026-01-13,Priority
+L0016,2026-01-05,Customer 16,904652431,090****127,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-07,2026-01-10,Priority
+L0017,2026-01-17,Customer 17,907577312,090****374,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-19,2026-01-22,Priority
+L0018,2026-01-05,Customer 18,909503461,090****481,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-07,2026-01-10,Priority
+L0019,2026-01-20,Customer 19,902970590,090****233,Facebook Ads,New Product Launch,Consultation,Interested,Internal,2026-01-22,2026-01-25,Follow up
+L0020,2026-01-25,Customer 20,908865324,090****167,Facebook Ads,New Product Launch,Consultation,Interested,Internal,2026-01-27,2026-01-30,Follow up
+L0021,2026-01-01,Customer 21,909774648,090****616,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-03,2026-01-06,Priority
+L0022,2026-01-07,Customer 22,906846170,090****394,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-01-09,2026-01-12,Follow up
+L0023,2026-01-09,Customer 23,902506691,090****319,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-11,2026-01-14,Priority
+L0024,2026-01-20,Customer 24,905626992,090****474,Facebook Ads,New Product Launch,Consultation,Interested,Internal,2026-01-22,2026-01-25,Follow up
+L0025,2026-01-06,Customer 25,906935706,090****131,Facebook Ads,New Product Launch,Consultation,New,Internal,2026-01-08,2026-01-11,Follow up
+L0026,2026-01-01,Customer 26,901239023,090****202,Facebook Ads,New Product Launch,Consultation,New,Internal,2026-01-03,2026-01-06,Follow up
+L0027,2026-01-28,Customer 27,901594958,090****919,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-30,2026-02-02,Priority
+L0028,2026-01-03,Customer 28,902409549,090****593,Facebook Ads,New Product Launch,Consultation,Interested,Internal,2026-01-05,2026-01-08,Follow up
+L0029,2026-01-28,Customer 29,905581977,090****951,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-30,2026-02-02,Priority
+L0030,2026-01-08,Customer 30,907142078,090****138,Facebook Ads,New Product Launch,Consultation,New,Internal,2026-01-10,2026-01-13,Follow up
+L0031,2026-01-24,Customer 31,908851413,090****860,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-26,2026-01-29,Priority
+L0032,2026-01-26,Customer 32,908801933,090****342,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-01-28,2026-01-31,Follow up
+L0033,2026-01-14,Customer 33,902120025,090****772,Facebook Ads,New Product Launch,Consultation,Interested,Internal,2026-01-16,2026-01-19,Follow up
+L0034,2026-01-23,Customer 34,903823485,090****867,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-25,2026-01-28,Priority
+L0035,2026-01-05,Customer 35,909565578,090****867,Facebook Ads,New Product Launch,Consultation,Interested,Internal,2026-01-07,2026-01-10,Follow up
+L0036,2026-01-02,Customer 36,906236319,090****819,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-01-04,2026-01-07,Follow up
+L0037,2026-01-04,Customer 37,905477838,090****480,Facebook Ads,New Product Launch,Consultation,Interested,Internal,2026-01-06,2026-01-09,Follow up
+L0038,2026-01-20,Customer 38,901594241,090****412,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-22,2026-01-25,Priority
+L0039,2026-01-13,Customer 39,907159781,090****256,Facebook Ads,New Product Launch,Consultation,Interested,Internal,2026-01-15,2026-01-18,Follow up
+L0040,2026-01-08,Customer 40,908477759,090****416,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-01-10,2026-01-13,Follow up
+L0041,2026-01-18,Customer 41,902888256,090****773,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-01-20,2026-01-23,Follow up
+L0042,2026-01-25,Customer 42,905953046,090****435,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-27,2026-01-30,Priority
+L0043,2026-01-06,Customer 43,907297924,090****600,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-01-08,2026-01-11,Follow up
+L0044,2026-01-10,Customer 44,905788107,090****726,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-12,2026-01-15,Priority
+L0045,2026-01-04,Customer 45,902467362,090****767,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-06,2026-01-09,Priority
+L0046,2026-01-20,Customer 46,907379201,090****198,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-22,2026-01-25,Priority
+L0047,2026-01-21,Customer 47,902187315,090****131,Facebook Ads,New Product Launch,Consultation,New,Internal,2026-01-23,2026-01-26,Follow up
+L0048,2026-01-19,Customer 48,903823485,090****333,Facebook Ads,New Product Launch,Consultation,Interested,Internal,2026-01-21,2026-01-24,Follow up
+L0049,2026-01-11,Customer 49,908860271,090****659,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-01-13,2026-01-16,Follow up
+L0050,2026-01-14,Customer 50,909404285,090****200,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-16,2026-01-19,Priority
+L0051,2026-01-26,Customer 51,905139049,090****488,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-28,2026-01-31,Priority
+L0052,2026-01-27,Customer 52,903875327,090****619,Facebook Ads,New Product Launch,Consultation,New,Internal,2026-01-29,2026-02-01,Follow up
+L0053,2026-01-25,Customer 53,908753715,090****663,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-01-27,2026-01-30,Follow up
+L0054,2026-01-20,Customer 54,906236968,090****363,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-01-22,2026-01-25,Follow up
+L0055,2026-01-08,Customer 55,902882855,090****681,Facebook Ads,New Product Launch,Consultation,Interested,Internal,2026-01-10,2026-01-13,Follow up
+L0056,2026-01-04,Customer 56,908736466,090****864,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-01-06,2026-01-09,Follow up
+L0057,2026-01-08,Customer 57,908638363,090****774,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-01-10,2026-01-13,Follow up
+L0058,2026-01-10,Customer 58,907142078,090****346,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-12,2026-01-15,Priority
+L0059,2026-01-08,Customer 59,906846170,090****142,Facebook Ads,New Product Launch,Consultation,Interested,Internal,2026-01-10,2026-01-13,Follow up
+L0060,2026-01-01,Customer 60,904071375,090****202,Facebook Ads,New Product Launch,Consultation,Interested,Internal,2026-01-03,2026-01-06,Follow up
+L0061,2026-01-08,Customer 61,909565578,090****256,Facebook Ads,New Product Launch,Consultation,New,Internal,2026-01-10,2026-01-13,Follow up
+L0062,2026-01-28,Customer 62,905445214,090****354,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-30,2026-02-02,Priority
+L0063,2026-01-13,Customer 63,905788107,090****862,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-01-15,2026-01-18,Follow up
+L0064,2026-01-14,Customer 64,908860271,090****860,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-01-16,2026-01-19,Follow up
+L0065,2026-01-28,Customer 65,908865324,090****616,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-30,2026-02-02,Priority
+L0066,2026-01-08,Customer 66,906660143,090****835,Facebook Ads,New Product Launch,Consultation,Interested,Internal,2026-01-10,2026-01-13,Follow up
+L0067,2026-01-19,Customer 67,909673998,090****167,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-21,2026-01-24,Priority
+L0068,2026-01-08,Customer 68,905953046,090****319,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-01-10,2026-01-13,Follow up
+L0069,2026-01-02,Customer 69,903875327,090****412,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-01-04,2026-01-07,Follow up
+L0070,2026-01-05,Customer 70,902273180,090****773,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-01-07,2026-01-10,Follow up
+L0071,2026-01-21,Customer 71,905626992,090****123,Facebook Ads,New Product Launch,Consultation,New,Internal,2026-01-23,2026-01-26,Follow up
+L0072,2026-01-06,Customer 72,906236968,090****320,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-01-08,2026-01-11,Follow up
+L0073,2026-01-11,Customer 73,906616258,090****391,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-01-13,2026-01-16,Follow up
+L0074,2026-01-17,Customer 74,902970590,090****342,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-01-19,2026-01-22,Follow up
+L0075,2026-01-14,Customer 75,904671239,090****867,Facebook Ads,New Product Launch,Consultation,Interested,Internal,2026-01-16,2026-01-19,Follow up
+L0076,2026-01-08,Customer 76,909503461,090****819,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-10,2026-01-13,Priority
+L0077,2026-01-26,Customer 77,901509378,090****481,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-01-28,2026-01-31,Follow up
+L0078,2026-01-05,Customer 78,902409549,090****435,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-07,2026-01-10,Priority
+L0079,2026-01-13,Customer 79,903328574,090****416,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-01-15,2026-01-18,Follow up
+L0080,2026-01-27,Customer 80,908848419,090****549,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-01-29,2026-02-01,Follow up
+L0081,2026-01-04,Customer 81,909774648,090****127,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-01-06,2026-01-09,Follow up
+L0082,2026-01-20,Customer 82,908801933,090****233,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-01-22,2026-01-25,Follow up
+L0083,2026-01-08,Customer 83,908477759,090****366,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-01-10,2026-01-13,Follow up
+L0084,2026-01-25,Customer 84,905477838,090****474,Facebook Ads,New Product Launch,Consultation,Interested,Internal,2026-01-27,2026-01-30,Follow up
+L0085,2026-01-29,Customer 85,905139049,090****374,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-31,2026-02-03,Priority
+L0086,2026-01-01,Customer 86,902506691,090****600,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-01-03,2026-01-06,Follow up
+L0087,2026-01-06,Customer 87,908865660,090****772,Facebook Ads,New Product Launch,Consultation,Interested,Internal,2026-01-08,2026-01-11,Follow up
+L0088,2026-01-10,Customer 88,902888256,090****741,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-12,2026-01-15,Priority
+L0089,2026-01-14,Customer 89,903117540,090****363,Facebook Ads,New Product Launch,Consultation,Interested,Internal,2026-01-16,2026-01-19,Follow up
+L0090,2026-01-26,Customer 90,907159781,090****659,Facebook Ads,New Product Launch,Consultation,Interested,Internal,2026-01-28,2026-01-31,Follow up
+L0091,2026-01-05,Customer 91,901594958,090****131,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-01-07,2026-01-10,Follow up
+L0092,2026-01-19,Customer 92,904652431,090****767,Facebook Ads,New Product Launch,Consultation,Interested,Internal,2026-01-21,2026-01-24,Follow up
+L0093,2026-01-11,Customer 93,902187315,090****198,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-01-13,2026-01-16,Follow up
+L0094,2026-01-29,Customer 94,907379201,090****663,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-31,2026-02-03,Priority
+L0095,2026-01-08,Customer 95,905973059,090****480,Facebook Ads,New Product Launch,Consultation,New,Internal,2026-01-10,2026-01-13,Follow up
+L0096,2026-01-27,Customer 96,908753715,090****864,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-01-29,2026-02-01,Follow up
+L0097,2026-01-01,Customer 97,909404285,090****402,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-03,2026-01-06,Priority
+L0098,2026-01-05,Customer 98,901594241,090****681,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-01-07,2026-01-10,Follow up
+L0099,2026-01-21,Customer 99,906236319,090****774,Facebook Ads,New Product Launch,Consultation,Interested,Internal,2026-01-23,2026-01-26,Follow up
+L0100,2026-01-11,Customer 100,908638363,090****951,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-01-13,2026-01-16,Follow up
+L0101,2026-01-25,Customer 101,902467362,090****600,Facebook Ads,New Product Launch,Consultation,New,Internal,2026-01-27,2026-01-30,Follow up
+L0102,2026-01-15,Customer 102,908736466,090****200,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-17,2026-01-20,Priority
+L0103,2026-01-14,Customer 103,907577312,090****333,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-01-16,2026-01-19,Follow up
+L0104,2026-01-04,Customer 104,908477146,090****919,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-01-06,2026-01-09,Follow up
+L0105,2026-01-20,Customer 105,908851413,090****867,Facebook Ads,New Product Launch,Consultation,Interested,Internal,2026-01-22,2026-01-25,Follow up
+L0106,2026-01-26,Customer 106,905581977,090****394,Facebook Ads,New Product Launch,Consultation,New,Internal,2026-01-28,2026-01-31,Follow up
+L0107,2026-01-13,Customer 107,902120025,090****593,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-01-15,2026-01-18,Follow up
+L0108,2026-01-23,Customer 108,907297924,090****488,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-01-25,2026-01-28,Priority
+L0109,2026-01-10,Customer 109,901239023,090****829,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-01-12,2026-01-15,Follow up
+L0110,2026-01-28,Customer 110,906935706,090****138,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-01-30,2026-02-02,Follow up
+L0111,2026-01-14,Customer 111,903328574,090****862,TikTok Ads,Lead Gen April,Consultation,Contacted,Internal,2026-01-16,2026-01-19,Follow up
+L0112,2026-01-18,Customer 112,908865660,090****474,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-20,2026-01-23,Priority
+L0113,2026-01-13,Customer 113,902882855,090****549,TikTok Ads,Lead Gen April,Consultation,Lost,Internal,2026-01-15,2026-01-18,Follow up
+L0114,2026-01-15,Customer 114,903117540,090****123,TikTok Ads,Lead Gen April,Consultation,Lost,Internal,2026-01-17,2026-01-20,Follow up
+L0115,2026-01-19,Customer 115,908848419,090****354,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-21,2026-01-24,Priority
+L0116,2026-01-16,Customer 116,904071375,090****835,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-18,2026-01-21,Priority
+L0117,2026-01-08,Customer 117,905973059,090****131,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-10,2026-01-13,Priority
+L0118,2026-01-20,Customer 118,906660143,090****366,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-22,2026-01-25,Priority
+L0119,2026-01-08,Customer 119,905445214,090****741,TikTok Ads,Lead Gen April,Consultation,Contacted,Internal,2026-01-10,2026-01-13,Follow up
+L0120,2026-01-23,Customer 120,909673998,090****142,TikTok Ads,Lead Gen April,Consultation,Lost,Internal,2026-01-25,2026-01-28,Follow up
+L0121,2026-01-20,Customer 121,902273180,090****320,TikTok Ads,Lead Gen April,Consultation,Lost,Internal,2026-01-22,2026-01-25,Follow up
+L0122,2026-01-16,Customer 122,908477146,090****829,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-18,2026-01-21,Priority
+L0123,2026-01-28,Customer 123,904671239,090****600,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-30,2026-02-02,Priority
+L0124,2026-01-15,Customer 124,901509378,090****402,TikTok Ads,Lead Gen April,Consultation,Contacted,Internal,2026-01-17,2026-01-20,Follow up
+L0125,2026-01-09,Customer 125,906616258,090****391,TikTok Ads,Lead Gen April,Consultation,Interested,Internal,2026-01-11,2026-01-14,Follow up
+L0126,2026-01-19,Customer 126,904652431,090****127,TikTok Ads,Lead Gen April,Consultation,Contacted,Internal,2026-01-21,2026-01-24,Follow up
+L0127,2026-01-17,Customer 127,907577312,090****374,TikTok Ads,Lead Gen April,Consultation,Interested,Internal,2026-01-19,2026-01-22,Follow up
+L0128,2026-01-15,Customer 128,909503461,090****481,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-17,2026-01-20,Priority
+L0129,2026-01-17,Customer 129,902970590,090****233,TikTok Ads,Lead Gen April,Consultation,New,Internal,2026-01-19,2026-01-22,Follow up
+L0130,2026-01-23,Customer 130,908865324,090****167,TikTok Ads,Lead Gen April,Consultation,New,Internal,2026-01-25,2026-01-28,Follow up
+L0131,2026-01-08,Customer 131,909774648,090****616,TikTok Ads,Lead Gen April,Consultation,Interested,Internal,2026-01-10,2026-01-13,Follow up
+L0132,2026-01-27,Customer 132,906846170,090****394,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-29,2026-02-01,Priority
+L0133,2026-01-03,Customer 133,902506691,090****319,TikTok Ads,Lead Gen April,Consultation,Contacted,Internal,2026-01-05,2026-01-08,Follow up
+L0134,2026-01-14,Customer 134,905626992,090****474,TikTok Ads,Lead Gen April,Consultation,New,Internal,2026-01-16,2026-01-19,Follow up
+L0135,2026-01-22,Customer 135,906935706,090****131,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-24,2026-01-27,Priority
+L0136,2026-01-26,Customer 136,901239023,090****202,TikTok Ads,Lead Gen April,Consultation,New,Internal,2026-01-28,2026-01-31,Follow up
+L0137,2026-01-21,Customer 137,901594958,090****919,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-23,2026-01-26,Priority
+L0138,2026-01-06,Customer 138,902409549,090****593,TikTok Ads,Lead Gen April,Consultation,New,Internal,2026-01-08,2026-01-11,Follow up
+L0139,2026-01-06,Customer 139,905581977,090****951,TikTok Ads,Lead Gen April,Consultation,Lost,Internal,2026-01-08,2026-01-11,Follow up
+L0140,2026-01-17,Customer 140,907142078,090****138,TikTok Ads,Lead Gen April,Consultation,Interested,Internal,2026-01-19,2026-01-22,Follow up
+L0141,2026-01-23,Customer 141,908851413,090****860,TikTok Ads,Lead Gen April,Consultation,Contacted,Internal,2026-01-25,2026-01-28,Follow up
+L0142,2026-01-18,Customer 142,908801933,090****342,TikTok Ads,Lead Gen April,Consultation,Lost,Internal,2026-01-20,2026-01-23,Follow up
+L0143,2026-01-05,Customer 143,902120025,090****772,TikTok Ads,Lead Gen April,Consultation,New,Internal,2026-01-07,2026-01-10,Follow up
+L0144,2026-01-10,Customer 144,903823485,090****867,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-12,2026-01-15,Priority
+L0145,2026-01-15,Customer 145,909565578,090****867,TikTok Ads,Lead Gen April,Consultation,New,Internal,2026-01-17,2026-01-20,Follow up
+L0146,2026-01-04,Customer 146,906236319,090****819,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-06,2026-01-09,Priority
+L0147,2026-01-22,Customer 147,905477838,090****480,TikTok Ads,Lead Gen April,Consultation,Interested,Internal,2026-01-24,2026-01-27,Follow up
+L0148,2026-01-26,Customer 148,901594241,090****412,TikTok Ads,Lead Gen April,Consultation,Contacted,Internal,2026-01-28,2026-01-31,Follow up
+L0149,2026-01-25,Customer 149,907159781,090****256,TikTok Ads,Lead Gen April,Consultation,New,Internal,2026-01-27,2026-01-30,Follow up
+L0150,2026-01-25,Customer 150,908477759,090****416,TikTok Ads,Lead Gen April,Consultation,Interested,Internal,2026-01-27,2026-01-30,Follow up
+L0151,2026-01-27,Customer 151,902888256,090****773,TikTok Ads,Lead Gen April,Consultation,New,Internal,2026-01-29,2026-02-01,Follow up
+L0152,2026-01-31,Customer 152,905953046,090****435,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-02-02,2026-02-05,Priority
+L0153,2026-01-28,Customer 153,907297924,090****600,TikTok Ads,Lead Gen April,Consultation,Interested,Internal,2026-01-30,2026-02-02,Follow up
+L0154,2026-01-12,Customer 154,905788107,090****726,TikTok Ads,Lead Gen April,Consultation,New,Internal,2026-01-14,2026-01-17,Follow up
+L0155,2026-01-15,Customer 155,902467362,090****767,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-17,2026-01-20,Priority
+L0156,2026-01-16,Customer 156,907379201,090****198,TikTok Ads,Lead Gen April,Consultation,Contacted,Internal,2026-01-18,2026-01-21,Follow up
+L0157,2026-01-14,Customer 157,902187315,090****131,TikTok Ads,Lead Gen April,Consultation,Contacted,Internal,2026-01-16,2026-01-19,Follow up
+L0158,2026-01-15,Customer 158,903823485,090****333,TikTok Ads,Lead Gen April,Consultation,Contacted,Internal,2026-01-17,2026-01-20,Follow up
+L0159,2026-01-11,Customer 159,908860271,090****659,TikTok Ads,Lead Gen April,Consultation,Contacted,Internal,2026-01-13,2026-01-16,Follow up
+L0160,2026-01-31,Customer 160,909404285,090****200,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-02-02,2026-02-05,Priority
+L0161,2026-01-26,Customer 161,905139049,090****488,TikTok Ads,Lead Gen April,Consultation,Contacted,Internal,2026-01-28,2026-01-31,Follow up
+L0162,2026-01-13,Customer 162,903875327,090****619,TikTok Ads,Lead Gen April,Consultation,Contacted,Internal,2026-01-15,2026-01-18,Follow up
+L0163,2026-01-08,Customer 163,908753715,090****663,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-10,2026-01-13,Priority
+L0164,2026-01-07,Customer 164,906236968,090****363,TikTok Ads,Lead Gen April,Consultation,Interested,Internal,2026-01-09,2026-01-12,Follow up
+L0165,2026-01-18,Customer 165,902882855,090****681,TikTok Ads,Lead Gen April,Consultation,Lost,Internal,2026-01-20,2026-01-23,Follow up
+L0166,2026-01-04,Customer 166,908736466,090****864,TikTok Ads,Lead Gen April,Consultation,Contacted,Internal,2026-01-06,2026-01-09,Follow up
+L0167,2026-01-13,Customer 167,908638363,090****774,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-15,2026-01-18,Priority
+L0168,2026-01-27,Customer 168,907142078,090****346,TikTok Ads,Lead Gen April,Consultation,Lost,Internal,2026-01-29,2026-02-01,Follow up
+L0169,2026-01-26,Customer 169,906846170,090****142,TikTok Ads,Lead Gen April,Consultation,Lost,Internal,2026-01-28,2026-01-31,Follow up
+L0170,2026-01-05,Customer 170,904071375,090****202,TikTok Ads,Lead Gen April,Consultation,New,Internal,2026-01-07,2026-01-10,Follow up
+L0171,2026-01-05,Customer 171,909565578,090****256,TikTok Ads,Lead Gen April,Consultation,Contacted,Internal,2026-01-07,2026-01-10,Follow up
+L0172,2026-01-20,Customer 172,905445214,090****354,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-22,2026-01-25,Priority
+L0173,2026-01-01,Customer 173,905788107,090****862,TikTok Ads,Lead Gen April,Consultation,Interested,Internal,2026-01-03,2026-01-06,Follow up
+L0174,2026-01-17,Customer 174,908860271,090****860,TikTok Ads,Lead Gen April,Consultation,New,Internal,2026-01-19,2026-01-22,Follow up
+L0175,2026-01-08,Customer 175,908865324,090****616,TikTok Ads,Lead Gen April,Consultation,Interested,Internal,2026-01-10,2026-01-13,Follow up
+L0176,2026-01-21,Customer 176,906660143,090****835,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-23,2026-01-26,Priority
+L0177,2026-01-25,Customer 177,909673998,090****167,TikTok Ads,Lead Gen April,Consultation,Interested,Internal,2026-01-27,2026-01-30,Follow up
+L0178,2026-01-12,Customer 178,905953046,090****319,TikTok Ads,Lead Gen April,Consultation,Lost,Internal,2026-01-14,2026-01-17,Follow up
+L0179,2026-01-18,Customer 179,903875327,090****412,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-20,2026-01-23,Priority
+L0180,2026-01-18,Customer 180,902273180,090****773,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-20,2026-01-23,Priority
+L0181,2026-01-13,Customer 181,905626992,090****123,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-15,2026-01-18,Priority
+L0182,2026-01-15,Customer 182,906236968,090****320,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-17,2026-01-20,Priority
+L0183,2026-01-01,Customer 183,906616258,090****391,TikTok Ads,Lead Gen April,Consultation,New,Internal,2026-01-03,2026-01-06,Follow up
+L0184,2026-01-03,Customer 184,902970590,090****342,TikTok Ads,Lead Gen April,Consultation,Lost,Internal,2026-01-05,2026-01-08,Follow up
+L0185,2026-01-16,Customer 185,904671239,090****867,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-18,2026-01-21,Priority
+L0186,2026-01-21,Customer 186,909503461,090****819,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-23,2026-01-26,Priority
+L0187,2026-01-19,Customer 187,901509378,090****481,TikTok Ads,Lead Gen April,Consultation,Lost,Internal,2026-01-21,2026-01-24,Follow up
+L0188,2026-01-02,Customer 188,902409549,090****435,TikTok Ads,Lead Gen April,Consultation,Lost,Internal,2026-01-04,2026-01-07,Follow up
+L0189,2026-01-26,Customer 189,903328574,090****416,TikTok Ads,Lead Gen April,Consultation,Lost,Internal,2026-01-28,2026-01-31,Follow up
+L0190,2026-01-15,Customer 190,908848419,090****549,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-17,2026-01-20,Priority
+L0191,2026-01-03,Customer 191,909774648,090****127,TikTok Ads,Lead Gen April,Consultation,New,Internal,2026-01-05,2026-01-08,Follow up
+L0192,2026-01-18,Customer 192,908801933,090****233,TikTok Ads,Lead Gen April,Consultation,Interested,Internal,2026-01-20,2026-01-23,Follow up
+L0193,2026-01-26,Customer 193,908477759,090****366,TikTok Ads,Lead Gen April,Consultation,Interested,Internal,2026-01-28,2026-01-31,Follow up
+L0194,2026-01-25,Customer 194,905477838,090****474,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-27,2026-01-30,Priority
+L0195,2026-01-03,Customer 195,905139049,090****374,TikTok Ads,Lead Gen April,Consultation,New,Internal,2026-01-05,2026-01-08,Follow up
+L0196,2026-01-02,Customer 196,902506691,090****600,TikTok Ads,Lead Gen April,Consultation,Lost,Internal,2026-01-04,2026-01-07,Follow up
+L0197,2026-01-28,Customer 197,908865660,090****772,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-30,2026-02-02,Priority
+L0198,2026-01-22,Customer 198,902888256,090****741,TikTok Ads,Lead Gen April,Consultation,New,Internal,2026-01-24,2026-01-27,Follow up
+L0199,2026-01-22,Customer 199,903117540,090****363,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-24,2026-01-27,Priority
+L0200,2026-01-23,Customer 200,907159781,090****659,TikTok Ads,Lead Gen April,Consultation,Interested,Internal,2026-01-25,2026-01-28,Follow up
+L0201,2026-01-05,Customer 201,901594958,090****131,TikTok Ads,Lead Gen April,Consultation,Contacted,Internal,2026-01-07,2026-01-10,Follow up
+L0202,2026-01-04,Customer 202,904652431,090****767,TikTok Ads,Lead Gen April,Consultation,New,Internal,2026-01-06,2026-01-09,Follow up
+L0203,2026-01-09,Customer 203,902187315,090****198,TikTok Ads,Lead Gen April,Consultation,New,Internal,2026-01-11,2026-01-14,Follow up
+L0204,2026-01-13,Customer 204,907379201,090****663,TikTok Ads,Lead Gen April,Consultation,New,Internal,2026-01-15,2026-01-18,Follow up
+L0205,2026-01-20,Customer 205,905973059,090****480,TikTok Ads,Lead Gen April,Consultation,New,Internal,2026-01-22,2026-01-25,Follow up
+L0206,2026-01-18,Customer 206,908753715,090****864,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-20,2026-01-23,Priority
+L0207,2026-01-07,Customer 207,909404285,090****402,TikTok Ads,Lead Gen April,Consultation,Lost,Internal,2026-01-09,2026-01-12,Follow up
+L0208,2026-01-07,Customer 208,901594241,090****681,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-09,2026-01-12,Priority
+L0209,2026-01-21,Customer 209,906236319,090****774,TikTok Ads,Lead Gen April,Consultation,Contacted,Internal,2026-01-23,2026-01-26,Follow up
+L0210,2026-01-17,Customer 210,908638363,090****951,TikTok Ads,Lead Gen April,Consultation,Interested,Internal,2026-01-19,2026-01-22,Follow up
+L0211,2026-01-07,Customer 211,902467362,090****600,TikTok Ads,Lead Gen April,Consultation,Contacted,Internal,2026-01-09,2026-01-12,Follow up
+L0212,2026-01-26,Customer 212,908736466,090****200,TikTok Ads,Lead Gen April,Consultation,Lost,Internal,2026-01-28,2026-01-31,Follow up
+L0213,2026-01-19,Customer 213,907577312,090****333,TikTok Ads,Lead Gen April,Consultation,Lost,Internal,2026-01-21,2026-01-24,Follow up
+L0214,2026-01-27,Customer 214,908477146,090****919,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-29,2026-02-01,Priority
+L0215,2026-01-22,Customer 215,908851413,090****867,TikTok Ads,Lead Gen April,Consultation,New,Internal,2026-01-24,2026-01-27,Follow up
+L0216,2026-01-02,Customer 216,905581977,090****394,TikTok Ads,Lead Gen April,Consultation,Contacted,Internal,2026-01-04,2026-01-07,Follow up
+L0217,2026-01-12,Customer 217,902120025,090****593,TikTok Ads,Lead Gen April,Consultation,Converted,Internal,2026-01-14,2026-01-17,Priority
+L0218,2026-01-01,Customer 218,907297924,090****488,TikTok Ads,Lead Gen April,Consultation,New,Internal,2026-01-03,2026-01-06,Follow up
+L0219,2026-01-11,Customer 219,901239023,090****829,TikTok Ads,Lead Gen April,Consultation,Interested,Internal,2026-01-13,2026-01-16,Follow up
+L0220,2026-01-26,Customer 220,906935706,090****138,TikTok Ads,Lead Gen April,Consultation,Lost,Internal,2026-01-28,2026-01-31,Follow up
+L0221,2026-02-06,Customer 221,903328574,090****862,LinkedIn,Brand Refresh,Consultation,New,Internal,2026-02-08,2026-02-11,Follow up
+L0222,2026-02-04,Customer 222,908865660,090****474,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-06,2026-02-09,Priority
+L0223,2026-02-08,Customer 223,902882855,090****549,LinkedIn,Brand Refresh,Consultation,Interested,Internal,2026-02-10,2026-02-13,Follow up
+L0224,2026-02-09,Customer 224,903117540,090****123,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-11,2026-02-14,Priority
+L0225,2026-02-06,Customer 225,908848419,090****354,LinkedIn,Brand Refresh,Consultation,Lost,Internal,2026-02-08,2026-02-11,Follow up
+L0226,2026-02-10,Customer 226,904071375,090****835,LinkedIn,Brand Refresh,Consultation,New,Internal,2026-02-12,2026-02-15,Follow up
+L0227,2026-02-07,Customer 227,905973059,090****131,LinkedIn,Brand Refresh,Consultation,Interested,Internal,2026-02-09,2026-02-12,Follow up
+L0228,2026-02-07,Customer 228,906660143,090****366,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-09,2026-02-12,Priority
+L0229,2026-02-10,Customer 229,905445214,090****741,LinkedIn,Brand Refresh,Consultation,Interested,Internal,2026-02-12,2026-02-15,Follow up
+L0230,2026-02-04,Customer 230,909673998,090****142,LinkedIn,Brand Refresh,Consultation,Interested,Internal,2026-02-06,2026-02-09,Follow up
+L0231,2026-02-05,Customer 231,902273180,090****320,LinkedIn,Brand Refresh,Consultation,New,Internal,2026-02-07,2026-02-10,Follow up
+L0232,2026-02-14,Customer 232,908477146,090****829,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-16,2026-02-19,Priority
+L0233,2026-02-01,Customer 233,904671239,090****600,LinkedIn,Brand Refresh,Consultation,Contacted,Internal,2026-02-03,2026-02-06,Follow up
+L0234,2026-02-23,Customer 234,901509378,090****402,LinkedIn,Brand Refresh,Consultation,Interested,Internal,2026-02-25,2026-02-28,Follow up
+L0235,2026-02-05,Customer 235,906616258,090****391,LinkedIn,Brand Refresh,Consultation,New,Internal,2026-02-07,2026-02-10,Follow up
+L0236,2026-02-08,Customer 236,904652431,090****127,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-10,2026-02-13,Priority
+L0237,2026-02-09,Customer 237,907577312,090****374,LinkedIn,Brand Refresh,Consultation,Lost,Internal,2026-02-11,2026-02-14,Follow up
+L0238,2026-02-21,Customer 238,909503461,090****481,LinkedIn,Brand Refresh,Consultation,New,Internal,2026-02-23,2026-02-26,Follow up
+L0239,2026-02-10,Customer 239,902970590,090****233,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-12,2026-02-15,Priority
+L0240,2026-02-08,Customer 240,908865324,090****167,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-10,2026-02-13,Priority
+L0241,2026-02-01,Customer 241,909774648,090****616,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-03,2026-02-06,Priority
+L0242,2026-02-16,Customer 242,906846170,090****394,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-18,2026-02-21,Priority
+L0243,2026-02-28,Customer 243,902506691,090****319,LinkedIn,Brand Refresh,Consultation,Interested,Internal,2026-03-02,2026-03-05,Follow up
+L0244,2026-02-12,Customer 244,905626992,090****474,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-14,2026-02-17,Priority
+L0245,2026-02-12,Customer 245,906935706,090****131,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-14,2026-02-17,Priority
+L0246,2026-02-28,Customer 246,901239023,090****202,LinkedIn,Brand Refresh,Consultation,Interested,Internal,2026-03-02,2026-03-05,Follow up
+L0247,2026-02-17,Customer 247,901594958,090****919,LinkedIn,Brand Refresh,Consultation,Lost,Internal,2026-02-19,2026-02-22,Follow up
+L0248,2026-02-18,Customer 248,902409549,090****593,LinkedIn,Brand Refresh,Consultation,Lost,Internal,2026-02-20,2026-02-23,Follow up
+L0249,2026-02-10,Customer 249,905581977,090****951,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-12,2026-02-15,Priority
+L0250,2026-02-09,Customer 250,907142078,090****138,LinkedIn,Brand Refresh,Consultation,Contacted,Internal,2026-02-11,2026-02-14,Follow up
+L0251,2026-02-14,Customer 251,908851413,090****860,LinkedIn,Brand Refresh,Consultation,New,Internal,2026-02-16,2026-02-19,Follow up
+L0252,2026-02-26,Customer 252,908801933,090****342,LinkedIn,Brand Refresh,Consultation,Contacted,Internal,2026-02-28,2026-03-03,Follow up
+L0253,2026-02-17,Customer 253,902120025,090****772,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-19,2026-02-22,Priority
+L0254,2026-02-01,Customer 254,903823485,090****867,LinkedIn,Brand Refresh,Consultation,Contacted,Internal,2026-02-03,2026-02-06,Follow up
+L0255,2026-02-13,Customer 255,909565578,090****867,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-15,2026-02-18,Priority
+L0256,2026-02-08,Customer 256,906236319,090****819,LinkedIn,Brand Refresh,Consultation,Interested,Internal,2026-02-10,2026-02-13,Follow up
+L0257,2026-02-13,Customer 257,905477838,090****480,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-15,2026-02-18,Priority
+L0258,2026-02-27,Customer 258,901594241,090****412,LinkedIn,Brand Refresh,Consultation,Lost,Internal,2026-03-01,2026-03-04,Follow up
+L0259,2026-02-26,Customer 259,907159781,090****256,LinkedIn,Brand Refresh,Consultation,Interested,Internal,2026-02-28,2026-03-03,Follow up
+L0260,2026-02-20,Customer 260,908477759,090****416,LinkedIn,Brand Refresh,Consultation,Contacted,Internal,2026-02-22,2026-02-25,Follow up
+L0261,2026-02-27,Customer 261,902888256,090****773,LinkedIn,Brand Refresh,Consultation,New,Internal,2026-03-01,2026-03-04,Follow up
+L0262,2026-02-25,Customer 262,905953046,090****435,LinkedIn,Brand Refresh,Consultation,Contacted,Internal,2026-02-27,2026-03-02,Follow up
+L0263,2026-02-19,Customer 263,907297924,090****600,LinkedIn,Brand Refresh,Consultation,Lost,Internal,2026-02-21,2026-02-24,Follow up
+L0264,2026-02-07,Customer 264,905788107,090****726,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-09,2026-02-12,Priority
+L0265,2026-02-04,Customer 265,902467362,090****767,LinkedIn,Brand Refresh,Consultation,Interested,Internal,2026-02-06,2026-02-09,Follow up
+L0266,2026-02-01,Customer 266,907379201,090****198,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-03,2026-02-06,Priority
+L0267,2026-02-23,Customer 267,902187315,090****131,LinkedIn,Brand Refresh,Consultation,New,Internal,2026-02-25,2026-02-28,Follow up
+L0268,2026-02-18,Customer 268,903823485,090****333,LinkedIn,Brand Refresh,Consultation,Lost,Internal,2026-02-20,2026-02-23,Follow up
+L0269,2026-02-21,Customer 269,908860271,090****659,LinkedIn,Brand Refresh,Consultation,New,Internal,2026-02-23,2026-02-26,Follow up
+L0270,2026-02-15,Customer 270,909404285,090****200,LinkedIn,Brand Refresh,Consultation,New,Internal,2026-02-17,2026-02-20,Follow up
+L0271,2026-02-22,Customer 271,905139049,090****488,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-24,2026-02-27,Priority
+L0272,2026-02-27,Customer 272,903875327,090****619,LinkedIn,Brand Refresh,Consultation,Lost,Internal,2026-03-01,2026-03-04,Follow up
+L0273,2026-02-25,Customer 273,908753715,090****663,LinkedIn,Brand Refresh,Consultation,New,Internal,2026-02-27,2026-03-02,Follow up
+L0274,2026-02-13,Customer 274,906236968,090****363,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-15,2026-02-18,Priority
+L0275,2026-02-02,Customer 275,902882855,090****681,LinkedIn,Brand Refresh,Consultation,Contacted,Internal,2026-02-04,2026-02-07,Follow up
+L0276,2026-02-01,Customer 276,908736466,090****864,LinkedIn,Brand Refresh,Consultation,Lost,Internal,2026-02-03,2026-02-06,Follow up
+L0277,2026-02-09,Customer 277,908638363,090****774,LinkedIn,Brand Refresh,Consultation,New,Internal,2026-02-11,2026-02-14,Follow up
+L0278,2026-02-09,Customer 278,907142078,090****346,LinkedIn,Brand Refresh,Consultation,New,Internal,2026-02-11,2026-02-14,Follow up
+L0279,2026-02-24,Customer 279,906846170,090****142,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-26,2026-03-01,Priority
+L0280,2026-02-10,Customer 280,904071375,090****202,LinkedIn,Brand Refresh,Consultation,Lost,Internal,2026-02-12,2026-02-15,Follow up
+L0281,2026-02-03,Customer 281,909565578,090****256,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-05,2026-02-08,Priority
+L0282,2026-02-13,Customer 282,905445214,090****354,LinkedIn,Brand Refresh,Consultation,Interested,Internal,2026-02-15,2026-02-18,Follow up
+L0283,2026-02-19,Customer 283,905788107,090****862,LinkedIn,Brand Refresh,Consultation,Interested,Internal,2026-02-21,2026-02-24,Follow up
+L0284,2026-02-11,Customer 284,908860271,090****860,LinkedIn,Brand Refresh,Consultation,New,Internal,2026-02-13,2026-02-16,Follow up
+L0285,2026-02-18,Customer 285,908865324,090****616,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-20,2026-02-23,Priority
+L0286,2026-02-27,Customer 286,906660143,090****835,LinkedIn,Brand Refresh,Consultation,New,Internal,2026-03-01,2026-03-04,Follow up
+L0287,2026-02-15,Customer 287,909673998,090****167,LinkedIn,Brand Refresh,Consultation,Lost,Internal,2026-02-17,2026-02-20,Follow up
+L0288,2026-02-02,Customer 288,905953046,090****319,LinkedIn,Brand Refresh,Consultation,Contacted,Internal,2026-02-04,2026-02-07,Follow up
+L0289,2026-02-23,Customer 289,903875327,090****412,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-25,2026-02-28,Priority
+L0290,2026-02-01,Customer 290,902273180,090****773,LinkedIn,Brand Refresh,Consultation,Lost,Internal,2026-02-03,2026-02-06,Follow up
+L0291,2026-02-10,Customer 291,905626992,090****123,LinkedIn,Brand Refresh,Consultation,New,Internal,2026-02-12,2026-02-15,Follow up
+L0292,2026-02-20,Customer 292,906236968,090****320,LinkedIn,Brand Refresh,Consultation,Contacted,Internal,2026-02-22,2026-02-25,Follow up
+L0293,2026-02-20,Customer 293,906616258,090****391,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-22,2026-02-25,Priority
+L0294,2026-02-01,Customer 294,902970590,090****342,LinkedIn,Brand Refresh,Consultation,Lost,Internal,2026-02-03,2026-02-06,Follow up
+L0295,2026-02-08,Customer 295,904671239,090****867,LinkedIn,Brand Refresh,Consultation,Interested,Internal,2026-02-10,2026-02-13,Follow up
+L0296,2026-02-22,Customer 296,909503461,090****819,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-24,2026-02-27,Priority
+L0297,2026-02-18,Customer 297,901509378,090****481,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-20,2026-02-23,Priority
+L0298,2026-02-11,Customer 298,902409549,090****435,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-13,2026-02-16,Priority
+L0299,2026-02-21,Customer 299,903328574,090****416,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-23,2026-02-26,Priority
+L0300,2026-02-26,Customer 300,908848419,090****549,LinkedIn,Brand Refresh,Consultation,Lost,Internal,2026-02-28,2026-03-03,Follow up
+L0301,2026-02-15,Customer 301,909774648,090****127,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-17,2026-02-20,Priority
+L0302,2026-02-23,Customer 302,908801933,090****233,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-25,2026-02-28,Priority
+L0303,2026-02-09,Customer 303,908477759,090****366,LinkedIn,Brand Refresh,Consultation,Contacted,Internal,2026-02-11,2026-02-14,Follow up
+L0304,2026-02-08,Customer 304,905477838,090****474,LinkedIn,Brand Refresh,Consultation,Interested,Internal,2026-02-10,2026-02-13,Follow up
+L0305,2026-02-16,Customer 305,905139049,090****374,LinkedIn,Brand Refresh,Consultation,Lost,Internal,2026-02-18,2026-02-21,Follow up
+L0306,2026-02-17,Customer 306,902506691,090****600,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-19,2026-02-22,Priority
+L0307,2026-02-03,Customer 307,908865660,090****772,LinkedIn,Brand Refresh,Consultation,Contacted,Internal,2026-02-05,2026-02-08,Follow up
+L0308,2026-02-12,Customer 308,902888256,090****741,LinkedIn,Brand Refresh,Consultation,New,Internal,2026-02-14,2026-02-17,Follow up
+L0309,2026-02-24,Customer 309,903117540,090****363,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-26,2026-03-01,Priority
+L0310,2026-02-15,Customer 310,907159781,090****659,LinkedIn,Brand Refresh,Consultation,Contacted,Internal,2026-02-17,2026-02-20,Follow up
+L0311,2026-02-28,Customer 311,901594958,090****131,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-03-02,2026-03-05,Priority
+L0312,2026-02-17,Customer 312,904652431,090****767,LinkedIn,Brand Refresh,Consultation,Lost,Internal,2026-02-19,2026-02-22,Follow up
+L0313,2026-02-24,Customer 313,902187315,090****198,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-26,2026-03-01,Priority
+L0314,2026-02-24,Customer 314,907379201,090****663,LinkedIn,Brand Refresh,Consultation,Contacted,Internal,2026-02-26,2026-03-01,Follow up
+L0315,2026-02-13,Customer 315,905973059,090****480,LinkedIn,Brand Refresh,Consultation,New,Internal,2026-02-15,2026-02-18,Follow up
+L0316,2026-02-19,Customer 316,908753715,090****864,LinkedIn,Brand Refresh,Consultation,Lost,Internal,2026-02-21,2026-02-24,Follow up
+L0317,2026-02-22,Customer 317,909404285,090****402,LinkedIn,Brand Refresh,Consultation,New,Internal,2026-02-24,2026-02-27,Follow up
+L0318,2026-02-05,Customer 318,901594241,090****681,LinkedIn,Brand Refresh,Consultation,Contacted,Internal,2026-02-07,2026-02-10,Follow up
+L0319,2026-02-19,Customer 319,906236319,090****774,LinkedIn,Brand Refresh,Consultation,Contacted,Internal,2026-02-21,2026-02-24,Follow up
+L0320,2026-02-15,Customer 320,908638363,090****951,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-17,2026-02-20,Priority
+L0321,2026-02-02,Customer 321,902467362,090****600,LinkedIn,Brand Refresh,Consultation,Lost,Internal,2026-02-04,2026-02-07,Follow up
+L0322,2026-02-09,Customer 322,908736466,090****200,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-11,2026-02-14,Priority
+L0323,2026-02-27,Customer 323,907577312,090****333,LinkedIn,Brand Refresh,Consultation,Lost,Internal,2026-03-01,2026-03-04,Follow up
+L0324,2026-02-13,Customer 324,908477146,090****919,LinkedIn,Brand Refresh,Consultation,Interested,Internal,2026-02-15,2026-02-18,Follow up
+L0325,2026-02-05,Customer 325,908851413,090****867,LinkedIn,Brand Refresh,Consultation,Interested,Internal,2026-02-07,2026-02-10,Follow up
+L0326,2026-02-15,Customer 326,905581977,090****394,LinkedIn,Brand Refresh,Consultation,New,Internal,2026-02-17,2026-02-20,Follow up
+L0327,2026-02-27,Customer 327,902120025,090****593,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-03-01,2026-03-04,Priority
+L0328,2026-02-13,Customer 328,907297924,090****488,LinkedIn,Brand Refresh,Consultation,Interested,Internal,2026-02-15,2026-02-18,Follow up
+L0329,2026-02-25,Customer 329,901239023,090****829,LinkedIn,Brand Refresh,Consultation,Interested,Internal,2026-02-27,2026-03-02,Follow up
+L0330,2026-02-14,Customer 330,906935706,090****138,LinkedIn,Brand Refresh,Consultation,Converted,Internal,2026-02-16,2026-02-19,Priority
+L0331,2026-02-10,Customer 331,903328574,090****862,Google Search,New Product Launch,Consultation,Lost,Internal,2026-02-12,2026-02-15,Follow up
+L0332,2026-02-10,Customer 332,908865660,090****474,Google Search,New Product Launch,Consultation,Contacted,Internal,2026-02-12,2026-02-15,Follow up
+L0333,2026-02-13,Customer 333,902882855,090****549,Google Search,New Product Launch,Consultation,Contacted,Internal,2026-02-15,2026-02-18,Follow up
+L0334,2026-02-26,Customer 334,903117540,090****123,Google Search,New Product Launch,Consultation,Converted,Internal,2026-02-28,2026-03-03,Priority
+L0335,2026-02-05,Customer 335,908848419,090****354,Google Search,New Product Launch,Consultation,New,Internal,2026-02-07,2026-02-10,Follow up
+L0336,2026-02-03,Customer 336,904071375,090****835,Google Search,New Product Launch,Consultation,Converted,Internal,2026-02-05,2026-02-08,Priority
+L0337,2026-02-25,Customer 337,905973059,090****131,Google Search,New Product Launch,Consultation,Interested,Internal,2026-02-27,2026-03-02,Follow up
+L0338,2026-02-17,Customer 338,906660143,090****366,Google Search,New Product Launch,Consultation,Interested,Internal,2026-02-19,2026-02-22,Follow up
+L0339,2026-02-06,Customer 339,905445214,090****741,Google Search,New Product Launch,Consultation,New,Internal,2026-02-08,2026-02-11,Follow up
+L0340,2026-02-14,Customer 340,909673998,090****142,Google Search,New Product Launch,Consultation,Converted,Internal,2026-02-16,2026-02-19,Priority
+L0341,2026-02-23,Customer 341,902273180,090****320,Google Search,New Product Launch,Consultation,Interested,Internal,2026-02-25,2026-02-28,Follow up
+L0342,2026-02-28,Customer 342,908477146,090****829,Google Search,New Product Launch,Consultation,Contacted,Internal,2026-03-02,2026-03-05,Follow up
+L0343,2026-02-27,Customer 343,904671239,090****600,Google Search,New Product Launch,Consultation,Interested,Internal,2026-03-01,2026-03-04,Follow up
+L0344,2026-02-21,Customer 344,901509378,090****402,Google Search,New Product Launch,Consultation,Converted,Internal,2026-02-23,2026-02-26,Priority
+L0345,2026-02-12,Customer 345,906616258,090****391,Google Search,New Product Launch,Consultation,Contacted,Internal,2026-02-14,2026-02-17,Follow up
+L0346,2026-02-23,Customer 346,904652431,090****127,Google Search,New Product Launch,Consultation,Contacted,Internal,2026-02-25,2026-02-28,Follow up
+L0347,2026-02-23,Customer 347,907577312,090****374,Google Search,New Product Launch,Consultation,Interested,Internal,2026-02-25,2026-02-28,Follow up
+L0348,2026-02-16,Customer 348,909503461,090****481,Google Search,New Product Launch,Consultation,Converted,Internal,2026-02-18,2026-02-21,Priority
+L0349,2026-02-09,Customer 349,902970590,090****233,Google Search,New Product Launch,Consultation,Interested,Internal,2026-02-11,2026-02-14,Follow up
+L0350,2026-02-11,Customer 350,908865324,090****167,Google Search,New Product Launch,Consultation,Interested,Internal,2026-02-13,2026-02-16,Follow up
+L0351,2026-02-20,Customer 351,909774648,090****616,Google Search,New Product Launch,Consultation,Converted,Internal,2026-02-22,2026-02-25,Priority
+L0352,2026-02-14,Customer 352,906846170,090****394,Google Search,New Product Launch,Consultation,Converted,Internal,2026-02-16,2026-02-19,Priority
+L0353,2026-02-10,Customer 353,902506691,090****319,Google Search,New Product Launch,Consultation,Converted,Internal,2026-02-12,2026-02-15,Priority
+L0354,2026-02-18,Customer 354,905626992,090****474,Google Search,New Product Launch,Consultation,Converted,Internal,2026-02-20,2026-02-23,Priority
+L0355,2026-02-06,Customer 355,906935706,090****131,Google Search,New Product Launch,Consultation,New,Internal,2026-02-08,2026-02-11,Follow up
+L0356,2026-02-14,Customer 356,901239023,090****202,Google Search,New Product Launch,Consultation,Converted,Internal,2026-02-16,2026-02-19,Priority
+L0357,2026-02-23,Customer 357,901594958,090****919,Google Search,New Product Launch,Consultation,Converted,Internal,2026-02-25,2026-02-28,Priority
+L0358,2026-02-07,Customer 358,902409549,090****593,Google Search,New Product Launch,Consultation,Contacted,Internal,2026-02-09,2026-02-12,Follow up
+L0359,2026-02-01,Customer 359,905581977,090****951,Google Search,New Product Launch,Consultation,Contacted,Internal,2026-02-03,2026-02-06,Follow up
+L0360,2026-02-02,Customer 360,907142078,090****138,Google Search,New Product Launch,Consultation,Lost,Internal,2026-02-04,2026-02-07,Follow up
+L0361,2026-02-16,Customer 361,908851413,090****860,Google Search,New Product Launch,Consultation,Converted,Internal,2026-02-18,2026-02-21,Priority
+L0362,2026-02-03,Customer 362,908801933,090****342,Google Search,New Product Launch,Consultation,Interested,Internal,2026-02-05,2026-02-08,Follow up
+L0363,2026-02-10,Customer 363,902120025,090****772,Google Search,New Product Launch,Consultation,Lost,Internal,2026-02-12,2026-02-15,Follow up
+L0364,2026-02-23,Customer 364,903823485,090****867,Google Search,New Product Launch,Consultation,Converted,Internal,2026-02-25,2026-02-28,Priority
+L0365,2026-02-24,Customer 365,909565578,090****867,Google Search,New Product Launch,Consultation,Lost,Internal,2026-02-26,2026-03-01,Follow up
+L0366,2026-02-25,Customer 366,906236319,090****819,Google Search,New Product Launch,Consultation,Converted,Internal,2026-02-27,2026-03-02,Priority
+L0367,2026-02-28,Customer 367,905477838,090****480,Google Search,New Product Launch,Consultation,Lost,Internal,2026-03-02,2026-03-05,Follow up
+L0368,2026-02-24,Customer 368,901594241,090****412,Google Search,New Product Launch,Consultation,Converted,Internal,2026-02-26,2026-03-01,Priority
+L0369,2026-02-11,Customer 369,907159781,090****256,Google Search,New Product Launch,Consultation,Lost,Internal,2026-02-13,2026-02-16,Follow up
+L0370,2026-02-16,Customer 370,908477759,090****416,Google Search,New Product Launch,Consultation,Contacted,Internal,2026-02-18,2026-02-21,Follow up
+L0371,2026-02-18,Customer 371,902888256,090****773,Google Search,New Product Launch,Consultation,Contacted,Internal,2026-02-20,2026-02-23,Follow up
+L0372,2026-02-09,Customer 372,905953046,090****435,Google Search,New Product Launch,Consultation,Contacted,Internal,2026-02-11,2026-02-14,Follow up
+L0373,2026-02-02,Customer 373,907297924,090****600,Google Search,New Product Launch,Consultation,Interested,Internal,2026-02-04,2026-02-07,Follow up
+L0374,2026-02-21,Customer 374,905788107,090****726,Google Search,New Product Launch,Consultation,Contacted,Internal,2026-02-23,2026-02-26,Follow up
+L0375,2026-02-10,Customer 375,902467362,090****767,Google Search,New Product Launch,Consultation,Converted,Internal,2026-02-12,2026-02-15,Priority
+L0376,2026-02-11,Customer 376,907379201,090****198,Google Search,New Product Launch,Consultation,Contacted,Internal,2026-02-13,2026-02-16,Follow up
+L0377,2026-02-07,Customer 377,902187315,090****131,Google Search,New Product Launch,Consultation,Converted,Internal,2026-02-09,2026-02-12,Priority
+L0378,2026-02-12,Customer 378,903823485,090****333,Google Search,New Product Launch,Consultation,Contacted,Internal,2026-02-14,2026-02-17,Follow up
+L0379,2026-02-25,Customer 379,908860271,090****659,Google Search,New Product Launch,Consultation,New,Internal,2026-02-27,2026-03-02,Follow up
+L0380,2026-02-09,Customer 380,909404285,090****200,Google Search,New Product Launch,Consultation,New,Internal,2026-02-11,2026-02-14,Follow up
+L0381,2026-02-07,Customer 381,905139049,090****488,Google Search,New Product Launch,Consultation,New,Internal,2026-02-09,2026-02-12,Follow up
+L0382,2026-02-28,Customer 382,903875327,090****619,Google Search,New Product Launch,Consultation,Converted,Internal,2026-03-02,2026-03-05,Priority
+L0383,2026-02-17,Customer 383,908753715,090****663,Google Search,New Product Launch,Consultation,Interested,Internal,2026-02-19,2026-02-22,Follow up
+L0384,2026-02-12,Customer 384,906236968,090****363,Google Search,New Product Launch,Consultation,Lost,Internal,2026-02-14,2026-02-17,Follow up
+L0385,2026-02-12,Customer 385,902882855,090****681,Google Search,New Product Launch,Consultation,Converted,Internal,2026-02-14,2026-02-17,Priority
+L0386,2026-02-11,Customer 386,908736466,090****864,Google Search,New Product Launch,Consultation,Interested,Internal,2026-02-13,2026-02-16,Follow up
+L0387,2026-02-04,Customer 387,908638363,090****774,Google Search,New Product Launch,Consultation,Lost,Internal,2026-02-06,2026-02-09,Follow up
+L0388,2026-02-13,Customer 388,907142078,090****346,Google Search,New Product Launch,Consultation,Lost,Internal,2026-02-15,2026-02-18,Follow up
+L0389,2026-03-05,Customer 389,906846170,090****142,Google Search,New Product Launch,Consultation,Converted,Internal,2026-03-07,2026-03-10,Priority
+L0390,2026-03-11,Customer 390,904071375,090****202,Google Search,New Product Launch,Consultation,Lost,Internal,2026-03-13,2026-03-16,Follow up
+L0391,2026-03-05,Customer 391,909565578,090****256,Google Search,New Product Launch,Consultation,Converted,Internal,2026-03-07,2026-03-10,Priority
+L0392,2026-03-19,Customer 392,905445214,090****354,Google Search,New Product Launch,Consultation,Contacted,Internal,2026-03-21,2026-03-24,Follow up
+L0393,2026-03-11,Customer 393,905788107,090****862,Google Search,New Product Launch,Consultation,Lost,Internal,2026-03-13,2026-03-16,Follow up
+L0394,2026-03-27,Customer 394,908860271,090****860,Google Search,New Product Launch,Consultation,Lost,Internal,2026-03-29,2026-04-01,Follow up
+L0395,2026-03-18,Customer 395,908865324,090****616,Google Search,New Product Launch,Consultation,Converted,Internal,2026-03-20,2026-03-23,Priority
+L0396,2026-03-04,Customer 396,906660143,090****835,Google Search,New Product Launch,Consultation,Lost,Internal,2026-03-06,2026-03-09,Follow up
+L0397,2026-03-08,Customer 397,909673998,090****167,Google Search,New Product Launch,Consultation,Contacted,Internal,2026-03-10,2026-03-13,Follow up
+L0398,2026-03-17,Customer 398,905953046,090****319,Google Search,New Product Launch,Consultation,New,Internal,2026-03-19,2026-03-22,Follow up
+L0399,2026-03-22,Customer 399,903875327,090****412,Google Search,New Product Launch,Consultation,Converted,Internal,2026-03-24,2026-03-27,Priority
+L0400,2026-03-17,Customer 400,902273180,090****773,Google Search,New Product Launch,Consultation,Lost,Internal,2026-03-19,2026-03-22,Follow up
+L0401,2026-03-11,Customer 401,905626992,090****123,Google Search,New Product Launch,Consultation,Lost,Internal,2026-03-13,2026-03-16,Follow up
+L0402,2026-03-09,Customer 402,906236968,090****320,Google Search,New Product Launch,Consultation,Interested,Internal,2026-03-11,2026-03-14,Follow up
+L0403,2026-03-24,Customer 403,906616258,090****391,Google Search,New Product Launch,Consultation,Converted,Internal,2026-03-26,2026-03-29,Priority
+L0404,2026-03-03,Customer 404,902970590,090****342,Google Search,New Product Launch,Consultation,Lost,Internal,2026-03-05,2026-03-08,Follow up
+L0405,2026-03-25,Customer 405,904671239,090****867,Google Search,New Product Launch,Consultation,Contacted,Internal,2026-03-27,2026-03-30,Follow up
+L0406,2026-03-24,Customer 406,909503461,090****819,Google Search,New Product Launch,Consultation,Converted,Internal,2026-03-26,2026-03-29,Priority
+L0407,2026-03-16,Customer 407,901509378,090****481,Google Search,New Product Launch,Consultation,Converted,Internal,2026-03-18,2026-03-21,Priority
+L0408,2026-03-11,Customer 408,902409549,090****435,Google Search,New Product Launch,Consultation,Converted,Internal,2026-03-13,2026-03-16,Priority
+L0409,2026-03-17,Customer 409,903328574,090****416,Google Search,New Product Launch,Consultation,Converted,Internal,2026-03-19,2026-03-22,Priority
+L0410,2026-03-01,Customer 410,908848419,090****549,Google Search,New Product Launch,Consultation,Contacted,Internal,2026-03-03,2026-03-06,Follow up
+L0411,2026-03-18,Customer 411,909774648,090****127,Google Search,New Product Launch,Consultation,Converted,Internal,2026-03-20,2026-03-23,Priority
+L0412,2026-03-24,Customer 412,908801933,090****233,Google Search,New Product Launch,Consultation,Converted,Internal,2026-03-26,2026-03-29,Priority
+L0413,2026-03-22,Customer 413,908477759,090****366,Google Search,New Product Launch,Consultation,Interested,Internal,2026-03-24,2026-03-27,Follow up
+L0414,2026-03-27,Customer 414,905477838,090****474,Google Search,New Product Launch,Consultation,Interested,Internal,2026-03-29,2026-04-01,Follow up
+L0415,2026-03-01,Customer 415,905139049,090****374,Google Search,New Product Launch,Consultation,Interested,Internal,2026-03-03,2026-03-06,Follow up
+L0416,2026-03-14,Customer 416,902506691,090****600,Google Search,New Product Launch,Consultation,Converted,Internal,2026-03-16,2026-03-19,Priority
+L0417,2026-03-27,Customer 417,908865660,090****772,Google Search,New Product Launch,Consultation,Interested,Internal,2026-03-29,2026-04-01,Follow up
+L0418,2026-03-25,Customer 418,902888256,090****741,Google Search,New Product Launch,Consultation,Lost,Internal,2026-03-27,2026-03-30,Follow up
+L0419,2026-03-26,Customer 419,903117540,090****363,Google Search,New Product Launch,Consultation,Converted,Internal,2026-03-28,2026-03-31,Priority
+L0420,2026-03-28,Customer 420,907159781,090****659,Google Search,New Product Launch,Consultation,New,Internal,2026-03-30,2026-04-02,Follow up
+L0421,2026-03-26,Customer 421,901594958,090****131,Google Search,New Product Launch,Consultation,Converted,Internal,2026-03-28,2026-03-31,Priority
+L0422,2026-03-04,Customer 422,904652431,090****767,Google Search,New Product Launch,Consultation,Lost,Internal,2026-03-06,2026-03-09,Follow up
+L0423,2026-03-24,Customer 423,902187315,090****198,Google Search,New Product Launch,Consultation,Converted,Internal,2026-03-26,2026-03-29,Priority
+L0424,2026-03-10,Customer 424,907379201,090****663,Google Search,New Product Launch,Consultation,Contacted,Internal,2026-03-12,2026-03-15,Follow up
+L0425,2026-03-23,Customer 425,905973059,090****480,Google Search,New Product Launch,Consultation,Interested,Internal,2026-03-25,2026-03-28,Follow up
+L0426,2026-03-09,Customer 426,908753715,090****864,Google Search,New Product Launch,Consultation,Interested,Internal,2026-03-11,2026-03-14,Follow up
+L0427,2026-03-13,Customer 427,909404285,090****402,Google Search,New Product Launch,Consultation,Contacted,Internal,2026-03-15,2026-03-18,Follow up
+L0428,2026-03-25,Customer 428,901594241,090****681,Google Search,New Product Launch,Consultation,Lost,Internal,2026-03-27,2026-03-30,Follow up
+L0429,2026-03-09,Customer 429,906236319,090****774,Google Search,New Product Launch,Consultation,Lost,Internal,2026-03-11,2026-03-14,Follow up
+L0430,2026-03-16,Customer 430,908638363,090****951,Google Search,New Product Launch,Consultation,Converted,Internal,2026-03-18,2026-03-21,Priority
+L0431,2026-03-02,Customer 431,902467362,090****600,Google Search,New Product Launch,Consultation,Contacted,Internal,2026-03-04,2026-03-07,Follow up
+L0432,2026-03-08,Customer 432,908736466,090****200,Google Search,New Product Launch,Consultation,Converted,Internal,2026-03-10,2026-03-13,Priority
+L0433,2026-03-15,Customer 433,907577312,090****333,Google Search,New Product Launch,Consultation,New,Internal,2026-03-17,2026-03-20,Follow up
+L0434,2026-03-09,Customer 434,908477146,090****919,Google Search,New Product Launch,Consultation,Lost,Internal,2026-03-11,2026-03-14,Follow up
+L0435,2026-03-10,Customer 435,908851413,090****867,Google Search,New Product Launch,Consultation,New,Internal,2026-03-12,2026-03-15,Follow up
+L0436,2026-03-02,Customer 436,905581977,090****394,Google Search,New Product Launch,Consultation,Interested,Internal,2026-03-04,2026-03-07,Follow up
+L0437,2026-03-25,Customer 437,902120025,090****593,Google Search,New Product Launch,Consultation,Converted,Internal,2026-03-27,2026-03-30,Priority
+L0438,2026-03-19,Customer 438,907297924,090****488,Google Search,New Product Launch,Consultation,Interested,Internal,2026-03-21,2026-03-24,Follow up
+L0439,2026-03-15,Customer 439,901239023,090****829,Google Search,New Product Launch,Consultation,New,Internal,2026-03-17,2026-03-20,Follow up
+L0440,2026-03-14,Customer 440,906935706,090****138,Google Search,New Product Launch,Consultation,Converted,Internal,2026-03-16,2026-03-19,Priority
+L0441,2026-03-20,Customer 441,903328574,090****862,LinkedIn,Mega Sale Q1,Consultation,New,Internal,2026-03-22,2026-03-25,Follow up
+L0442,2026-03-05,Customer 442,908865660,090****474,LinkedIn,Mega Sale Q1,Consultation,New,Internal,2026-03-07,2026-03-10,Follow up
+L0443,2026-03-10,Customer 443,902882855,090****549,LinkedIn,Mega Sale Q1,Consultation,Lost,Internal,2026-03-12,2026-03-15,Follow up
+L0444,2026-03-27,Customer 444,903117540,090****123,LinkedIn,Mega Sale Q1,Consultation,Converted,Internal,2026-03-29,2026-04-01,Priority
+L0445,2026-03-21,Customer 445,908848419,090****354,LinkedIn,Mega Sale Q1,Consultation,Interested,Internal,2026-03-23,2026-03-26,Follow up
+L0446,2026-03-09,Customer 446,904071375,090****835,LinkedIn,Mega Sale Q1,Consultation,Converted,Internal,2026-03-11,2026-03-14,Priority
+L0447,2026-03-08,Customer 447,905973059,090****131,LinkedIn,Mega Sale Q1,Consultation,Interested,Internal,2026-03-10,2026-03-13,Follow up
+L0448,2026-03-07,Customer 448,906660143,090****366,LinkedIn,Mega Sale Q1,Consultation,New,Internal,2026-03-09,2026-03-12,Follow up
+L0449,2026-03-26,Customer 449,905445214,090****741,LinkedIn,Mega Sale Q1,Consultation,Contacted,Internal,2026-03-28,2026-03-31,Follow up
+L0450,2026-03-13,Customer 450,909673998,090****142,LinkedIn,Mega Sale Q1,Consultation,Converted,Internal,2026-03-15,2026-03-18,Priority
+L0451,2026-03-22,Customer 451,902273180,090****320,LinkedIn,Mega Sale Q1,Consultation,Lost,Internal,2026-03-24,2026-03-27,Follow up
+L0452,2026-03-24,Customer 452,908477146,090****829,LinkedIn,Mega Sale Q1,Consultation,New,Internal,2026-03-26,2026-03-29,Follow up
+L0453,2026-03-18,Customer 453,904671239,090****600,LinkedIn,Mega Sale Q1,Consultation,Interested,Internal,2026-03-20,2026-03-23,Follow up
+L0454,2026-03-20,Customer 454,901509378,090****402,LinkedIn,Mega Sale Q1,Consultation,Converted,Internal,2026-03-22,2026-03-25,Priority
+L0455,2026-03-16,Customer 455,906616258,090****391,LinkedIn,Mega Sale Q1,Consultation,Interested,Internal,2026-03-18,2026-03-21,Follow up
+L0456,2026-03-27,Customer 456,904652431,090****127,LinkedIn,Mega Sale Q1,Consultation,Lost,Internal,2026-03-29,2026-04-01,Follow up
+L0457,2026-03-28,Customer 457,907577312,090****374,LinkedIn,Mega Sale Q1,Consultation,Lost,Internal,2026-03-30,2026-04-02,Follow up
+L0458,2026-03-15,Customer 458,909503461,090****481,LinkedIn,Mega Sale Q1,Consultation,Converted,Internal,2026-03-17,2026-03-20,Priority
+L0459,2026-03-08,Customer 459,902970590,090****233,LinkedIn,Mega Sale Q1,Consultation,Lost,Internal,2026-03-10,2026-03-13,Follow up
+L0460,2026-03-09,Customer 460,908865324,090****167,LinkedIn,Mega Sale Q1,Consultation,Lost,Internal,2026-03-11,2026-03-14,Follow up
+L0461,2026-03-18,Customer 461,909774648,090****616,LinkedIn,Mega Sale Q1,Consultation,Converted,Internal,2026-03-20,2026-03-23,Priority
+L0462,2026-03-14,Customer 462,906846170,090****394,LinkedIn,Mega Sale Q1,Consultation,Converted,Internal,2026-03-16,2026-03-19,Priority
+L0463,2026-03-11,Customer 463,902506691,090****319,LinkedIn,Mega Sale Q1,Consultation,Converted,Internal,2026-03-13,2026-03-16,Priority
+L0464,2026-03-17,Customer 464,905626992,090****474,LinkedIn,Mega Sale Q1,Consultation,Converted,Internal,2026-03-19,2026-03-22,Priority
+L0465,2026-03-17,Customer 465,906935706,090****131,LinkedIn,Mega Sale Q1,Consultation,New,Internal,2026-03-19,2026-03-22,Follow up
+L0466,2026-03-15,Customer 466,901239023,090****202,LinkedIn,Mega Sale Q1,Consultation,Converted,Internal,2026-03-17,2026-03-20,Priority
+L0467,2026-03-19,Customer 467,901594958,090****919,LinkedIn,Mega Sale Q1,Consultation,Converted,Internal,2026-03-21,2026-03-24,Priority
+L0468,2026-03-14,Customer 468,902409549,090****593,LinkedIn,Mega Sale Q1,Consultation,Contacted,Internal,2026-03-16,2026-03-19,Follow up
+L0469,2026-03-04,Customer 469,905581977,090****951,LinkedIn,Mega Sale Q1,Consultation,New,Internal,2026-03-06,2026-03-09,Follow up
+L0470,2026-03-14,Customer 470,907142078,090****138,LinkedIn,Mega Sale Q1,Consultation,New,Internal,2026-03-16,2026-03-19,Follow up
+L0471,2026-03-05,Customer 471,908851413,090****860,LinkedIn,Mega Sale Q1,Consultation,Converted,Internal,2026-03-07,2026-03-10,Priority
+L0472,2026-03-03,Customer 472,908801933,090****342,LinkedIn,Mega Sale Q1,Consultation,Lost,Internal,2026-03-05,2026-03-08,Follow up
+L0473,2026-03-05,Customer 473,902120025,090****772,LinkedIn,Mega Sale Q1,Consultation,Lost,Internal,2026-03-07,2026-03-10,Follow up
+L0474,2026-03-20,Customer 474,903823485,090****867,LinkedIn,Mega Sale Q1,Consultation,Converted,Internal,2026-03-22,2026-03-25,Priority
+L0475,2026-03-04,Customer 475,909565578,090****867,LinkedIn,Mega Sale Q1,Consultation,Contacted,Internal,2026-03-06,2026-03-09,Follow up
+L0476,2026-03-19,Customer 476,906236319,090****819,LinkedIn,Mega Sale Q1,Consultation,Converted,Internal,2026-03-21,2026-03-24,Priority
+L0477,2026-03-05,Customer 477,905477838,090****480,LinkedIn,Mega Sale Q1,Consultation,New,Internal,2026-03-07,2026-03-10,Follow up
+L0478,2026-03-21,Customer 478,901594241,090****412,LinkedIn,Mega Sale Q1,Consultation,Converted,Internal,2026-03-23,2026-03-26,Priority
+L0479,2026-03-14,Customer 479,907159781,090****256,LinkedIn,Mega Sale Q1,Consultation,Lost,Internal,2026-03-16,2026-03-19,Follow up
+L0480,2026-03-21,Customer 480,908477759,090****416,LinkedIn,Mega Sale Q1,Consultation,New,Internal,2026-03-23,2026-03-26,Follow up
+L0481,2026-03-19,Customer 481,902888256,090****773,LinkedIn,Mega Sale Q1,Consultation,New,Internal,2026-03-21,2026-03-24,Follow up
+L0482,2026-03-08,Customer 482,905953046,090****435,LinkedIn,Mega Sale Q1,Consultation,Interested,Internal,2026-03-10,2026-03-13,Follow up
+L0483,2026-03-02,Customer 483,907297924,090****600,LinkedIn,Mega Sale Q1,Consultation,Contacted,Internal,2026-03-04,2026-03-07,Follow up
+L0484,2026-03-08,Customer 484,905788107,090****726,LinkedIn,Mega Sale Q1,Consultation,Lost,Internal,2026-03-10,2026-03-13,Follow up
+L0485,2026-03-09,Customer 485,902467362,090****767,LinkedIn,Mega Sale Q1,Consultation,Converted,Internal,2026-03-11,2026-03-14,Priority
+L0486,2026-03-26,Customer 486,907379201,090****198,LinkedIn,Mega Sale Q1,Consultation,Interested,Internal,2026-03-28,2026-03-31,Follow up
+L0487,2026-03-03,Customer 487,902187315,090****131,LinkedIn,Mega Sale Q1,Consultation,Converted,Internal,2026-03-05,2026-03-08,Priority
+L0488,2026-03-15,Customer 488,903823485,090****333,LinkedIn,Mega Sale Q1,Consultation,Interested,Internal,2026-03-17,2026-03-20,Follow up
+L0489,2026-03-27,Customer 489,908860271,090****659,LinkedIn,Mega Sale Q1,Consultation,Lost,Internal,2026-03-29,2026-04-01,Follow up
+L0490,2026-03-12,Customer 490,909404285,090****200,LinkedIn,Mega Sale Q1,Consultation,Lost,Internal,2026-03-14,2026-03-17,Follow up
+L0491,2026-03-27,Customer 491,905139049,090****488,LinkedIn,Mega Sale Q1,Consultation,New,Internal,2026-03-29,2026-04-01,Follow up
+L0492,2026-03-21,Customer 492,903875327,090****619,LinkedIn,Mega Sale Q1,Consultation,Converted,Internal,2026-03-23,2026-03-26,Priority
+L0493,2026-03-14,Customer 493,908753715,090****663,LinkedIn,Mega Sale Q1,Consultation,Interested,Internal,2026-03-16,2026-03-19,Follow up
+L0494,2026-03-13,Customer 494,906236968,090****363,LinkedIn,Mega Sale Q1,Consultation,Interested,Internal,2026-03-15,2026-03-18,Follow up
+L0495,2026-03-10,Customer 495,902882855,090****681,LinkedIn,Mega Sale Q1,Consultation,Converted,Internal,2026-03-12,2026-03-15,Priority
+L0496,2026-03-26,Customer 496,908736466,090****864,LinkedIn,Mega Sale Q1,Consultation,Interested,Internal,2026-03-28,2026-03-31,Follow up
+L0497,2026-03-13,Customer 497,908638363,090****774,LinkedIn,Mega Sale Q1,Consultation,Interested,Internal,2026-03-15,2026-03-18,Follow up
+L0498,2026-03-04,Customer 498,907142078,090****346,LinkedIn,Mega Sale Q1,Consultation,Lost,Internal,2026-03-06,2026-03-09,Follow up
+L0499,2026-03-23,Customer 499,906846170,090****142,LinkedIn,Mega Sale Q1,Consultation,Converted,Internal,2026-03-25,2026-03-28,Priority
+L0500,2026-04-03,Customer 500,904071375,090****202,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-04-05,2026-04-08,Follow up
+L0501,2026-04-05,Customer 501,909565578,090****256,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-04-07,2026-04-10,Priority
+L0502,2026-04-22,Customer 502,905445214,090****354,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-04-24,2026-04-27,Follow up
+L0503,2026-04-05,Customer 503,905788107,090****862,Facebook Ads,New Product Launch,Consultation,Interested,Internal,2026-04-07,2026-04-10,Follow up
+L0504,2026-04-08,Customer 504,908860271,090****860,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-04-10,2026-04-13,Follow up
+L0505,2026-04-18,Customer 505,908865324,090****616,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-04-20,2026-04-23,Priority
+L0506,2026-04-22,Customer 506,906660143,090****835,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-04-24,2026-04-27,Follow up
+L0507,2026-04-17,Customer 507,909673998,090****167,Facebook Ads,New Product Launch,Consultation,New,Internal,2026-04-19,2026-04-22,Follow up
+L0508,2026-04-15,Customer 508,905953046,090****319,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-04-17,2026-04-20,Follow up
+L0509,2026-04-14,Customer 509,903875327,090****412,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-04-16,2026-04-19,Priority
+L0510,2026-04-26,Customer 510,902273180,090****773,Facebook Ads,New Product Launch,Consultation,New,Internal,2026-04-28,2026-05-01,Follow up
+L0511,2026-04-06,Customer 511,905626992,090****123,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-04-08,2026-04-11,Follow up
+L0512,2026-04-20,Customer 512,906236968,090****320,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-04-22,2026-04-25,Follow up
+L0513,2026-04-09,Customer 513,906616258,090****391,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-04-11,2026-04-14,Priority
+L0514,2026-04-27,Customer 514,902970590,090****342,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-04-29,2026-05-02,Follow up
+L0515,2026-04-13,Customer 515,904671239,090****867,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-04-15,2026-04-18,Follow up
+L0516,2026-04-18,Customer 516,909503461,090****819,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-04-20,2026-04-23,Priority
+L0517,2026-04-04,Customer 517,901509378,090****481,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-04-06,2026-04-09,Priority
+L0518,2026-04-04,Customer 518,902409549,090****435,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-04-06,2026-04-09,Priority
+L0519,2026-04-13,Customer 519,903328574,090****416,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-04-15,2026-04-18,Priority
+L0520,2026-04-05,Customer 520,908848419,090****549,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-04-07,2026-04-10,Follow up
+L0521,2026-04-11,Customer 521,909774648,090****127,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-04-13,2026-04-16,Priority
+L0522,2026-04-12,Customer 522,908801933,090****233,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-04-14,2026-04-17,Priority
+L0523,2026-04-02,Customer 523,908477759,090****366,Facebook Ads,New Product Launch,Consultation,New,Internal,2026-04-04,2026-04-07,Follow up
+L0524,2026-04-04,Customer 524,905477838,090****474,Facebook Ads,New Product Launch,Consultation,Contacted,Internal,2026-04-06,2026-04-09,Follow up
+L0525,2026-04-20,Customer 525,905139049,090****374,Facebook Ads,New Product Launch,Consultation,Interested,Internal,2026-04-22,2026-04-25,Follow up
+L0526,2026-04-05,Customer 526,902506691,090****600,Facebook Ads,New Product Launch,Consultation,Converted,Internal,2026-04-07,2026-04-10,Priority
+L0527,2026-04-03,Customer 527,908865660,090****772,Facebook Ads,New Product Launch,Consultation,Lost,Internal,2026-04-05,2026-04-08,Follow up

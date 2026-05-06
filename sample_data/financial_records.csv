@@ -1,0 +1,17 @@
+month,category,type,actual_amount,target_amount,completion_rate,difference,notes,approver
+2026-01,Revenue,Income,7160759367,7518797335,0.95,-358037968,Verified,Nguyen Van N
+2026-01,Marketing,Expense,44948087,42700682,01.05,2247404,Verified,Nguyen Van N
+2026-01,Salaries,Expense,415664415,415664415,1.0,0,Verified,Nguyen Van N
+2026-01,General Ops,Expense,15000000,15000000,1.0,0,Verified,Nguyen Van N
+2026-02,Revenue,Income,7390979564,7760528542,0.95,-369548978,Verified,Nguyen Van N
+2026-02,Marketing,Expense,34826396,33085076,01.05,1741319,Verified,Nguyen Van N
+2026-02,Salaries,Expense,415664415,415664415,1.0,0,Verified,Nguyen Van N
+2026-02,General Ops,Expense,15000000,15000000,1.0,0,Verified,Nguyen Van N
+2026-03,Revenue,Income,0,0,1.0,0,Verified,Nguyen Van N
+2026-03,Marketing,Expense,43731401,41544830,01.05,2186570,Verified,Nguyen Van N
+2026-03,Salaries,Expense,415664415,415664415,1.0,0,Verified,Nguyen Van N
+2026-03,General Ops,Expense,15000000,15000000,1.0,0,Verified,Nguyen Van N
+2026-04,Revenue,Income,0,0,1.0,0,Verified,Nguyen Van N
+2026-04,Marketing,Expense,35914309,34118593,01.05,1795715,Verified,Nguyen Van N
+2026-04,Salaries,Expense,415664415,415664415,1.0,0,Verified,Nguyen Van N
+2026-04,General Ops,Expense,15000000,15000000,1.0,0,Verified,Nguyen Van N

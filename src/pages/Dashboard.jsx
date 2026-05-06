@@ -1,0 +1,302 @@
+import React from 'react';
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, 
+  PieChart, Pie, Cell 
+} from 'recharts';
+import { useData } from '../context/DataContext';
+
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div style={{ backgroundColor: 'var(--bg-tertiary)', padding: '10px', border: '1px solid var(--border-color)', borderRadius: '4px' }}>
+        <p style={{ margin: 0, fontWeight: 'bold' }}>{label || payload[0].name}</p>
+        {payload.map((p, idx) => (
+          <p key={idx} style={{ margin: 0, color: p.color || p.fill }}>
+            {p.name}: {p.value}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
+
+function Dashboard() {
+  const { sales, transactions, marketing, leads, financials } = useData();
+
+  // --- KPI CALCULATIONS ---
+  
+  // 1. Doanh thu — match both Vietnamese mapped names AND English Supabase originals
+  const revenueItems = financials.filter(f => 
+    f['Hạng mục'] === 'Revenue' || f['Hạng mục'] === 'Doanh thu thực thu' || f['Hạng mục'] === 'Doanh thu HĐMB'
+  );
+  const doanhThu = Number(revenueItems.reduce((sum, f) => sum + Number(f['Thực tế (tỷ)'] || 0), 0)).toFixed(2);
+  const doanhThuKH = Number(revenueItems.reduce((sum, f) => sum + Number(f['KH (tỷ)'] || 0), 0)).toFixed(2);
+  const doanhThuPercent = doanhThuKH > 0 ? Math.round((doanhThu / doanhThuKH) * 100) : 0;
+
+  // 2. Lợi nhuận gộp — match both 'Expense' (Supabase) and 'Chi phí' (Vietnamese)
+  const expenseItems = financials.filter(f => 
+    f['Loại'] === 'Expense' || f['Loại'] === 'Chi phí'
+  );
+  const chiPhi = expenseItems.reduce((sum, f) => sum + Number(f['Thực tế (tỷ)'] || 0), 0);
+  const loiNhuan = (doanhThu - chiPhi).toFixed(2);
+  const margin = doanhThu > 0 ? ((loiNhuan / doanhThu) * 100).toFixed(1) : 0;
+
+  // 3. Giao dịch — match all possible status variants
+  const totalGD = transactions.length;
+  const countHDMB = transactions.filter(t => t['Trạng thái'] === 'Đã ký HĐMB' || t['Trạng thái'] === 'Completed').length;
+  const countCoc = transactions.filter(t => t['Trạng thái'] === 'Đã đặt cọc').length;
+  const countGiuCho = transactions.filter(t => t['Trạng thái'] === 'Giữ chỗ' || t['Trạng thái'] === 'Đang giữ chỗ').length;
+
+  // 4. Tổng Lead
+  const totalLeads = leads.length;
+  const chuaPhanCongLeads = leads.filter(l => l['Ghi chú']?.includes('Chưa phân công') || !l['Sales phụ trách']);
+  const daPhanCong = totalLeads - chuaPhanCongLeads.length;
+
+  // 5. Booking MKT
+  const totalBooking = marketing.reduce((sum, m) => sum + Number(m['Booking'] || 0), 0);
+  const totalLeadMkt = marketing.reduce((sum, m) => sum + Number(m['Lead'] || 0), 0);
+  const totalChiPhiMktRaw = marketing.reduce((sum, m) => sum + Number(m['CP (tr)'] || 0), 0);
+  const totalChiPhiMkt = Number(totalChiPhiMktRaw.toFixed(1));
+
+  // --- INSIGHTS GENERATION ---
+  const insights = [];
+
+  // Unassigned leads insight
+  if (chuaPhanCongLeads.length > 0) {
+    const unassignedIds = chuaPhanCongLeads.map(l => l['Mã lead']).slice(0, 5).join(' • ');
+    insights.push({
+      type: 'danger',
+      title: `${chuaPhanCongLeads.length} lead chưa phân công — ${unassignedIds}${chuaPhanCongLeads.length > 5 ? '...' : ''}`,
+      desc: 'Phân công sales ngay trong ngày để không bỏ lỡ cơ hội tiếp cận.'
+    });
+  }
+
+  // Sales KPI insights
+  sales.forEach(s => {
+    const thucTe = Number(s['Doanh số (tỷ)'] || 0);
+    const kpi = Number(s['KH DS (tỷ)'] || 1); // Fixed KPI field name from db.json
+    const percent = Math.round((thucTe / kpi) * 100);
+    if (percent < 70) {
+      insights.push({
+        type: 'danger',
+        title: `${s['Tên NV']} (${s['Mã NV']}) chỉ đạt ${percent}% KPI`,
+        desc: `DS ${thucTe} tỷ / KH ${kpi} tỷ · ⚠ Dưới KPI - cần coaching`
+      });
+    }
+  });
+
+  // Marketing insights
+  let bestMkt = null;
+  let bestMktRate = 0;
+  marketing.forEach(m => {
+    const cp = Number(m['CP (tr)']);
+    const bk = Number(m['Booking']);
+    if (cp > 0 && bk > 0) {
+      const rate = bk / cp; // Bookings per million
+      if (rate > bestMktRate) {
+        bestMktRate = rate;
+        bestMkt = m;
+      }
+    }
+  });
+
+  if (bestMkt) {
+    const leadCount = bestMkt['Lead'];
+    const bookCount = bestMkt['Booking'];
+    const cp = Number(bestMkt['CP (tr)']);
+    const conversion = ((bookCount / leadCount) * 100).toFixed(1);
+    insights.push({
+      type: 'success',
+      title: `${bestMkt['Kênh']} hiệu quả nhất: CĐ ${conversion}%`,
+      desc: `Chi ${cp}tr · ${leadCount} lead · ${bookCount} booking`
+    });
+  }
+
+  // --- CHARTS DATA ---
+  
+  // 1. Lead Status
+  const statusCounts = {};
+  leads.forEach(l => {
+    const status = l['Trạng thái'];
+    statusCounts[status] = (statusCounts[status] || 0) + 1;
+  });
+  const leadStatusData = Object.keys(statusCounts).map(k => ({ name: k, value: statusCounts[k] }));
+  const PIE_COLORS = ['#b366ff', '#ccff00', '#00cc66', '#00e5ff', '#ff4d94', '#ffcc00'];
+
+  // 2. Booking by Channel
+  const mktChannelData = marketing.map(m => ({
+    name: m['Kênh'],
+    Booking: Number(m['Booking'] || 0)
+  }));
+
+  // 3. Transactions by Zone
+  const zoneCounts = {};
+  transactions.forEach(t => {
+    const zone = t['Phân khu'] || 'Khác';
+    zoneCounts[zone] = (zoneCounts[zone] || 0) + 1;
+  });
+  const zoneData = Object.keys(zoneCounts).map(k => ({ name: k, value: zoneCounts[k] }));
+  const ZONE_COLORS = ['#ff4d94', '#4da6ff', '#00e5ff'];
+
+  // 4. Funnel
+  const funnelData = [
+    { name: 'Lead Marketing', value: totalLeadMkt, fill: '#ccff00' },
+    { name: 'Lead CRM', value: totalLeads, fill: '#b366ff' },
+    { name: 'Đã liên hệ+', value: leads.filter(l => l['Trạng thái'] !== 'MỚI TIẾP NHẬN').length, fill: '#00e5ff' },
+    { name: 'Booking MKT', value: totalBooking, fill: '#4da6ff' },
+    { name: 'Giao dịch', value: totalGD, fill: '#ffcc00' },
+    { name: 'Đã ký HĐMB', value: countHDMB, fill: '#ff4d94' }
+  ].reverse(); // reverse for vertical bar chart layout (bottom up visually)
+
+  // 5. Sales vs KPI
+  const salesData = sales.map(s => ({
+    name: s['Tên NV'].split(' ').pop(), // Just first name
+    'Thực tế (tỷ)': Number(s['DS thực (tỷ)'] || 0),
+    'KPI (tỷ)': Number(s['KH DS (tỷ)'] || 0)
+  }));
+
+  return (
+    <div>
+      {/* KPI GRID */}
+      <div className="dash-kpi-grid">
+        <div className="dash-kpi-card card-revenue">
+          <div className="dash-kpi-title">Doanh thu</div>
+          <div className="dash-kpi-value">{doanhThu}<span className="dash-kpi-unit">tỷ</span></div>
+          <div className="dash-kpi-subtext">{doanhThuPercent}% KH · KH: {doanhThuKH} tỷ</div>
+        </div>
+        
+        <div className="dash-kpi-card card-profit">
+          <div className="dash-kpi-title">Lợi nhuận gộp</div>
+          <div className="dash-kpi-value">{loiNhuan}<span className="dash-kpi-unit">tỷ</span></div>
+          <div className="dash-kpi-subtext">{margin}% biên LN</div>
+        </div>
+
+        <div className="dash-kpi-card card-deals">
+          <div className="dash-kpi-title">Giao dịch</div>
+          <div className="dash-kpi-value">{totalGD}</div>
+          <div className="dash-kpi-subtext">{countHDMB} HĐMB · {countCoc} Cọc · {countGiuCho} Giữ chỗ</div>
+        </div>
+
+        <div className="dash-kpi-card card-leads">
+          <div className="dash-kpi-title">Tổng Lead CRM</div>
+          <div className="dash-kpi-value">{totalLeads}</div>
+          <div className="dash-kpi-subtext">{chuaPhanCongLeads.length} chưa phân công · {daPhanCong} đã phân</div>
+        </div>
+
+        <div className="dash-kpi-card card-mkt">
+          <div className="dash-kpi-title">Booking MKT</div>
+          <div className="dash-kpi-value">{totalBooking}</div>
+          <div className="dash-kpi-subtext">{totalLeadMkt} leads · {totalChiPhiMkt}tr chi phí</div>
+        </div>
+
+        <div className="dash-kpi-card card-unassigned">
+          <div className="dash-kpi-title">Chưa phân công</div>
+          <div className="dash-kpi-value">{chuaPhanCongLeads.length}</div>
+          <div className="dash-kpi-subtext">Xử lý ngay</div>
+        </div>
+      </div>
+
+      {/* INSIGHTS */}
+      <div className="section-title">▶ Cảnh báo & Insights tự động</div>
+      <div className="insight-list">
+        {insights.map((insight, idx) => (
+          <div key={idx} className={`insight-item alert-${insight.type}`}>
+            <div className="insight-icon"></div>
+            <div className="insight-content">
+              <div className="insight-title">{insight.title}</div>
+              <div className="insight-desc">{insight.desc}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* CHARTS ROW 1 */}
+      <div className="dash-charts-grid">
+        <div className="dash-chart-card">
+          <div className="dash-chart-title">Trạng thái Lead CRM</div>
+          <div className="dash-chart-subtitle">Tổng {totalLeads} leads</div>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={leadStatusData} cx="40%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={5} dataKey="value">
+                {leadStatusData.map((entry, index) => <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />)}
+              </Pie>
+              <Tooltip content={<CustomTooltip />} />
+              <Legend layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{ fontSize: '11px', color: 'var(--text-muted)' }} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="dash-chart-card">
+          <div className="dash-chart-title">Booking theo kênh</div>
+          <div className="dash-chart-subtitle">Tổng {totalBooking} booking</div>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={mktChannelData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#2a2e39" vertical={false} />
+              <XAxis dataKey="name" stroke="#8b92a5" fontSize={11} tickLine={false} axisLine={false} />
+              <YAxis stroke="#8b92a5" fontSize={11} tickLine={false} axisLine={false} />
+              <Tooltip cursor={{ fill: '#252932' }} content={<CustomTooltip />} />
+              <Bar dataKey="Booking" radius={[4, 4, 0, 0]}>
+                {mktChannelData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={['#4da6ff', '#00e5ff', '#ff4d94', '#00cc66'][index % 4]} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="dash-chart-card">
+          <div className="dash-chart-title">Giao dịch theo phân khu</div>
+          <div className="dash-chart-subtitle">Tổng {totalGD} giao dịch</div>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={zoneData} cx="40%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={5} dataKey="value">
+                {zoneData.map((entry, index) => <Cell key={`cell-${index}`} fill={ZONE_COLORS[index % ZONE_COLORS.length]} />)}
+              </Pie>
+              <Tooltip content={<CustomTooltip />} />
+              <Legend layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{ fontSize: '11px', color: 'var(--text-muted)' }} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* CHARTS ROW 2 */}
+      <div className="dash-charts-wide-grid">
+        <div className="dash-chart-card">
+          <div className="dash-chart-title">Funnel chuyển đổi</div>
+          <div className="dash-chart-subtitle">MKT Lead → CRM → Booking → GD</div>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={funnelData} layout="vertical" margin={{ top: 10, right: 30, left: 30, bottom: 0 }}>
+              <XAxis type="number" hide />
+              <YAxis dataKey="name" type="category" stroke="#8b92a5" fontSize={11} axisLine={false} tickLine={false} />
+              <Tooltip cursor={{ fill: '#252932' }} content={<CustomTooltip />} />
+              <Bar dataKey="value" barSize={15} radius={[0, 4, 4, 0]}>
+                {funnelData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.fill} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="dash-chart-card">
+          <div className="dash-chart-title">Doanh số Sales vs KPI</div>
+          <div className="dash-chart-subtitle">Đơn vị: Tỷ VNĐ</div>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={salesData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#2a2e39" vertical={false} />
+              <XAxis dataKey="name" stroke="#8b92a5" fontSize={11} tickLine={false} axisLine={false} />
+              <YAxis stroke="#8b92a5" fontSize={11} tickLine={false} axisLine={false} />
+              <Tooltip cursor={{ fill: '#252932' }} content={<CustomTooltip />} />
+              <Legend wrapperStyle={{ fontSize: '11px', color: 'var(--text-muted)' }} verticalAlign="top" align="right" />
+              <Bar dataKey="Thực tế (tỷ)" fill="#ffcc00" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="KPI (tỷ)" fill="#5c677d" radius={[2, 2, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Dashboard;
