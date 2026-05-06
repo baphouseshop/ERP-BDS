@@ -54,10 +54,53 @@ const Logs = () => {
     return mapping[table] || table;
   };
 
+  const columnMapping = {
+    'ma_lead': 'Mã Lead', 'ho_ten': 'Họ tên', 'sdt': 'SĐT', 'nguon': 'Nguồn',
+    'chien_dich_id': 'Chiến dịch', 'nhu_cau': 'Nhu cầu', 'trang_thai': 'Trạng thái',
+    'nhan_vien_id': 'Mã nhân viên', 'ten_san': 'Tên sàn', 'ngay_hen': 'Ngày hẹn',
+    'ngay_fu': 'Ngày Follow-up', 'ghi_chu': 'Ghi chú', 'ngay_nhan': 'Ngày nhận',
+    'ma_gd': 'Mã GD', 'khach_hang': 'Khách hàng', 'ngay_gd': 'Ngày GD',
+    'ma_sp': 'Mã SP', 'phan_khu': 'Phân khu', 'gia_vnd': 'Giá HĐ',
+    'tien_coc': 'Tiền cọc', 'hoa_hong': 'Hoa hồng', 'sales_name': 'Tên Sales',
+    'ma_nv': 'Mã NV', 'ten_nv': 'Tên NV', 'san': 'Sàn', 'chuc_vu': 'Chức vụ',
+    'luong_vnd': 'Lương', 'ngay_vao_lam': 'Ngày vào làm', 'email': 'Email'
+  };
+
+  const renderDiff = (log) => {
+    if (log.action === 'INSERT') {
+      return Object.entries(log.new_data || {}).map(([key, val]) => (
+        val && <div key={key}><strong>{columnMapping[key] || key}:</strong> {String(val)}</div>
+      ));
+    }
+    if (log.action === 'DELETE') {
+      return <div style={{ color: 'var(--danger)' }}>Bản ghi đã bị xóa</div>;
+    }
+    
+    // For UPDATE: Compare old and new
+    const oldD = log.old_data || {};
+    const newD = log.new_data || {};
+    const changes = Object.keys(newD).filter(key => 
+      String(oldD[key] || '') !== String(newD[key] || '')
+    );
+
+    if (changes.length === 0) return <div>Không có thay đổi dữ liệu chính</div>;
+
+    return changes.map(key => (
+      <div key={key} style={{ marginBottom: '4px' }}>
+        <strong>{columnMapping[key] || key}:</strong> 
+        <span style={{ color: '#f44336', textDecoration: 'line-through', margin: '0 8px' }}>{String(oldD[key] || 'Trống')}</span>
+        <span style={{ color: '#4caf50' }}>➔ {String(newD[key] || 'Trống')}</span>
+      </div>
+    ));
+  };
+
   return (
     <div className="page-container" style={{ padding: '20px' }}>
       <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--text-primary)' }}>Lịch sử chỉnh sửa dữ liệu</h2>
+        <div>
+          <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--text-primary)' }}>Lịch sử chỉnh sửa dữ liệu</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Theo dõi các thao tác Thêm, Sửa, Xóa trên hệ thống.</p>
+        </div>
         <button className="btn-submit" onClick={fetchLogs} style={{ padding: '8px 16px', fontSize: '14px' }}>
           Làm mới
         </button>
@@ -72,7 +115,7 @@ const Logs = () => {
                 <th style={{ padding: '12px 15px' }}>Bảng</th>
                 <th style={{ padding: '12px 15px' }}>Mã bản ghi</th>
                 <th style={{ padding: '12px 15px' }}>Hành động</th>
-                <th style={{ padding: '12px 15px' }}>Chi tiết</th>
+                <th style={{ padding: '12px 15px' }}>Chi tiết thay đổi</th>
               </tr>
             </thead>
             <tbody style={{ color: 'var(--text-primary)' }}>
@@ -83,16 +126,16 @@ const Logs = () => {
               ) : (
                 logs.map((log) => (
                   <tr key={log.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                    <td style={{ padding: '12px 15px', whiteSpace: 'nowrap' }}>
+                    <td style={{ padding: '12px 15px', whiteSpace: 'nowrap', verticalAlign: 'top' }}>
                       {new Date(log.created_at).toLocaleString('vi-VN')}
                     </td>
-                    <td style={{ padding: '12px 15px', fontWeight: '500' }}>
+                    <td style={{ padding: '12px 15px', fontWeight: '500', verticalAlign: 'top' }}>
                       {getTableNameVietnamese(log.table_name)}
                     </td>
-                    <td style={{ padding: '12px 15px' }}>
+                    <td style={{ padding: '12px 15px', verticalAlign: 'top', fontWeight: 'bold', color: 'var(--accent)' }}>
                       {log.record_id}
                     </td>
-                    <td style={{ padding: '12px 15px' }}>
+                    <td style={{ padding: '12px 15px', verticalAlign: 'top' }}>
                       <span style={{ 
                         backgroundColor: getActionColor(log.action) + '22', 
                         color: getActionColor(log.action),
@@ -105,33 +148,9 @@ const Logs = () => {
                       </span>
                     </td>
                     <td style={{ padding: '12px 15px' }}>
-                      <details>
-                        <summary style={{ cursor: 'pointer', color: 'var(--accent-color)', fontSize: '13px' }}>Xem thay đổi</summary>
-                        <div style={{ 
-                          marginTop: '10px', 
-                          padding: '10px', 
-                          backgroundColor: 'var(--bg-primary)', 
-                          borderRadius: '6px',
-                          fontSize: '11px',
-                          maxHeight: '200px',
-                          overflowY: 'auto'
-                        }}>
-                          {log.action === 'UPDATE' ? (
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                              <div>
-                                <div style={{ color: '#f44336', marginBottom: '5px' }}>Cũ:</div>
-                                <pre style={{ margin: 0 }}>{formatData(log.old_data)}</pre>
-                              </div>
-                              <div>
-                                <div style={{ color: '#4caf50', marginBottom: '5px' }}>Mới:</div>
-                                <pre style={{ margin: 0 }}>{formatData(log.new_data)}</pre>
-                              </div>
-                            </div>
-                          ) : (
-                            <pre style={{ margin: 0 }}>{formatData(log.action === 'DELETE' ? log.old_data : log.new_data)}</pre>
-                          )}
-                        </div>
-                      </details>
+                      <div style={{ fontSize: '13px', lineHeight: '1.6' }}>
+                        {renderDiff(log)}
+                      </div>
                     </td>
                   </tr>
                 ))
