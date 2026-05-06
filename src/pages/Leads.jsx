@@ -17,6 +17,7 @@ function Leads() {
   const [filterSales, setFilterSales] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
+  const [sortConfig, setSortConfig] = useState({ key: 'Ngày nhận', direction: 'desc' });
 
   // Unique values for dropdowns
   const uniqueStatuses = [...new Set(leads.map(l => l['Trạng thái']).filter(Boolean))];
@@ -40,7 +41,33 @@ function Leads() {
     if (filterAgency && l['Tên sàn'] !== filterAgency) return false;
     if (filterSales && l['Sales phụ trách'] !== filterSales) return false;
     return true;
+  }).sort((a, b) => {
+    if (!sortConfig.key) return 0;
+    
+    let aValue = a[sortConfig.key];
+    let bValue = b[sortConfig.key];
+
+    // Handle date sorting
+    if (['Ngày nhận', 'Ngày FU', 'Ngày hẹn', 'Lần cập nhật cuối'].includes(sortConfig.key)) {
+      aValue = aValue ? new Date(aValue).getTime() : 0;
+      bValue = bValue ? new Date(bValue).getTime() : 0;
+    } else {
+      aValue = String(aValue || '').toLowerCase();
+      bValue = String(bValue || '').toLowerCase();
+    }
+
+    if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+    return 0;
   });
+
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
 
   // Pagination Logic
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -340,21 +367,49 @@ function Leads() {
           <thead>
             <tr>
               <th>Thao tác</th>
-              <th>Mã Lead</th>
-              <th>Họ Tên</th>
-              <th>SĐT</th>
-              <th>Nguồn</th>
-              <th>Chiến dịch</th>
-              <th>Nhu cầu</th>
-              <th>Trạng thái</th>
-              <th>Sales phụ trách</th>
-              <th>Mã NV</th>
-              <th>Tên sàn</th>
-              <th>Ngày nhận</th>
-              <th>Ngày Follow up</th>
-              <th>Ngày hẹn</th>
+              <th onClick={() => handleSort('Mã lead')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                Mã Lead {sortConfig.key === 'Mã lead' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+              </th>
+              <th onClick={() => handleSort('Họ tên')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                Họ Tên {sortConfig.key === 'Họ tên' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+              </th>
+              <th onClick={() => handleSort('SĐT (đầy đủ)')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                SĐT {sortConfig.key === 'SĐT (đầy đủ)' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+              </th>
+              <th onClick={() => handleSort('Nguồn')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                Nguồn {sortConfig.key === 'Nguồn' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+              </th>
+              <th onClick={() => handleSort('Chiến dịch')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                Chiến dịch {sortConfig.key === 'Chiến dịch' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+              </th>
+              <th onClick={() => handleSort('Nhu cầu')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                Nhu cầu {sortConfig.key === 'Nhu cầu' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+              </th>
+              <th onClick={() => handleSort('Trạng thái')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                Trạng thái {sortConfig.key === 'Trạng thái' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+              </th>
+              <th onClick={() => handleSort('Sales phụ trách')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                Sales phụ trách {sortConfig.key === 'Sales phụ trách' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+              </th>
+              <th onClick={() => handleSort('Mã NV')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                Mã NV {sortConfig.key === 'Mã NV' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+              </th>
+              <th onClick={() => handleSort('Tên sàn')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                Tên sàn {sortConfig.key === 'Tên sàn' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+              </th>
+              <th onClick={() => handleSort('Ngày nhận')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                Ngày nhận {sortConfig.key === 'Ngày nhận' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+              </th>
+              <th onClick={() => handleSort('Ngày FU')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                Ngày Follow up {sortConfig.key === 'Ngày FU' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+              </th>
+              <th onClick={() => handleSort('Ngày hẹn')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                Ngày hẹn {sortConfig.key === 'Ngày hẹn' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+              </th>
               <th>Ghi chú</th>
-              <th>Cập nhật cuối</th>
+              <th onClick={() => handleSort('Lần cập nhật cuối')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                Cập nhật cuối {sortConfig.key === 'Lần cập nhật cuối' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+              </th>
               <th>Người cập nhật</th>
             </tr>
           </thead>

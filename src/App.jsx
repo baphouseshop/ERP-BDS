@@ -7,6 +7,7 @@ import Sales from './pages/Sales';
 import Marketing from './pages/Marketing';
 import Financials from './pages/Financials';
 import Staff from './pages/Staff';
+import Logs from './pages/Logs';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
 import { useData } from './context/DataContext';
@@ -163,6 +164,7 @@ function TopBar({ session }) {
     { path: '/marketing', label: 'MARKETING', roles: ['Admin', 'BOD', 'Marketing'] },
     { path: '/leads', label: 'CRM LEADS', roles: ['Admin', 'BOD', 'Sales', 'Marketing'] },
     { path: '/staff', label: 'NHÂN SỰ', roles: ['Admin', 'BOD', 'HR'] },
+    { path: '/logs', label: 'LỊCH SỬ', roles: ['Admin', 'BOD'] },
     { path: '/settings', label: 'CÀI ĐẶT', roles: ['Admin', 'BOD'] },
   ];
 
@@ -246,6 +248,7 @@ function App() {
             <Route path="/marketing" element={checkAccess(['Admin', 'BOD', 'Marketing']) ? <Marketing /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
             <Route path="/financials" element={checkAccess(['Admin', 'BOD', 'Kế toán']) ? <Financials /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
             <Route path="/staff" element={checkAccess(['Admin', 'BOD', 'HR']) ? <Staff /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
+            <Route path="/logs" element={checkAccess(['Admin', 'BOD']) ? <Logs /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
             <Route path="/settings" element={checkAccess(['Admin', 'BOD']) ? <Settings /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
           </Routes>
         )}

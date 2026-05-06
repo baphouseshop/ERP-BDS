@@ -239,7 +239,7 @@ export const DataProvider = ({ children }) => {
   const addLead = async (newLead) => {
     const dbLead = {
       ma_lead: newLead["Mã lead"],
-      ngay_nhan: newLead["Ngày nhận"],
+      ngay_nhan: newLead["Ngày nhận"] || null,
       ho_ten: newLead["Họ tên"],
       sdt: newLead["SĐT (đầy đủ)"],
       nguon: newLead["Nguồn"],
@@ -248,8 +248,8 @@ export const DataProvider = ({ children }) => {
       trang_thai: newLead["Trạng thái"],
       nhan_vien_id: newLead["Mã NV"] || null,
       ten_san: newLead["Tên sàn"],
-      ngay_hen: newLead["Ngày hẹn"],
-      ngay_fu: newLead["Ngày FU"],
+      ngay_hen: newLead["Ngày hẹn"] || null,
+      ngay_fu: newLead["Ngày FU"] || null,
       ghi_chu: newLead["Ghi chú"]
     };
 
@@ -272,8 +272,8 @@ export const DataProvider = ({ children }) => {
       trang_thai: updatedLead["Trạng thái"],
       nhan_vien_id: updatedLead["Mã NV"] || null,
       ten_san: updatedLead["Tên sàn"],
-      ngay_hen: updatedLead["Ngày hẹn"],
-      ngay_fu: updatedLead["Ngày FU"],
+      ngay_hen: updatedLead["Ngày hẹn"] || null,
+      ngay_fu: updatedLead["Ngày FU"] || null,
       ghi_chu: updatedLead["Ghi chú"]
     };
 
@@ -300,8 +300,8 @@ export const DataProvider = ({ children }) => {
       trang_thai: l["Trạng thái"],
       nhan_vien_id: l["Mã NV"] || null,
       ten_san: l["Tên sàn"],
-      ngay_hen: l["Ngày hẹn"],
-      ngay_fu: l["Ngày FU"],
+      ngay_hen: l["Ngày hẹn"] || null,
+      ngay_fu: l["Ngày FU"] || null,
       ghi_chu: l["Ghi chú"]
     }));
 
@@ -346,7 +346,7 @@ export const DataProvider = ({ children }) => {
   const addTransaction = async (newTransaction) => {
     const dbTrans = {
       ma_gd: newTransaction["Mã GD"],
-      ngay_gd: newTransaction["Ngày GD"],
+      ngay_gd: newTransaction["Ngày GD"] || null,
       khach_hang_id: newTransaction["Mã Lead"],
       nhan_vien_id: newTransaction["Mã nhân viên"],
       ma_sp: newTransaction["Mã SP"],
@@ -369,7 +369,7 @@ export const DataProvider = ({ children }) => {
 
   const editTransaction = async (updatedTransaction) => {
     const dbTrans = {
-      ngay_gd: updatedTransaction["Ngày GD"],
+      ngay_gd: updatedTransaction["Ngày GD"] || null,
       khach_hang_id: updatedTransaction["Mã Lead"],
       nhan_vien_id: updatedTransaction["Mã nhân viên"],
       ma_sp: updatedTransaction["Mã SP"],
@@ -497,7 +497,7 @@ export const DataProvider = ({ children }) => {
       chuc_vu: newStaff["Chức vụ"],
       sdt: newStaff["SĐT"],
       email: newStaff["Email"],
-      ngay_vao_lam: newStaff["Ngày vào làm"],
+      ngay_vao_lam: newStaff["Ngày vào làm"] || null,
       trang_thai: newStaff["Trạng thái"],
       luong: Number(newStaff["Lương (VNĐ)"]),
       quan_ly_id: newStaff["Quản lý (Mã NV)"]
@@ -519,7 +519,7 @@ export const DataProvider = ({ children }) => {
       chuc_vu: updatedStaff["Chức vụ"],
       sdt: updatedStaff["SĐT"],
       email: updatedStaff["Email"],
-      ngay_vao_lam: updatedStaff["Ngày vào làm"],
+      ngay_vao_lam: updatedStaff["Ngày vào làm"] || null,
       trang_thai: updatedStaff["Trạng thái"],
       luong: Number(updatedStaff["Lương (VNĐ)"]),
       quan_ly_id: updatedStaff["Quản lý (Mã NV)"]

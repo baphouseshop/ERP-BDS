@@ -13,6 +13,7 @@ function Transactions() {
   const [filterSales, setFilterSales] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
+  const [sortConfig, setSortConfig] = useState({ key: 'Ngày GD', direction: 'desc' });
 
   const uniqueStatuses = [...new Set(transactions.map(t => t['Trạng thái']).filter(Boolean))];
   const uniqueZones = [...new Set(transactions.map(t => t['Phân khu']).filter(Boolean))];
@@ -32,7 +33,36 @@ function Transactions() {
     if (filterZone && t['Phân khu'] !== filterZone) return false;
     if (filterSales && t['Sales'] !== filterSales) return false;
     return true;
+  }).sort((a, b) => {
+    if (!sortConfig.key) return 0;
+    
+    let aValue = a[sortConfig.key];
+    let bValue = b[sortConfig.key];
+
+    // Handle date sorting
+    if (['Ngày GD'].includes(sortConfig.key)) {
+      aValue = aValue ? new Date(aValue).getTime() : 0;
+      bValue = bValue ? new Date(bValue).getTime() : 0;
+    } else if (['Giá (VNĐ)', 'Tiền cọc', 'Hoa hồng'].includes(sortConfig.key)) {
+      aValue = Number(aValue || 0);
+      bValue = Number(bValue || 0);
+    } else {
+      aValue = String(aValue || '').toLowerCase();
+      bValue = String(bValue || '').toLowerCase();
+    }
+
+    if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+    return 0;
   });
+
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
 
   // Pagination Logic
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -185,17 +215,39 @@ function Transactions() {
           <thead>
             <tr>
               <th>Thao tác</th>
-              <th>Mã GD</th>
-              <th>Khách hàng</th>
-              <th>Ngày</th>
-              <th>Mã SP</th>
-              <th>Phân khu</th>
-              <th>Giá HĐ</th>
-              <th>Tiền cọc</th>
-              <th>Hoa hồng</th>
-              <th>Trạng thái</th>
-              <th>Sales</th>
-              <th>Mã NV</th>
+              <th onClick={() => handleSort('Mã GD')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                Mã GD {sortConfig.key === 'Mã GD' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+              </th>
+              <th onClick={() => handleSort('Khách hàng')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                Khách hàng {sortConfig.key === 'Khách hàng' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+              </th>
+              <th onClick={() => handleSort('Ngày GD')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                Ngày {sortConfig.key === 'Ngày GD' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+              </th>
+              <th onClick={() => handleSort('Mã SP')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                Mã SP {sortConfig.key === 'Mã SP' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+              </th>
+              <th onClick={() => handleSort('Phân khu')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                Phân khu {sortConfig.key === 'Phân khu' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+              </th>
+              <th onClick={() => handleSort('Giá (VNĐ)')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                Giá HĐ {sortConfig.key === 'Giá (VNĐ)' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+              </th>
+              <th onClick={() => handleSort('Tiền cọc')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                Tiền cọc {sortConfig.key === 'Tiền cọc' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+              </th>
+              <th onClick={() => handleSort('Hoa hồng')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                Hoa hồng {sortConfig.key === 'Hoa hồng' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+              </th>
+              <th onClick={() => handleSort('Trạng thái')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                Trạng thái {sortConfig.key === 'Trạng thái' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+              </th>
+              <th onClick={() => handleSort('Sales')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                Sales {sortConfig.key === 'Sales' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+              </th>
+              <th onClick={() => handleSort('Mã nhân viên')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                Mã NV {sortConfig.key === 'Mã nhân viên' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+              </th>
               <th>Ghi chú</th>
             </tr>
           </thead>

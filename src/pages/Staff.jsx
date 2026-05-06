@@ -12,6 +12,7 @@ function Staff() {
   const [filterStatusF, setFilterStatusF] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
+  const [sortConfig, setSortConfig] = useState({ key: 'Mã NV', direction: 'asc' });
 
   const uniqueDepts = [...new Set(staff.map(s => s['Sàn']).filter(Boolean))];
   const uniqueStatuses = [...new Set(staff.map(s => s['Trạng thái']).filter(Boolean))];
@@ -28,7 +29,36 @@ function Staff() {
     if (filterDept && s['Sàn'] !== filterDept) return false;
     if (filterStatusF && s['Trạng thái'] !== filterStatusF) return false;
     return true;
+  }).sort((a, b) => {
+    if (!sortConfig.key) return 0;
+    
+    let aValue = a[sortConfig.key];
+    let bValue = b[sortConfig.key];
+
+    // Handle date sorting
+    if (['Ngày vào làm'].includes(sortConfig.key)) {
+      aValue = aValue ? new Date(aValue).getTime() : 0;
+      bValue = bValue ? new Date(bValue).getTime() : 0;
+    } else if (['Lương (VNĐ)'].includes(sortConfig.key)) {
+      aValue = Number(aValue || 0);
+      bValue = Number(bValue || 0);
+    } else {
+      aValue = String(aValue || '').toLowerCase();
+      bValue = String(bValue || '').toLowerCase();
+    }
+
+    if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+    return 0;
   });
+
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
 
   // Pagination Logic
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -143,16 +173,16 @@ function Staff() {
           <thead>
             <tr>
               <th>Thao tác</th>
-              <th>Mã NV</th>
-              <th>Họ Tên</th>
-              <th>Sàn / Đại lý</th>
-              <th>Chức vụ</th>
-              <th>SĐT</th>
-              <th>Email</th>
-              <th>Ngày vào làm</th>
-              <th>Trạng thái</th>
-              <th>Lương (VNĐ)</th>
-              <th>Quản lý</th>
+              <th onClick={() => handleSort('Mã NV')} style={{ cursor: 'pointer' }}>Mã NV {sortConfig.key === 'Mã NV' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+              <th onClick={() => handleSort('Tên NV')} style={{ cursor: 'pointer' }}>Họ Tên {sortConfig.key === 'Tên NV' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+              <th onClick={() => handleSort('Sàn')} style={{ cursor: 'pointer' }}>Sàn / Đại lý {sortConfig.key === 'Sàn' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+              <th onClick={() => handleSort('Chức vụ')} style={{ cursor: 'pointer' }}>Chức vụ {sortConfig.key === 'Chức vụ' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+              <th onClick={() => handleSort('SĐT')} style={{ cursor: 'pointer' }}>SĐT {sortConfig.key === 'SĐT' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+              <th onClick={() => handleSort('Email')} style={{ cursor: 'pointer' }}>Email {sortConfig.key === 'Email' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+              <th onClick={() => handleSort('Ngày vào làm')} style={{ cursor: 'pointer' }}>Ngày vào làm {sortConfig.key === 'Ngày vào làm' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+              <th onClick={() => handleSort('Trạng thái')} style={{ cursor: 'pointer' }}>Trạng thái {sortConfig.key === 'Trạng thái' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+              <th onClick={() => handleSort('Lương (VNĐ)')} style={{ cursor: 'pointer' }}>Lương (VNĐ) {sortConfig.key === 'Lương (VNĐ)' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+              <th onClick={() => handleSort('Quản lý (Mã NV)')} style={{ cursor: 'pointer' }}>Quản lý {sortConfig.key === 'Quản lý (Mã NV)' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
             </tr>
           </thead>
           <tbody>
