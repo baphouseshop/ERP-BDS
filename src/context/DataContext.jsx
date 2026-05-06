@@ -108,7 +108,8 @@ export const DataProvider = ({ children }) => {
             "CPL (tr)": dbMkt.chi_phi_moi_lead ? (dbMkt.chi_phi_moi_lead / 1000000).toFixed(1) : 0,
             "CP/Book (tr)": dbMkt.chi_phi_moi_booking ? (dbMkt.chi_phi_moi_booking / 1000000).toFixed(1) : 0,
             "Click": dbMkt.luot_click,
-            "Ghi chú": dbMkt.ghi_chu
+            "Ghi chú": dbMkt.ghi_chu,
+            "_id": dbMkt.ma_chien_dich
           })));
         }
 
@@ -123,7 +124,8 @@ export const DataProvider = ({ children }) => {
             "Chênh lệch": dbFin.chenh_lech ? (dbFin.chenh_lech / 1000000000).toFixed(2) : 0,
             "Ghi chú": dbFin.ghi_chu,
             "Người duyệt": getEmpName(dbFin.nguoi_duyet_id),
-            "_approver_id": dbFin.nguoi_duyet_id
+            "_approver_id": dbFin.nguoi_duyet_id,
+            "_id": dbFin.ma_tc
           })));
         }
 
@@ -455,10 +457,10 @@ export const DataProvider = ({ children }) => {
       await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
     }
 
-    const { error } = await supabase.from('marketing_campaigns').update(dbMkt).eq('ma_chien_dich', updatedMarketing["Tên chiến dịch"]);
+    const { error } = await supabase.from('marketing_campaigns').update(dbMkt).eq('ma_chien_dich', updatedMarketing["_id"] || updatedMarketing["Tên chiến dịch"]);
     if (!error) {
       setMarketing(prev => prev.map(m => 
-        m['Tên chiến dịch'] === updatedMarketing['Tên chiến dịch'] ? updatedMarketing : m
+        m['_id'] === updatedMarketing['_id'] ? updatedMarketing : m
       ));
     } else {
       console.error("Error editing marketing:", error);
@@ -506,14 +508,11 @@ export const DataProvider = ({ children }) => {
       await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
     }
 
-    const { error } = await supabase.from('financial_records').update(dbFin).match({ 
-      thang: updatedFinancial["Tháng"], 
-      hang_muc: updatedFinancial["Hạng mục"] 
-    });
+    const { error } = await supabase.from('financial_records').update(dbFin).eq('ma_tc', updatedFinancial["_id"] || "");
     
     if (!error) {
       setFinancials(prev => prev.map(f => 
-        (f['Tháng'] === updatedFinancial['Tháng'] && f['Hạng mục'] === updatedFinancial['Hạng mục']) ? updatedFinancial : f
+        f['_id'] === updatedFinancial['_id'] ? updatedFinancial : f
       ));
     } else {
       console.error("Error editing financial:", error);
@@ -621,16 +620,16 @@ export const DataProvider = ({ children }) => {
   const deleteMarketing = async (id) => {
     const { error } = await supabase.from('marketing_campaigns').delete().eq('ma_chien_dich', id);
     if (!error) {
-      setMarketing(prev => prev.filter(m => m['Tên chiến dịch'] !== id));
+      setMarketing(prev => prev.filter(m => m['_id'] !== id));
     } else {
       console.error("Error deleting marketing:", error);
     }
   };
 
-  const deleteFinancial = async (month, category) => {
-    const { error } = await supabase.from('financial_records').delete().match({ thang: month, hang_muc: category });
+  const deleteFinancial = async (id) => {
+    const { error } = await supabase.from('financial_records').delete().eq('ma_tc', id);
     if (!error) {
-      setFinancials(prev => prev.filter(f => !(f['Tháng'] === month && f['Hạng mục'] === category)));
+      setFinancials(prev => prev.filter(f => f['_id'] !== id));
     } else {
       console.error("Error deleting financial:", error);
     }
