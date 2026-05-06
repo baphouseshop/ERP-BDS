@@ -253,6 +253,10 @@ export const DataProvider = ({ children }) => {
       ghi_chu: newLead["Ghi chú"]
     };
 
+    if (currentUser?.name) {
+      await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
+    }
+
     const { error } = await supabase.from('leads').insert([dbLead]);
     if (!error) {
       setLeads(prev => [newLead, ...prev]);
@@ -276,6 +280,10 @@ export const DataProvider = ({ children }) => {
       ngay_fu: updatedLead["Ngày FU"] || null,
       ghi_chu: updatedLead["Ghi chú"]
     };
+
+    if (currentUser?.name) {
+      await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
+    }
 
     const { error } = await supabase.from('leads').update(dbLead).eq('ma_lead', updatedLead["Mã lead"]);
     if (!error) {
@@ -358,6 +366,10 @@ export const DataProvider = ({ children }) => {
       ghi_chu: newTransaction["Ghi chú"]
     };
 
+    if (currentUser?.name) {
+      await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
+    }
+
     const { error } = await supabase.from('transactions').insert([dbTrans]);
     if (!error) {
       setTransactions(prev => [newTransaction, ...prev]);
@@ -380,6 +392,10 @@ export const DataProvider = ({ children }) => {
       trang_thai: updatedTransaction["Trạng thái"],
       ghi_chu: updatedTransaction["Ghi chú"]
     };
+
+    if (currentUser?.name) {
+      await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
+    }
 
     const { error } = await supabase.from('transactions').update(dbTrans).eq('ma_gd', updatedTransaction["Mã GD"]);
     if (!error) {
@@ -408,6 +424,10 @@ export const DataProvider = ({ children }) => {
       ghi_chu: newMarketing["Ghi chú"]
     };
 
+    if (currentUser?.name) {
+      await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
+    }
+
     const { error } = await supabase.from('marketing_campaigns').insert([dbMkt]);
     if (!error) {
       setMarketing(prev => [newMarketing, ...prev]);
@@ -430,6 +450,10 @@ export const DataProvider = ({ children }) => {
       luot_click: Number(updatedMarketing["Click"]),
       ghi_chu: updatedMarketing["Ghi chú"]
     };
+
+    if (currentUser?.name) {
+      await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
+    }
 
     const { error } = await supabase.from('marketing_campaigns').update(dbMkt).eq('ma_chien_dich', updatedMarketing["Tên chiến dịch"]);
     if (!error) {
@@ -455,6 +479,10 @@ export const DataProvider = ({ children }) => {
       nguoi_duyet_id: newFinancial["_approver_id"]
     };
 
+    if (currentUser?.name) {
+      await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
+    }
+
     const { error } = await supabase.from('financial_records').insert([dbFin]);
     if (!error) {
       setFinancials(prev => [newFinancial, ...prev]);
@@ -473,6 +501,10 @@ export const DataProvider = ({ children }) => {
       ghi_chu: updatedFinancial["Ghi chú"],
       nguoi_duyet_id: updatedFinancial["_approver_id"]
     };
+
+    if (currentUser?.name) {
+      await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
+    }
 
     const { error } = await supabase.from('financial_records').update(dbFin).match({ 
       thang: updatedFinancial["Tháng"], 
@@ -503,6 +535,10 @@ export const DataProvider = ({ children }) => {
       quan_ly_id: newStaff["Quản lý (Mã NV)"]
     };
 
+    if (currentUser?.name) {
+      await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
+    }
+
     const { error } = await supabase.from('employees').insert([dbStaff]);
     if (!error) {
       setStaff(prev => [newStaff, ...prev]);
@@ -525,6 +561,10 @@ export const DataProvider = ({ children }) => {
       quan_ly_id: updatedStaff["Quản lý (Mã NV)"]
     };
 
+    if (currentUser?.name) {
+      await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
+    }
+
     const { error } = await supabase.from('employees').update(dbStaff).eq('ma_nv', updatedStaff["Mã NV"]);
     if (!error) {
       setStaff(prev => prev.map(s => 
@@ -537,6 +577,10 @@ export const DataProvider = ({ children }) => {
   };
 
   const deleteLead = async (id) => {
+    if (currentUser?.name) {
+      await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
+    }
+
     const { error } = await supabase.from('leads').delete().eq('ma_lead', id);
     if (!error) {
       setLeads(prev => prev.filter(l => l['Mã lead'] !== id));
@@ -547,6 +591,10 @@ export const DataProvider = ({ children }) => {
   };
 
   const deleteTransaction = async (id) => {
+    if (currentUser?.name) {
+      await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
+    }
+
     const { error } = await supabase.from('transactions').delete().eq('ma_gd', id);
     if (!error) {
       setTransactions(prev => prev.filter(t => t['Mã GD'] !== id));
@@ -557,6 +605,10 @@ export const DataProvider = ({ children }) => {
   };
 
   const deleteStaff = async (id) => {
+    if (currentUser?.name) {
+      await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
+    }
+
     const { error } = await supabase.from('employees').delete().eq('ma_nv', id);
     if (!error) {
       setStaff(prev => prev.filter(s => s['Mã NV'] !== id));
