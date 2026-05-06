@@ -74,7 +74,8 @@ export const DataProvider = ({ children }) => {
             "Tên sàn": dbLead.ten_san || "Nội bộ",
             "Ngày hẹn": dbLead.ngay_hen,
             "Ngày FU": dbLead.ngay_fu,
-            "Ghi chú": dbLead.ghi_chu
+            "Ghi chú": dbLead.ghi_chu,
+            "_created_at": dbLead.created_at
           })));
         }
 
@@ -92,7 +93,8 @@ export const DataProvider = ({ children }) => {
             "Sales": getEmpName(dbTrans.nhan_vien_id),
             "Mã nhân viên": dbTrans.nhan_vien_id,
             "Khách hàng": getLeadName(dbTrans.khach_hang_id),
-            "Mã Lead": dbTrans.khach_hang_id
+            "Mã Lead": dbTrans.khach_hang_id,
+            "_created_at": dbTrans.created_at
           })));
         }
 
@@ -109,7 +111,8 @@ export const DataProvider = ({ children }) => {
             "CP/Book (tr)": dbMkt.chi_phi_moi_booking ? (dbMkt.chi_phi_moi_booking / 1000000).toFixed(1) : 0,
             "Click": dbMkt.luot_click,
             "Ghi chú": dbMkt.ghi_chu,
-            "_id": dbMkt.ma_chien_dich
+            "_id": dbMkt.ma_chien_dich,
+            "_created_at": dbMkt.created_at
           })));
         }
 
@@ -125,7 +128,8 @@ export const DataProvider = ({ children }) => {
             "Ghi chú": dbFin.ghi_chu,
             "Người duyệt": getEmpName(dbFin.nguoi_duyet_id),
             "_approver_id": dbFin.nguoi_duyet_id,
-            "_id": dbFin.ma_tc
+            "_id": dbFin.ma_tc,
+            "_created_at": dbFin.created_at
           })));
         }
 
@@ -141,7 +145,8 @@ export const DataProvider = ({ children }) => {
             "Ngày vào làm": emp.ngay_vao_lam || "",
             "Trạng thái": emp.trang_thai || "Active",
             "Lương (VNĐ)": emp.luong || 0,
-            "Quản lý (Mã NV)": emp.quan_ly_id || ""
+            "Quản lý (Mã NV)": emp.quan_ly_id || "",
+            "_created_at": emp.created_at
           })));
 
           // Dynamically calculate sales from employees

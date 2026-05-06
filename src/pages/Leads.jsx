@@ -17,7 +17,8 @@ function Leads() {
   const [filterSales, setFilterSales] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
-  const [sortConfig, setSortConfig] = useState({ key: 'Ngày nhận', direction: 'desc' });
+  const itemsPerPage = 15;
+  const [sortConfig, setSortConfig] = useState({ key: '_created_at', direction: 'desc' });
 
   // Unique values for dropdowns
   const uniqueStatuses = [...new Set(leads.map(l => l['Trạng thái']).filter(Boolean))];
@@ -48,7 +49,7 @@ function Leads() {
     let bValue = b[sortConfig.key];
 
     // Handle date sorting
-    if (['Ngày nhận', 'Ngày FU', 'Ngày hẹn', 'Lần cập nhật cuối'].includes(sortConfig.key)) {
+    if (['_created_at', 'Ngày nhận', 'Ngày FU', 'Ngày hẹn', 'Lần cập nhật cuối'].includes(sortConfig.key)) {
       aValue = aValue ? new Date(aValue).getTime() : 0;
       bValue = bValue ? new Date(bValue).getTime() : 0;
     } else {
@@ -330,6 +331,22 @@ function Leads() {
             ⬆ Nhập Dữ liệu
           </button>
 
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <select 
+            className="filter-select" 
+            style={{ width: '180px', margin: 0 }}
+            value={`${sortConfig.key}-${sortConfig.direction}`} 
+            onChange={e => {
+              const [key, dir] = e.target.value.split('-');
+              setSortConfig({ key, direction: dir });
+            }}
+          >
+            <option value="_created_at-desc">Mới nhất lên đầu</option>
+            <option value="_created_at-asc">Cũ nhất lên đầu</option>
+            <option value="Họ tên-asc">Họ tên (A-Z)</option>
+            <option value="Họ tên-desc">Họ tên (Z-A)</option>
+            <option value="Ngày nhận-desc">Ngày nhận (Mới nhất)</option>
+          </select>
           <button onClick={handleOpenAddModal} className="btn-submit">
             Thêm Lead
           </button>

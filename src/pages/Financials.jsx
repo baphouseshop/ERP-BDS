@@ -68,6 +68,10 @@ function Financials() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
+  const [searchText, setSearchText] = useState('');
+  const [filterType, setFilterType] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
+  const [sortConfig, setSortConfig] = useState({ key: '_created_at', direction: 'desc' });
   const [formData, setFormData] = useState({
     'Tháng': new Date().toISOString().slice(0, 7),
     'Hạng mục': '',
@@ -223,13 +227,66 @@ function Financials() {
   const currentFinancials = financials.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(financials.length / itemsPerPage);
 
+  const uniqueCategories = [...new Set(financials.map(f => f['Hạng mục']).filter(Boolean))];
+
+  const filteredFinancials = financials.filter(f => {
+    const text = searchText.toLowerCase().trim();
+    if (text && !(
+      String(f['Hạng mục'] || '').toLowerCase().includes(text) ||
+      String(f['Ghi chú'] || '').toLowerCase().includes(text) ||
+      String(f['Người duyệt'] || '').toLowerCase().includes(text)
+    )) return false;
+    if (filterType && f['Loại'] !== filterType) return false;
+    if (filterCategory && f['Hạng mục'] !== filterCategory) return false;
+    return true;
+  }).sort((a, b) => {
+    let aValue = a[sortConfig.key];
+    let bValue = b[sortConfig.key];
+
+    if (sortConfig.key === '_created_at') {
+      aValue = aValue ? new Date(aValue).getTime() : 0;
+      bValue = bValue ? new Date(bValue).getTime() : 0;
+    } else {
+      aValue = String(aValue || '').toLowerCase();
+      bValue = String(bValue || '').toLowerCase();
+    }
+
+    if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  const clearFilters = () => { setSearchText(''); setFilterType(''); setFilterCategory(''); };
+
+  // Pagination Logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentFinancials = filteredFinancials.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPagesCount = Math.ceil(filteredFinancials.length / itemsPerPage);
+
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <div>
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1 className="page-title">Tài chính</h1>
-        <button onClick={handleOpenAddModal} className="btn-submit">Thêm Bản ghi</button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <select 
+            className="filter-select" 
+            style={{ width: '180px' }}
+            value={`${sortConfig.key}-${sortConfig.direction}`} 
+            onChange={e => {
+              const [key, dir] = e.target.value.split('-');
+              setSortConfig({ key, direction: dir });
+            }}
+          >
+            <option value="_created_at-desc">Mới nhất lên đầu</option>
+            <option value="_created_at-asc">Cũ nhất lên đầu</option>
+            <option value="Hạng mục-asc">Hạng mục (A-Z)</option>
+            <option value="Hạng mục-desc">Hạng mục (Z-A)</option>
+          </select>
+          <button onClick={handleOpenAddModal} className="btn-submit">Thêm Bản ghi</button>
+        </div>
       </div>
 
       {/* TOP KPI CARDS */}
@@ -311,7 +368,29 @@ function Financials() {
       {/* DETAILED LIST & MANAGEMENT */}
       <div className="fin-details-section">
         <div className="dash-chart-title" style={{ marginBottom: '5px' }}>Quản lý chi tiết hạng mục</div>
-        <div className="table-container" style={{ marginTop: '20px' }}>
+        
+        {/* FILTER BAR */}
+        <div className="filter-bar" style={{ marginTop: '15px', marginBottom: '15px' }}>
+          <input 
+            className="filter-input" 
+            placeholder="🔍 Tìm hạng mục, ghi chú, người duyệt..." 
+            value={searchText} 
+            onChange={e => setSearchText(e.target.value)} 
+          />
+          <select className="filter-select" value={filterType} onChange={e => setFilterType(e.target.value)}>
+            <option value="">-- Tất cả loại --</option>
+            <option value="Income">Thu nhập (Income)</option>
+            <option value="Expense">Chi phí (Expense)</option>
+          </select>
+          <select className="filter-select" value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
+            <option value="">-- Tất cả hạng mục --</option>
+            {uniqueCategories.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+          {(searchText || filterType || filterCategory) && <button className="btn-clear-filter" onClick={clearFilters}>✕ Xóa lọc</button>}
+          <span className="filter-count">Hiển thị <strong>{filteredFinancials.length}</strong>/{financials.length}</span>
+        </div>
+
+        <div className="table-container" style={{ marginTop: '10px' }}>
           <table>
             <thead>
               <tr>
@@ -356,7 +435,7 @@ function Financials() {
         </div>
 
         {/* Pagination Controls */}
-        {totalPages > 1 && (
+        {totalPagesCount > 1 && (
           <div className="pagination-container" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '20px', marginBottom: '40px' }}>
             <button 
               onClick={() => paginate(currentPage - 1)} 
@@ -366,12 +445,12 @@ function Financials() {
               Trải
             </button>
             
-            {[...Array(totalPages)].map((_, idx) => {
+            {[...Array(totalPagesCount)].map((_, idx) => {
               const pageNum = idx + 1;
-              if (totalPages > 7) {
+              if (totalPagesCount > 7) {
                 if (pageNum !== 1 && pageNum !== totalPages && (pageNum < currentPage - 1 || pageNum > currentPage + 1)) {
                   if (pageNum === 2 && currentPage > 3) return <span key="dots1" style={{ color: 'var(--text-muted)' }}>...</span>;
-                  if (pageNum === totalPages - 1 && currentPage < totalPages - 2) return <span key="dots2" style={{ color: 'var(--text-muted)' }}>...</span>;
+                  if (pageNum === totalPagesCount - 1 && currentPage < totalPagesCount - 2) return <span key="dots2" style={{ color: 'var(--text-muted)' }}>...</span>;
                   return null;
                 }
               }
@@ -397,8 +476,8 @@ function Financials() {
 
             <button 
               onClick={() => paginate(currentPage + 1)} 
-              disabled={currentPage === totalPages}
-              style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', opacity: currentPage === totalPages ? 0.5 : 1 }}
+              disabled={currentPage === totalPagesCount}
+              style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: currentPage === totalPagesCount ? 'not-allowed' : 'pointer', opacity: currentPage === totalPagesCount ? 0.5 : 1 }}
             >
               Phải
             </button>

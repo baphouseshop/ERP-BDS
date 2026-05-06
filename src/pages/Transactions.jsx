@@ -13,7 +13,8 @@ function Transactions() {
   const [filterSales, setFilterSales] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
-  const [sortConfig, setSortConfig] = useState({ key: 'Ngày GD', direction: 'desc' });
+  const itemsPerPage = 15;
+  const [sortConfig, setSortConfig] = useState({ key: '_created_at', direction: 'desc' });
 
   const uniqueStatuses = [...new Set(transactions.map(t => t['Trạng thái']).filter(Boolean))];
   const uniqueZones = [...new Set(transactions.map(t => t['Phân khu']).filter(Boolean))];
@@ -40,7 +41,7 @@ function Transactions() {
     let bValue = b[sortConfig.key];
 
     // Handle date sorting
-    if (['Ngày GD'].includes(sortConfig.key)) {
+    if (['_created_at', 'Ngày GD'].includes(sortConfig.key)) {
       aValue = aValue ? new Date(aValue).getTime() : 0;
       bValue = bValue ? new Date(bValue).getTime() : 0;
     } else if (['Giá (VNĐ)', 'Tiền cọc', 'Hoa hồng'].includes(sortConfig.key)) {
@@ -188,7 +189,24 @@ function Transactions() {
     <div>
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1 className="page-title">Giao dịch</h1>
-        <button onClick={handleOpenAddModal} className="btn-submit">Thêm Giao dịch</button>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <select 
+            className="filter-select" 
+            style={{ width: '180px', margin: 0 }}
+            value={`${sortConfig.key}-${sortConfig.direction}`} 
+            onChange={e => {
+              const [key, dir] = e.target.value.split('-');
+              setSortConfig({ key, direction: dir });
+            }}
+          >
+            <option value="_created_at-desc">Mới nhất lên đầu</option>
+            <option value="_created_at-asc">Cũ nhất lên đầu</option>
+            <option value="Khách hàng-asc">Khách hàng (A-Z)</option>
+            <option value="Khách hàng-desc">Khách hàng (Z-A)</option>
+            <option value="Ngày GD-desc">Ngày GD (Mới nhất)</option>
+          </select>
+          <button onClick={handleOpenAddModal} className="btn-submit">Thêm Giao dịch</button>
+        </div>
       </div>
 
       {/* FILTER BAR */}

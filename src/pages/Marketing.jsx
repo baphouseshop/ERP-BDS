@@ -22,6 +22,10 @@ function Marketing() {
   const { marketing, addMarketing, editMarketing, deleteMarketing } = useData();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const [filterChannel, setFilterChannel] = useState('');
+  const [sortConfig, setSortConfig] = useState({ key: '_created_at', direction: 'desc' });
+
   const [formData, setFormData] = useState({
     'Tháng': new Date().toISOString().slice(0, 7), // YYYY-MM
     'Tên chiến dịch': '',
@@ -165,11 +169,73 @@ function Marketing() {
     return 'var(--danger)';
   };
 
+  const uniqueChannels = [...new Set(marketing.map(m => m['Kênh']).filter(Boolean))];
+
+  const filteredMarketing = marketing.filter(m => {
+    const text = searchText.toLowerCase().trim();
+    if (text && !(
+      String(m['Tên chiến dịch'] || '').toLowerCase().includes(text) ||
+      String(m['Kênh'] || '').toLowerCase().includes(text) ||
+      String(m['Ghi chú'] || '').toLowerCase().includes(text)
+    )) return false;
+    if (filterChannel && m['Kênh'] !== filterChannel) return false;
+    return true;
+  }).sort((a, b) => {
+    let aValue = a[sortConfig.key];
+    let bValue = b[sortConfig.key];
+
+    if (sortConfig.key === '_created_at') {
+      aValue = aValue ? new Date(aValue).getTime() : 0;
+      bValue = bValue ? new Date(bValue).getTime() : 0;
+    } else {
+      aValue = String(aValue || '').toLowerCase();
+      bValue = String(bValue || '').toLowerCase();
+    }
+
+    if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  const clearFilters = () => { setSearchText(''); setFilterChannel(''); };
+
   return (
     <div>
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1 className="page-title">Marketing</h1>
-        <button onClick={handleOpenAddModal} className="btn-submit">Thêm Chiến dịch</button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <select 
+            className="filter-select" 
+            style={{ width: '180px' }}
+            value={`${sortConfig.key}-${sortConfig.direction}`} 
+            onChange={e => {
+              const [key, dir] = e.target.value.split('-');
+              setSortConfig({ key, direction: dir });
+            }}
+          >
+            <option value="_created_at-desc">Mới nhất lên đầu</option>
+            <option value="_created_at-asc">Cũ nhất lên đầu</option>
+            <option value="Tên chiến dịch-asc">Tên chiến dịch (A-Z)</option>
+            <option value="Tên chiến dịch-desc">Tên chiến dịch (Z-A)</option>
+          </select>
+          <button onClick={handleOpenAddModal} className="btn-submit">Thêm Chiến dịch</button>
+        </div>
+      </div>
+
+      {/* FILTER BAR */}
+      <div className="filter-bar" style={{ marginBottom: '20px' }}>
+        <input 
+          className="filter-input" 
+          placeholder="🔍 Tìm tên chiến dịch, kênh, ghi chú..." 
+          value={searchText} 
+          onChange={e => setSearchText(e.target.value)} 
+        />
+        <select className="filter-select" value={filterChannel} onChange={e => setFilterChannel(e.target.value)}>
+          <option value="">-- Tất cả kênh --</option>
+          {uniqueChannels.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+        {(searchText || filterChannel) && <button className="btn-clear-filter" onClick={clearFilters}>✕ Xóa lọc</button>}
+        <span className="filter-count">Hiển thị <strong>{filteredMarketing.length}</strong>/{marketing.length}</span>
       </div>
 
       {/* KPI GRID */}
@@ -257,7 +323,7 @@ function Marketing() {
       {/* CAMPAIGNS LIST */}
       <div className="section-title" style={{ marginTop: '30px' }}>▶ Chi tiết từng chiến dịch</div>
       <div>
-        {marketing.map((m, index) => {
+        {filteredMarketing.map((m, index) => {
           const leads = Number(m['Lead'] || 0);
           const bookings = Number(m['Booking'] || 0);
           const cp = Number(m['CP (tr)'] || 0);
