@@ -11,6 +11,8 @@ function Transactions() {
   const [filterStatus, setFilterStatus] = useState('');
   const [filterZone, setFilterZone] = useState('');
   const [filterSales, setFilterSales] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
 
   const uniqueStatuses = [...new Set(transactions.map(t => t['Trạng thái']).filter(Boolean))];
   const uniqueZones = [...new Set(transactions.map(t => t['Phân khu']).filter(Boolean))];
@@ -31,6 +33,14 @@ function Transactions() {
     if (filterSales && t['Sales'] !== filterSales) return false;
     return true;
   });
+
+  // Pagination Logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentTransactions = filteredTransactions.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const hasActiveFilters = searchText || filterStatus || filterZone || filterSales;
   const clearFilters = () => { setSearchText(''); setFilterStatus(''); setFilterZone(''); setFilterSales(''); };
@@ -190,7 +200,7 @@ function Transactions() {
             </tr>
           </thead>
           <tbody>
-            {filteredTransactions.map((t, index) => (
+            {currentTransactions.map((t, index) => (
               <tr key={index}>
                 <td>
                   <div style={{ display: 'flex', gap: '5px' }}>
@@ -256,6 +266,55 @@ function Transactions() {
           </tfoot>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="pagination-container" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '20px', marginBottom: '40px' }}>
+          <button 
+            onClick={() => paginate(currentPage - 1)} 
+            disabled={currentPage === 1}
+            style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', opacity: currentPage === 1 ? 0.5 : 1 }}
+          >
+            Trải
+          </button>
+          
+          {[...Array(totalPages)].map((_, idx) => {
+            const pageNum = idx + 1;
+            if (totalPages > 7) {
+              if (pageNum !== 1 && pageNum !== totalPages && (pageNum < currentPage - 1 || pageNum > currentPage + 1)) {
+                if (pageNum === 2 && currentPage > 3) return <span key="dots1" style={{ color: 'var(--text-muted)' }}>...</span>;
+                if (pageNum === totalPages - 1 && currentPage < totalPages - 2) return <span key="dots2" style={{ color: 'var(--text-muted)' }}>...</span>;
+                return null;
+              }
+            }
+            return (
+              <button
+                key={pageNum}
+                onClick={() => paginate(pageNum)}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '4px',
+                  border: '1px solid',
+                  borderColor: currentPage === pageNum ? 'var(--accent)' : 'var(--border-color)',
+                  background: currentPage === pageNum ? 'var(--accent)' : 'var(--bg-secondary)',
+                  color: currentPage === pageNum ? '#000' : 'var(--text-main)',
+                  fontWeight: 'bold',
+                  cursor: 'pointer'
+                }}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+
+          <button 
+            onClick={() => paginate(currentPage + 1)} 
+            disabled={currentPage === totalPages}
+            style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', opacity: currentPage === totalPages ? 0.5 : 1 }}
+          >
+            Phải
+          </button>
+        </div>
+      )}
 
       {isModalOpen && (
         <div className="modal-overlay">

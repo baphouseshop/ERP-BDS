@@ -15,6 +15,8 @@ function Leads() {
   const [filterSource, setFilterSource] = useState('');
   const [filterAgency, setFilterAgency] = useState('');
   const [filterSales, setFilterSales] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
 
   // Unique values for dropdowns
   const uniqueStatuses = [...new Set(leads.map(l => l['Trạng thái']).filter(Boolean))];
@@ -39,6 +41,14 @@ function Leads() {
     if (filterSales && l['Sales phụ trách'] !== filterSales) return false;
     return true;
   });
+
+  // Pagination Logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentLeads = filteredLeads.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredLeads.length / itemsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const hasActiveFilters = searchText || filterStatus || filterSource || filterAgency || filterSales;
   const clearFilters = () => { setSearchText(''); setFilterStatus(''); setFilterSource(''); setFilterAgency(''); setFilterSales(''); };
@@ -349,7 +359,7 @@ function Leads() {
             </tr>
           </thead>
           <tbody>
-            {filteredLeads.map((lead, index) => (
+            {currentLeads.map((lead, index) => (
               <tr key={index}>
                 <td>
                   <div style={{ display: 'flex', gap: '5px' }}>
@@ -399,6 +409,58 @@ function Leads() {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="pagination-container" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '20px', marginBottom: '40px' }}>
+          <button 
+            onClick={() => paginate(currentPage - 1)} 
+            disabled={currentPage === 1}
+            style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', opacity: currentPage === 1 ? 0.5 : 1 }}
+          >
+            Trái
+          </button>
+          
+          {[...Array(totalPages)].map((_, idx) => {
+            const pageNum = idx + 1;
+            if (totalPages > 7) {
+              if (pageNum !== 1 && pageNum !== totalPages && (pageNum < currentPage - 1 || pageNum > currentPage + 1)) {
+                if (pageNum === 2 && currentPage > 3) return <span key="dots1" style={{ color: 'var(--text-muted)' }}>...</span>;
+                if (pageNum === totalPages - 1 && currentPage < totalPages - 2) return <span key="dots2" style={{ color: 'var(--text-muted)' }}>...</span>;
+                if (pageNum < 2 || pageNum > totalPages - 1) return null;
+                return null;
+              }
+            }
+
+            return (
+              <button
+                key={pageNum}
+                onClick={() => paginate(pageNum)}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '4px',
+                  border: '1px solid',
+                  borderColor: currentPage === pageNum ? 'var(--accent)' : 'var(--border-color)',
+                  background: currentPage === pageNum ? 'var(--accent)' : 'var(--bg-secondary)',
+                  color: currentPage === pageNum ? '#000' : 'var(--text-main)',
+                  fontWeight: 'bold',
+                  cursor: 'pointer'
+                }}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+
+          <button 
+            onClick={() => paginate(currentPage + 1)} 
+            disabled={currentPage === totalPages}
+            style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', opacity: currentPage === totalPages ? 0.5 : 1 }}
+          >
+            Phải
+          </button>
+        </div>
+      )}
 
       {duplicateWarning && (
         <div className="modal-overlay">

@@ -10,6 +10,8 @@ function Staff() {
   const [searchText, setSearchText] = useState('');
   const [filterDept, setFilterDept] = useState('');
   const [filterStatusF, setFilterStatusF] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
 
   const uniqueDepts = [...new Set(staff.map(s => s['Sàn']).filter(Boolean))];
   const uniqueStatuses = [...new Set(staff.map(s => s['Trạng thái']).filter(Boolean))];
@@ -27,6 +29,14 @@ function Staff() {
     if (filterStatusF && s['Trạng thái'] !== filterStatusF) return false;
     return true;
   });
+
+  // Pagination Logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentStaff = filteredStaff.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredStaff.length / itemsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const hasActiveFilters = searchText || filterDept || filterStatusF;
   const clearFilters = () => { setSearchText(''); setFilterDept(''); setFilterStatusF(''); };
@@ -146,7 +156,7 @@ function Staff() {
             </tr>
           </thead>
           <tbody>
-            {filteredStaff.map((member, index) => (
+            {currentStaff.map((member, index) => (
               <tr key={index}>
                 <td>
                   <div style={{ display: 'flex', gap: '5px' }}>
@@ -180,14 +190,63 @@ function Staff() {
                 <td>{member['Quản lý (Mã NV)']}</td>
               </tr>
             ))}
-            {staff.length === 0 && (
+            {filteredStaff.length === 0 && (
               <tr>
-                <td colSpan="10" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '20px' }}>Chưa có dữ liệu nhân sự.</td>
+                <td colSpan="11" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '20px' }}>Chưa có dữ liệu nhân sự.</td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="pagination-container" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '20px', marginBottom: '40px' }}>
+          <button 
+            onClick={() => paginate(currentPage - 1)} 
+            disabled={currentPage === 1}
+            style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', opacity: currentPage === 1 ? 0.5 : 1 }}
+          >
+            Trang trước
+          </button>
+          
+          {[...Array(totalPages)].map((_, idx) => {
+            const pageNum = idx + 1;
+            if (totalPages > 7) {
+              if (pageNum !== 1 && pageNum !== totalPages && (pageNum < currentPage - 1 || pageNum > currentPage + 1)) {
+                if (pageNum === 2 && currentPage > 3) return <span key="dots1" style={{ color: 'var(--text-muted)', alignSelf: 'center' }}>...</span>;
+                if (pageNum === totalPages - 1 && currentPage < totalPages - 2) return <span key="dots2" style={{ color: 'var(--text-muted)', alignSelf: 'center' }}>...</span>;
+                return null;
+              }
+            }
+            return (
+              <button
+                key={pageNum}
+                onClick={() => paginate(pageNum)}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '4px',
+                  border: '1px solid',
+                  borderColor: currentPage === pageNum ? 'var(--accent)' : 'var(--border-color)',
+                  background: currentPage === pageNum ? 'var(--accent)' : 'var(--bg-secondary)',
+                  color: currentPage === pageNum ? '#fff' : 'var(--text-main)',
+                  fontWeight: 'bold',
+                  cursor: 'pointer'
+                }}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+
+          <button 
+            onClick={() => paginate(currentPage + 1)} 
+            disabled={currentPage === totalPages}
+            style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', opacity: currentPage === totalPages ? 0.5 : 1 }}
+          >
+            Trang sau
+          </button>
+        </div>
+      )}
 
       {isModalOpen && (
         <div className="modal-overlay">
