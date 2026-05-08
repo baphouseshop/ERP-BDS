@@ -144,7 +144,26 @@ export const DataProvider = ({ children }) => {
       let leadsQuery = supabase.from('leads').select('*', { count: 'exact' });
       leadsQuery = applyDateFilter(leadsQuery, globalFilter, 'ngay_nhan');
       if (!isAdminOrBOD) leadsQuery = leadsQuery.eq('nhan_vien_id', currentUser.ma_nv);
-      if (leadsSearch) leadsQuery = leadsQuery.or(`ho_ten.ilike.%${leadsSearch}%,sdt.ilike.%${leadsSearch}%,ma_lead.ilike.%${leadsSearch}%,nhan_vien_id.ilike.%${leadsSearch}%`);
+      
+      if (leadsSearch) {
+        const matchingStaffIds = employees
+          .filter(e => e.ho_ten?.toLowerCase().includes(leadsSearch.toLowerCase()) || e.ma_nv?.toLowerCase().includes(leadsSearch.toLowerCase()))
+          .map(e => e.ma_nv);
+        
+        let orParts = [
+          `ho_ten.ilike.%${leadsSearch}%`,
+          `sdt.ilike.%${leadsSearch}%`,
+          `ma_lead.ilike.%${leadsSearch}%`,
+          `nhan_vien_id.ilike.%${leadsSearch}%`
+        ];
+        
+        if (matchingStaffIds.length > 0) {
+          matchingStaffIds.forEach(id => {
+            if (id) orParts.push(`nhan_vien_id.eq.${id}`);
+          });
+        }
+        leadsQuery = leadsQuery.or(orParts.join(','));
+      }
       
       // Additional Leads Filters
       if (leadsFilterStatus) leadsQuery = leadsQuery.eq('trang_thai', leadsFilterStatus);
@@ -183,7 +202,29 @@ export const DataProvider = ({ children }) => {
       let transQuery = supabase.from('transactions').select('*', { count: 'exact' });
       transQuery = applyDateFilter(transQuery, globalFilter, 'ngay_gd');
       if (!isAdminOrBOD && userRole !== 'kế toán') transQuery = transQuery.eq('nhan_vien_id', currentUser.ma_nv);
-      if (transSearch) transQuery = transQuery.or(`ma_gd.ilike.%${transSearch}%,ma_sp.ilike.%${transSearch}%,khach_hang_id.ilike.%${transSearch}%`);
+      
+      if (transSearch) {
+        // Find matching staff
+        const matchingStaffIds = employees
+          .filter(e => e.ho_ten?.toLowerCase().includes(transSearch.toLowerCase()) || e.ma_nv?.toLowerCase().includes(transSearch.toLowerCase()))
+          .map(e => e.ma_nv);
+        
+        // Find matching leads (for customer name search)
+        const { data: matchingLeads } = await supabase.from('leads').select('ma_lead').ilike('ho_ten', `%${transSearch}%`);
+        const matchingLeadIds = matchingLeads?.map(l => l.ma_lead) || [];
+
+        let orParts = [
+          `ma_gd.ilike.%${transSearch}%`,
+          `ma_sp.ilike.%${transSearch}%`,
+          `khach_hang_id.ilike.%${transSearch}%`,
+          `nhan_vien_id.ilike.%${transSearch}%`
+        ];
+        
+        matchingStaffIds.forEach(id => { if(id) orParts.push(`nhan_vien_id.eq.${id}`); });
+        matchingLeadIds.forEach(id => { if(id) orParts.push(`khach_hang_id.eq.${id}`); });
+        
+        transQuery = transQuery.or(orParts.join(','));
+      }
 
       const transRange = [(transactionsPage - 1) * itemsPerPage, transactionsPage * itemsPerPage - 1];
       const { data: dbTrans, count: transCount } = await transQuery

@@ -199,10 +199,6 @@ function Transactions() {
       {/* FILTER BAR */}
       <div className="filter-bar">
         <input className="filter-input" placeholder="🔍 Tìm khách hàng, mã GD, mã NV, mã Lead..." value={localSearch} onChange={e => setLocalSearch(e.target.value)} />
-        <select className="filter-select" value={filterSales} onChange={e => setFilterSales(e.target.value)}>
-          <option value="">-- Sales --</option>
-          {uniqueSalesNames.map(s => <option key={s} value={s}>{s}</option>)}
-        </select>
         <select className="filter-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
           <option value="">-- Trạng thái --</option>
           {uniqueStatuses.map(s => <option key={s} value={s}>{s}</option>)}
