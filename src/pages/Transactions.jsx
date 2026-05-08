@@ -28,9 +28,7 @@ function Transactions() {
   const [filterZone, setFilterZone] = useState('');
   const [filterSales, setFilterSales] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: 'Ngày GD', direction: 'desc' });
-  const [currentPage, setCurrentPage] = useState(transactionsPage);
-
-  // Debounced Search Logic
+  const totalPages = Math.ceil(transactionsTotal / itemsPerPage);
   const [localSearch, setLocalSearch] = useState(transSearch);
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -38,19 +36,13 @@ function Transactions() {
         setTransSearch(localSearch);
         setTransactionsPage(1);
       }
-    }, 500); // 500ms delay
+    }, 500);
     return () => clearTimeout(timer);
   }, [localSearch]);
 
-  // Sync local search when global search is cleared
   useEffect(() => {
     setLocalSearch(transSearch);
   }, [transSearch]);
-
-  // Derived values for filters
-  const uniqueSalesNames = [...new Set(transactions.map(t => t['Sales']).filter(Boolean))];
-  const uniqueStatuses = [...new Set(transactions.map(t => t['Trạng thái']).filter(Boolean))];
-  const uniqueZones = [...new Set(transactions.map(t => t['Phân khu']).filter(Boolean))];
 
   const handleSort = (key) => {
     const keyMap = { 'Mã GD': 'ma_gd', 'Ngày GD': 'ngay_gd', 'Giá (VNĐ)': 'gia', 'Trạng thái': 'trang_thai' };
@@ -58,17 +50,15 @@ function Transactions() {
     setTransSort({ column: dbKey, ascending: transSort.column === dbKey ? !transSort.ascending : false });
   };
 
-  // Pagination Logic
-  const currentTransactions = transactions; // Already paginated from server
-  const totalPages = Math.ceil(transactionsTotal / itemsPerPage);
-
-  const paginate = (pageNumber) => {
-    setCurrentPage(pageNumber);
-    setTransactionsPage(pageNumber);
-  };
-
   const hasActiveFilters = transSearch || filterStatus || filterZone || filterSales;
-  const clearFilters = () => { setTransSearch(''); setFilterStatus(''); setFilterZone(''); setFilterSales(''); };
+  const clearFilters = () => { 
+    setLocalSearch('');
+    setTransSearch(''); 
+    setFilterStatus(''); 
+    setFilterZone(''); 
+    setFilterSales(''); 
+    setTransactionsPage(1);
+  };
   const [formData, setFormData] = useState({
     'Mã GD': '',
     'Ngày GD': '',
@@ -355,23 +345,23 @@ function Transactions() {
           {[...Array(totalPages)].map((_, idx) => {
             const pageNum = idx + 1;
             if (totalPages > 7) {
-              if (pageNum !== 1 && pageNum !== totalPages && (pageNum < currentPage - 1 || pageNum > currentPage + 1)) {
-                if (pageNum === 2 && currentPage > 3) return <span key="dots1" style={{ color: 'var(--text-muted)' }}>...</span>;
-                if (pageNum === totalPages - 1 && currentPage < totalPages - 2) return <span key="dots2" style={{ color: 'var(--text-muted)' }}>...</span>;
+              if (pageNum !== 1 && pageNum !== totalPages && (pageNum < transactionsPage - 1 || pageNum > transactionsPage + 1)) {
+                if (pageNum === 2 && transactionsPage > 3) return <span key="dots1" style={{ color: 'var(--text-muted)' }}>...</span>;
+                if (pageNum === totalPages - 1 && transactionsPage < totalPages - 2) return <span key="dots2" style={{ color: 'var(--text-muted)' }}>...</span>;
                 return null;
               }
             }
             return (
               <button
                 key={pageNum}
-                onClick={() => paginate(pageNum)}
+                onClick={() => setTransactionsPage(pageNum)}
                 style={{
                   padding: '6px 12px',
                   borderRadius: '4px',
                   border: '1px solid',
-                  borderColor: currentPage === pageNum ? 'var(--accent)' : 'var(--border-color)',
-                  background: currentPage === pageNum ? 'var(--accent)' : 'var(--bg-secondary)',
-                  color: currentPage === pageNum ? '#000' : 'var(--text-main)',
+                  borderColor: transactionsPage === pageNum ? 'var(--accent)' : 'var(--border-color)',
+                  background: transactionsPage === pageNum ? 'var(--accent)' : 'var(--bg-secondary)',
+                  color: transactionsPage === pageNum ? '#000' : 'var(--text-main)',
                   fontWeight: 'bold',
                   cursor: 'pointer'
                 }}
@@ -382,9 +372,9 @@ function Transactions() {
           })}
 
           <button 
-            onClick={() => paginate(currentPage + 1)} 
-            disabled={currentPage === totalPages}
-            style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', opacity: currentPage === totalPages ? 0.5 : 1 }}
+            onClick={() => setTransactionsPage(prev => Math.min(prev + 1, totalPages))} 
+            disabled={transactionsPage === totalPages}
+            style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: transactionsPage === totalPages ? 'not-allowed' : 'pointer', opacity: transactionsPage === totalPages ? 0.5 : 1 }}
           >
             Phải
           </button>

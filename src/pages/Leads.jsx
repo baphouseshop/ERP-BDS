@@ -72,7 +72,6 @@ function Leads() {
   const totalPages = Math.ceil(leadsTotal / itemsPerPage);
 
   const paginate = (pageNumber) => {
-    setCurrentPage(pageNumber);
     setLeadsPage(pageNumber);
   };
 
@@ -499,9 +498,9 @@ function Leads() {
       {totalPages > 1 && (
         <div className="pagination-container" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '20px', marginBottom: '40px' }}>
           <button
-            onClick={() => paginate(currentPage - 1)}
-            disabled={currentPage === 1}
-            style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', opacity: currentPage === 1 ? 0.5 : 1 }}
+            onClick={() => paginate(leadsPage - 1)}
+            disabled={leadsPage === 1}
+            style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: leadsPage === 1 ? 'not-allowed' : 'pointer', opacity: leadsPage === 1 ? 0.5 : 1 }}
           >
             Trái
           </button>
@@ -509,9 +508,9 @@ function Leads() {
           {[...Array(totalPages)].map((_, idx) => {
             const pageNum = idx + 1;
             if (totalPages > 7) {
-              if (pageNum !== 1 && pageNum !== totalPages && (pageNum < currentPage - 1 || pageNum > currentPage + 1)) {
-                if (pageNum === 2 && currentPage > 3) return <span key="dots1" style={{ color: 'var(--text-muted)' }}>...</span>;
-                if (pageNum === totalPages - 1 && currentPage < totalPages - 2) return <span key="dots2" style={{ color: 'var(--text-muted)' }}>...</span>;
+              if (pageNum !== 1 && pageNum !== totalPages && (pageNum < leadsPage - 1 || pageNum > leadsPage + 1)) {
+                if (pageNum === 2 && leadsPage > 3) return <span key="dots1" style={{ color: 'var(--text-muted)' }}>...</span>;
+                if (pageNum === totalPages - 1 && leadsPage < totalPages - 2) return <span key="dots2" style={{ color: 'var(--text-muted)' }}>...</span>;
                 if (pageNum < 2 || pageNum > totalPages - 1) return null;
                 return null;
               }
@@ -525,9 +524,9 @@ function Leads() {
                   padding: '6px 12px',
                   borderRadius: '4px',
                   border: '1px solid',
-                  borderColor: currentPage === pageNum ? 'var(--accent)' : 'var(--border-color)',
-                  background: currentPage === pageNum ? 'var(--accent)' : 'var(--bg-secondary)',
-                  color: currentPage === pageNum ? '#000' : 'var(--text-main)',
+                  borderColor: leadsPage === pageNum ? 'var(--accent)' : 'var(--border-color)',
+                  background: leadsPage === pageNum ? 'var(--accent)' : 'var(--bg-secondary)',
+                  color: leadsPage === pageNum ? '#000' : 'var(--text-main)',
                   fontWeight: 'bold',
                   cursor: 'pointer'
                 }}
@@ -538,9 +537,9 @@ function Leads() {
           })}
 
           <button
-            onClick={() => paginate(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', opacity: currentPage === totalPages ? 0.5 : 1 }}
+            onClick={() => paginate(leadsPage + 1)}
+            disabled={leadsPage === totalPages}
+            style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: leadsPage === totalPages ? 'not-allowed' : 'pointer', opacity: leadsPage === totalPages ? 0.5 : 1 }}
           >
             Phải
           </button>
