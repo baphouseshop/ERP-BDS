@@ -84,4 +84,20 @@ Chứa các file CSV (`leads.csv`, `transactions.csv`, v.v.) được sử dụn
 *   **Font chữ**: Hệ thống đang sử dụng font 'Outfit' từ Google Fonts (được nạp trong `index.html`).
 
 ---
-*Tài liệu được khởi tạo bởi Antigravity Agent - 2026*
+
+## 6. Quy tắc làm việc (Rules of Engagement)
+
+Đây là các quy tắc bắt buộc khi thực hiện cập nhật hoặc bảo trì hệ thống:
+
+1.  **Ổn định Giao diện (UI Stability)**:
+    *   **KHÔNG** tự ý thay đổi giao diện (màu sắc, bố cục, font chữ, hiệu ứng) của ứng dụng.
+    *   Mọi cập nhật chỉ tập trung vào việc sửa lỗi (bug fixes) hoặc tối ưu hóa logic xử lý bên trong.
+    *   Giữ nguyên hệ thống "Cyber-Nexus" hiện tại trừ khi có yêu cầu cụ thể.
+2.  **Quy trình phê duyệt**:
+    *   Nếu cần thay đổi bất kỳ thành phần nào của giao diện, **PHẢI** hỏi ý kiến và được sự cho phép của người dùng trước khi thực hiện.
+3.  **Deployment**:
+    *   Dự án hiện đã được kết nối với GitHub tại: `https://github.com/baphouseshop/ERP-B-S.git`.
+    *   Mọi thay đổi quan trọng nên được commit và push để đồng bộ với môi trường Production trên Vercel.
+
+---
+*Cập nhật lần cuối bởi Antigravity Agent - 08/05/2026*
