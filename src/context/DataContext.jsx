@@ -121,7 +121,8 @@ export const DataProvider = ({ children }) => {
         "Ngày vào làm": emp.ngay_vao_lam || "",
         "Trạng thái": emp.trang_thai || "Active",
         "Lương (VNĐ)": emp.luong || 0,
-        "Quản lý (Mã NV)": emp.quan_ly_id || ""
+        "Quản lý (Mã NV)": emp.quan_ly_id || "",
+        "Quyền": emp.quyen || "Sales"
       })));
 
       const getEmpName = (id) => employees.find(e => e.ma_nv == id)?.ho_ten || id || "";
@@ -613,7 +614,8 @@ export const DataProvider = ({ children }) => {
       ngay_vao_lam: newStaff["Ngày vào làm"] || null,
       trang_thai: newStaff["Trạng thái"],
       luong: Number(newStaff["Lương (VNĐ)"]),
-      quan_ly_id: newStaff["Quản lý (Mã NV)"]
+      quan_ly_id: newStaff["Quản lý (Mã NV)"],
+      quyen: newStaff["Quyền"]
     };
     const { error } = await supabase.from('employees').insert([dbStaff]);
     if (error) { 
@@ -633,7 +635,8 @@ export const DataProvider = ({ children }) => {
       ngay_vao_lam: updatedStaff["Ngày vào làm"] || null,
       trang_thai: updatedStaff["Trạng thái"],
       luong: Number(updatedStaff["Lương (VNĐ)"]),
-      quan_ly_id: updatedStaff["Quản lý (Mã NV)"]
+      quan_ly_id: updatedStaff["Quản lý (Mã NV)"],
+      quyen: updatedStaff["Quyền"]
     };
     const { error } = await supabase.from('employees').update(dbStaff).eq('ma_nv', updatedStaff["Mã NV"]);
     if (error) { 

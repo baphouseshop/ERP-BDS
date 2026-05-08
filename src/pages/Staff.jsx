@@ -82,7 +82,8 @@ function Staff() {
     'Ngày vào làm': '',
     'Trạng thái': 'Active',
     'Lương (VNĐ)': 0,
-    'Quản lý (Mã NV)': ''
+    'Quản lý (Mã NV)': '',
+    'Quyền': 'Sales'
   };
   
   const [formData, setFormData] = useState(initialFormState);
@@ -105,7 +106,8 @@ function Staff() {
       'Ngày vào làm': member['Ngày vào làm'] || '',
       'Trạng thái': member['Trạng thái'] || 'Active',
       'Lương (VNĐ)': member['Lương (VNĐ)'] || 0,
-      'Quản lý (Mã NV)': member['Quản lý (Mã NV)'] || ''
+      'Quản lý (Mã NV)': member['Quản lý (Mã NV)'] || '',
+      'Quyền': member['Quyền'] || 'Sales'
     });
     setIsModalOpen(true);
   };
@@ -316,8 +318,13 @@ function Staff() {
                   <input required className="input-field" value={formData['Sàn']} onChange={e => setFormData({...formData, 'Sàn': e.target.value})} placeholder="Đại lý F1" />
                 </div>
                 <div className="form-group">
-                  <label>Chức vụ</label>
-                  <input className="input-field" value={formData['Chức vụ']} onChange={e => setFormData({...formData, 'Chức vụ': e.target.value})} placeholder="VD: Sales Agent, Manager" />
+                  <label>Chức vụ *</label>
+                  <select required className="input-field" value={formData['Chức vụ']} onChange={e => setFormData({...formData, 'Chức vụ': e.target.value})}>
+                    <option value="">-- Chọn chức vụ --</option>
+                    <option value="Sale">Sale</option>
+                    <option value="Teamlead">Teamlead</option>
+                    <option value="Giám đốc sàn">Giám đốc sàn</option>
+                  </select>
                 </div>
                 <div className="form-group">
                   <label>Số điện thoại *</label>
@@ -336,6 +343,18 @@ function Staff() {
                   <select className="input-field" value={formData['Trạng thái']} onChange={e => setFormData({...formData, 'Trạng thái': e.target.value})}>
                     <option value="Active">Hoạt động (Active)</option>
                     <option value="Inactive">Đã nghỉ (Inactive)</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Quyền hệ thống</label>
+                  <select className="input-field" value={formData['Quyền']} onChange={e => setFormData({...formData, 'Quyền': e.target.value})}>
+                    <option value="Sales">Sales (Mặc định)</option>
+                    <option value="Teamlead">Teamlead</option>
+                    <option value="Admin">Admin (Quản trị)</option>
+                    <option value="BOD">BOD (Ban giám đốc)</option>
+                    <option value="Kế toán">Kế toán</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="HR">HR</option>
                   </select>
                 </div>
                 <div className="form-group">
