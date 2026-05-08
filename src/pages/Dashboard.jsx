@@ -33,10 +33,13 @@ function Dashboard() {
 
   // --- KPI CALCULATIONS ---
   
-  // 1. Doanh thu
-  const doanhThu = Number(stats.financial_stats?.revenue || 0).toFixed(2);
-  const doanhThuKH = Number(stats.financial_stats?.revenue_kh || 0).toFixed(2);
-  const doanhThuPercent = doanhThuKH > 0 ? Math.round((doanhThu / doanhThuKH) * 100) : 0;
+  // 1. Doanh thu - Tính toán từ allSales để đảm bảo khớp với tổng doanh số từng cá nhân
+  const calculatedTotalRevenue = allSales.reduce((sum, s) => sum + Number(s['Doanh số (tỷ)'] || 0), 0);
+  const calculatedTotalTarget = allSales.reduce((sum, s) => sum + Number(s['KH DS (tỷ)'] || 0), 0);
+  
+  const doanhThu = calculatedTotalRevenue.toFixed(2);
+  const doanhThuKH = calculatedTotalTarget.toFixed(2);
+  const doanhThuPercent = calculatedTotalTarget > 0 ? Math.round((calculatedTotalRevenue / calculatedTotalTarget) * 100) : 0;
 
   // 2. Lợi nhuận gộp
   const chiPhi = Number(stats.financial_stats?.expense || 0);
