@@ -233,10 +233,17 @@ function Staff() {
                 <td>{member['Ngày vào làm'] ? member['Ngày vào làm'].split('-').reverse().join('/') : ''}</td>
                 <td>
                   <span style={{ 
-                    color: member['Trạng thái'] === 'Active' ? 'var(--success)' : 'var(--danger)', 
-                    fontWeight: 'bold', 
-                    fontSize: '12px' 
-                  }}>{member['Trạng thái']}</span>
+                    padding: '4px 10px',
+                    borderRadius: '20px',
+                    backgroundColor: member['Trạng thái'] === 'Đang làm việc' ? 'rgba(0, 204, 102, 0.2)' : 'rgba(255, 77, 148, 0.2)',
+                    color: member['Trạng thái'] === 'Đang làm việc' ? '#00cc66' : '#ff4d94',
+                    fontWeight: '800', 
+                    fontSize: '11px',
+                    border: '1px solid currentColor',
+                    display: 'inline-block'
+                  }}>
+                    {member['Trạng thái']}
+                  </span>
                 </td>
                 <td>
                   <span className="badge" style={{ 
@@ -358,9 +365,9 @@ function Staff() {
                 </div>
                 <div className="form-group">
                   <label>Trạng thái</label>
-                  <select className="input-field" value={formData['Trạng thái']} onChange={e => setFormData({...formData, 'Trạng thái': e.target.value})}>
-                    <option value="Active">Hoạt động (Active)</option>
-                    <option value="Inactive">Đã nghỉ (Inactive)</option>
+                  <select className="input-field" value={formData['Trạng thái']} onChange={e => setFormData({ ...formData, 'Trạng thái': e.target.value })}>
+                    <option value="Đang làm việc">Đang làm việc</option>
+                    <option value="Đã nghỉ việc">Đã nghỉ việc</option>
                   </select>
                 </div>
                 <div className="form-group">

@@ -82,7 +82,7 @@ function Financials() {
   const [formData, setFormData] = useState({
     'Tháng': new Date().toISOString().slice(0, 7),
     'Hạng mục': '',
-    'Loại': 'Income',
+    'Loại': 'Doanh thu',
     'Thực tế (tỷ)': '',
     'KH (tỷ)': '',
     'Ghi chú': '',
@@ -96,7 +96,7 @@ function Financials() {
     setFormData({
       'Tháng': new Date().toISOString().slice(0, 7),
       'Hạng mục': '',
-      'Loại': 'Income',
+      'Loại': 'Doanh thu',
       'Thực tế (tỷ)': '',
       'KH (tỷ)': '',
       'Ghi chú': '',
@@ -111,7 +111,7 @@ function Financials() {
     setFormData({
       'Tháng': f['Tháng'] || '',
       'Hạng mục': f['Hạng mục'] || '',
-      'Loại': f['Loại'] || 'Income',
+      'Loại': f['Loại'] || 'Doanh thu',
       'Thực tế (tỷ)': f['Thực tế (tỷ)'] || '',
       'KH (tỷ)': f['KH (tỷ)'] || '',
       'Ghi chú': f['Ghi chú'] || '',
@@ -181,7 +181,7 @@ function Financials() {
   const sumFin = (name, key) => {
     const aliases = categoryAliases[name] || [name];
     return financials
-      .filter(f => aliases.includes(f['Hạng mục']))
+      .filter(f => aliases.includes(f['Hạng mục']) || aliases.includes(f['Loại']))
       .reduce((sum, f) => sum + Number(f[key] || 0), 0);
   };
 
@@ -499,9 +499,9 @@ function Financials() {
                 </div>
                 <div className="form-group">
                   <label>Loại</label>
-                  <select className="input-field" value={formData['Loại']} onChange={e => setFormData({...formData, 'Loại': e.target.value})}>
-                    <option value="Income">Thu nhập (Income)</option>
-                    <option value="Expense">Chi phí (Expense)</option>
+                  <select required className="input-field" value={formData['Loại']} onChange={e => setFormData({...formData, 'Loại': e.target.value})}>
+                    <option value="Doanh thu">Doanh thu (Income)</option>
+                    <option value="Chi phí">Chi phí (Expense)</option>
                   </select>
                 </div>
                 <div className="form-group">

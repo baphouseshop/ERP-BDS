@@ -280,12 +280,23 @@ function Transactions() {
                 <td style={{ color: 'var(--warning)', fontWeight: 'bold' }}>{formatTr(t['Hoa hồng'])}</td>
                 <td>
                   <span style={{
-                    padding: '4px 8px',
-                    borderRadius: '12px',
-                    border: '1px solid currentColor',
-                    color: (t['Trạng thái'] === 'Đã ký HĐMB' || t['Trạng thái'] === 'Completed') ? 'var(--accent)' : (t['Trạng thái'] === 'Đã đặt cọc' || t['Trạng thái'] === 'Đang giữ chỗ' || t['Trạng thái'] === 'Giữ chỗ') ? 'var(--cyan)' : 'var(--text-muted)',
+                    padding: '4px 10px',
+                    borderRadius: '20px',
+                    backgroundColor: 
+                      t['Trạng thái'] === 'Đã ký HĐMB' || t['Trạng thái'] === 'Đã hoàn thành' ? 'rgba(0, 204, 102, 0.2)' :
+                      t['Trạng thái'] === 'Đã đặt cọc' ? 'rgba(0, 229, 255, 0.2)' :
+                      t['Trạng thái'] === 'Giữ chỗ' || t['Trạng thái'] === 'Đang giữ chỗ' ? 'rgba(204, 255, 0, 0.2)' :
+                      t['Trạng thái'] === 'Đã hủy' ? 'rgba(255, 77, 148, 0.2)' : 'rgba(139, 146, 165, 0.2)',
+                    color: 
+                      t['Trạng thái'] === 'Đã ký HĐMB' || t['Trạng thái'] === 'Đã hoàn thành' ? '#00cc66' :
+                      t['Trạng thái'] === 'Đã đặt cọc' ? '#00e5ff' :
+                      t['Trạng thái'] === 'Giữ chỗ' || t['Trạng thái'] === 'Đang giữ chỗ' ? '#ccff00' :
+                      t['Trạng thái'] === 'Đã hủy' ? '#ff4d94' : '#8b92a5',
                     fontSize: '11px',
-                    fontWeight: 'bold'
+                    fontWeight: '800',
+                    border: '1px solid currentColor',
+                    display: 'inline-block',
+                    whiteSpace: 'nowrap'
                   }}>
                     {t['Trạng thái']}
                   </span>

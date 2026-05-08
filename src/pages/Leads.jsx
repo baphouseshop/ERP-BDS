@@ -438,14 +438,27 @@ function Leads() {
                 <td>{lead['Nhu cầu']}</td>
                 <td>
                   <span style={{
-                    padding: '4px 8px',
-                    borderRadius: '4px',
-                    backgroundColor: lead['Trạng thái'] === 'ĐÃ LIÊN HỆ' ? 'var(--success)' :
-                      lead['Trạng thái'] === 'MỚI TIẾP NHẬN' ? 'var(--warning)' :
-                        lead['Trạng thái'] === 'TỪ CHỐI' ? 'var(--danger)' : 'var(--accent)',
-                    color: lead['Trạng thái'] === 'TỪ CHỐI' ? '#fff' : '#000',
-                    fontSize: '12px',
-                    fontWeight: 'bold'
+                    padding: '4px 10px',
+                    borderRadius: '20px',
+                    backgroundColor: 
+                      lead['Trạng thái'] === 'ĐÃ CHỐT' ? 'rgba(0, 204, 102, 0.2)' :
+                      lead['Trạng thái'] === 'ĐÃ LIÊN HỆ' ? 'rgba(0, 229, 255, 0.2)' :
+                      lead['Trạng thái'] === 'MỚI TIẾP NHẬN' ? 'rgba(204, 255, 0, 0.2)' :
+                      lead['Trạng thái'] === 'TIỀM NĂNG' ? 'rgba(179, 102, 255, 0.2)' :
+                      lead['Trạng thái'] === 'ĐÃ CỌC' ? 'rgba(255, 204, 0, 0.2)' :
+                      lead['Trạng thái'] === 'KHÔNG NHU CẦU' ? 'rgba(255, 77, 148, 0.2)' : 'rgba(139, 146, 165, 0.2)',
+                    color: 
+                      lead['Trạng thái'] === 'ĐÃ CHỐT' ? '#00cc66' :
+                      lead['Trạng thái'] === 'ĐÃ LIÊN HỆ' ? '#00e5ff' :
+                      lead['Trạng thái'] === 'MỚI TIẾP NHẬN' ? '#ccff00' :
+                      lead['Trạng thái'] === 'TIỀM NĂNG' ? '#b366ff' :
+                      lead['Trạng thái'] === 'ĐÃ CỌC' ? '#ffcc00' :
+                      lead['Trạng thái'] === 'KHÔNG NHU CẦU' ? '#ff4d94' : '#8b92a5',
+                    fontSize: '11px',
+                    fontWeight: '800',
+                    border: '1px solid currentColor',
+                    display: 'inline-block',
+                    whiteSpace: 'nowrap'
                   }}>
                     {lead['Trạng thái']}
                   </span>

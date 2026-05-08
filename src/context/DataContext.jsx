@@ -119,7 +119,7 @@ export const DataProvider = ({ children }) => {
         "SĐT": emp.sdt ? (String(emp.sdt).startsWith('0') ? String(emp.sdt) : '0' + String(emp.sdt)) : "",
         "Email": emp.email || "",
         "Ngày vào làm": emp.ngay_vao_lam || "",
-        "Trạng thái": emp.trang_thai || "Active",
+        "Trạng thái": (emp.trang_thai === 'Active' || emp.trang_thai === 'Đang làm việc') ? "Đang làm việc" : "Đã nghỉ việc",
         "Lương (VNĐ)": emp.luong || 0,
         "Quản lý (Mã NV)": emp.quan_ly_id || "",
         "Quyền": emp.quyen || "Sales"
@@ -153,7 +153,7 @@ export const DataProvider = ({ children }) => {
           "Chiến dịch": getCampaignName(l.chien_dich_id),
           "_campaign_id": l.chien_dich_id,
           "Nhu cầu": l.nhu_cau,
-          "Trạng thái": l.trang_thai,
+          "Trạng thái": l.trang_thai || "MỚI TIẾP NHẬN",
           "Sales phụ trách": getEmpName(l.nhan_vien_id),
           "Mã NV": l.nhan_vien_id,
           "_employee_id": l.nhan_vien_id || null,
