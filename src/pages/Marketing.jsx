@@ -19,12 +19,15 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 function Marketing() {
-  const { marketing, addMarketing, editMarketing, deleteMarketing } = useData();
+  const { 
+    marketing, marketingTotal, marketingPage, setMarketingPage, 
+    marketingSearch, setMarketingSearch, marketingSort, setMarketingSort,
+    itemsPerPage, addMarketing, editMarketing, deleteMarketing 
+  } = useData();
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [searchText, setSearchText] = useState('');
   const [filterChannel, setFilterChannel] = useState('');
-  const [sortConfig, setSortConfig] = useState({ key: 'Tháng', direction: 'desc' });
 
   const [formData, setFormData] = useState({
     'Tháng': new Date().toISOString().slice(0, 7), // YYYY-MM
@@ -169,35 +172,7 @@ function Marketing() {
     return 'var(--danger)';
   };
 
-  const uniqueChannels = [...new Set(marketing.map(m => m['Kênh']).filter(Boolean))];
-
-  const filteredMarketing = marketing.filter(m => {
-    const text = searchText.toLowerCase().trim();
-    if (text && !(
-      String(m['Tên chiến dịch'] || '').toLowerCase().includes(text) ||
-      String(m['Kênh'] || '').toLowerCase().includes(text) ||
-      String(m['Ghi chú'] || '').toLowerCase().includes(text)
-    )) return false;
-    if (filterChannel && m['Kênh'] !== filterChannel) return false;
-    return true;
-  }).sort((a, b) => {
-    let aValue = a[sortConfig.key];
-    let bValue = b[sortConfig.key];
-
-    if (sortConfig.key === 'Tháng') {
-      aValue = aValue ? new Date(aValue).getTime() : 0;
-      bValue = bValue ? new Date(bValue).getTime() : 0;
-    } else {
-      aValue = String(aValue || '').toLowerCase();
-      bValue = String(bValue || '').toLowerCase();
-    }
-
-    if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-    if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
-    return 0;
-  });
-
-  const clearFilters = () => { setSearchText(''); setFilterChannel(''); };
+  const clearFilters = () => { setMarketingSearch(''); setFilterChannel(''); };
 
   return (
     <div>
@@ -207,16 +182,16 @@ function Marketing() {
           <select 
             className="filter-select" 
             style={{ width: '180px' }}
-            value={`${sortConfig.key}-${sortConfig.direction}`} 
+            value={`${marketingSort.column}-${marketingSort.ascending ? 'asc' : 'desc'}`} 
             onChange={e => {
-              const [key, dir] = e.target.value.split('-');
-              setSortConfig({ key, direction: dir });
+              const [col, dir] = e.target.value.split('-');
+              setMarketingSort({ column: col, ascending: dir === 'asc' });
             }}
           >
-            <option value="Tháng-desc">Mới nhất lên đầu</option>
-            <option value="Tháng-asc">Cũ nhất lên đầu</option>
-            <option value="Tên chiến dịch-asc">Tên chiến dịch (A-Z)</option>
-            <option value="Tên chiến dịch-desc">Tên chiến dịch (Z-A)</option>
+            <option value="thang-desc">Mới nhất lên đầu</option>
+            <option value="thang-asc">Cũ nhất lên đầu</option>
+            <option value="ten_chien_dich-asc">Tên chiến dịch (A-Z)</option>
+            <option value="ten_chien_dich-desc">Tên chiến dịch (Z-A)</option>
           </select>
           <button onClick={handleOpenAddModal} className="btn-submit">Thêm Chiến dịch</button>
         </div>
@@ -227,15 +202,12 @@ function Marketing() {
         <input 
           className="filter-input" 
           placeholder="🔍 Tìm tên chiến dịch, kênh, ghi chú..." 
-          value={searchText} 
-          onChange={e => setSearchText(e.target.value)} 
+          value={marketingSearch} 
+          onChange={e => setMarketingSearch(e.target.value)} 
         />
-        <select className="filter-select" value={filterChannel} onChange={e => setFilterChannel(e.target.value)}>
-          <option value="">-- Tất cả kênh --</option>
-          {uniqueChannels.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
-        {(searchText || filterChannel) && <button className="btn-clear-filter" onClick={clearFilters}>✕ Xóa lọc</button>}
-        <span className="filter-count">Hiển thị <strong>{filteredMarketing.length}</strong>/{marketing.length}</span>
+        {/* Optional: Filter by channel could be implemented server-side as well, but for now we focus on text search */}
+        {marketingSearch && <button className="btn-clear-filter" onClick={clearFilters}>✕ Xóa lọc</button>}
+        <span className="filter-count">Hiển thị trang <strong>{marketingPage}</strong> (Tổng <strong>{marketingTotal}</strong> bản ghi)</span>
       </div>
 
       {/* KPI GRID */}
@@ -323,7 +295,7 @@ function Marketing() {
       {/* CAMPAIGNS LIST */}
       <div className="section-title" style={{ marginTop: '30px' }}>▶ Chi tiết từng chiến dịch</div>
       <div>
-        {filteredMarketing.map((m, index) => {
+        {marketing.map((m, index) => {
           const leads = Number(m['Lead'] || 0);
           const bookings = Number(m['Booking'] || 0);
           const cp = Number(m['CP (tr)'] || 0);
@@ -394,6 +366,53 @@ function Marketing() {
           );
         })}
       </div>
+
+      {/* PAGINATION */}
+      {marketingTotal > itemsPerPage && (
+        <div className="pagination" style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '30px', marginBottom: '20px' }}>
+          <button 
+            onClick={() => setMarketingPage(prev => Math.max(prev - 1, 1))} 
+            disabled={marketingPage === 1}
+            className="btn-cancel"
+            style={{ padding: '6px 15px', opacity: marketingPage === 1 ? 0.5 : 1 }}
+          >Trước</button>
+          
+          {Array.from({ length: Math.ceil(marketingTotal / itemsPerPage) }).map((_, idx) => {
+            const pageNum = idx + 1;
+            const totalPages = Math.ceil(marketingTotal / itemsPerPage);
+            if (totalPages > 7) {
+              if (pageNum !== 1 && pageNum !== totalPages && (pageNum < marketingPage - 1 || pageNum > marketingPage + 1)) {
+                if (pageNum === 2 && marketingPage > 3) return <span key="dots1" style={{ color: 'var(--text-muted)' }}>...</span>;
+                if (pageNum === totalPages - 1 && marketingPage < totalPages - 2) return <span key="dots2" style={{ color: 'var(--text-muted)' }}>...</span>;
+                return null;
+              }
+            }
+            return (
+              <button 
+                key={pageNum} 
+                onClick={() => setMarketingPage(pageNum)}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '4px',
+                  border: '1px solid',
+                  borderColor: marketingPage === pageNum ? 'var(--accent)' : 'var(--border-color)',
+                  background: marketingPage === pageNum ? 'var(--accent)' : 'var(--bg-secondary)',
+                  color: marketingPage === pageNum ? '#000' : 'var(--text-main)',
+                  fontWeight: 'bold',
+                  cursor: 'pointer'
+                }}
+              >{pageNum}</button>
+            );
+          })}
+
+          <button 
+            onClick={() => setMarketingPage(prev => Math.min(prev + 1, Math.ceil(marketingTotal / itemsPerPage)))} 
+            disabled={marketingPage >= Math.ceil(marketingTotal / itemsPerPage)}
+            className="btn-cancel"
+            style={{ padding: '6px 15px', opacity: marketingPage >= Math.ceil(marketingTotal / itemsPerPage) ? 0.5 : 1 }}
+          >Sau</button>
+        </div>
+      )}
 
       {/* MODAL */}
       {isModalOpen && (

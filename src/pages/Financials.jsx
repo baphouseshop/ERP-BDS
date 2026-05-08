@@ -63,15 +63,23 @@ const renderProgressBar = (item, color, icon, calcTotal, calcKH) => {
 };
 
 function Financials() {
-  const { financials, transactions, marketing, staff, addFinancial, editFinancial, deleteFinancial } = useData();
+  const { 
+    financials, // full list for charts
+    financialsPaginated, // paginated list for table
+    financialsTotal,
+    financialsPage, setFinancialsPage,
+    financialsSearch, setFinancialsSearch,
+    financialsSort, setFinancialsSort,
+    transactions, marketing, staff, addFinancial, editFinancial, deleteFinancial 
+  } = useData();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  
   const itemsPerPage = 15;
-  const [searchText, setSearchText] = useState('');
   const [filterType, setFilterType] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
-  const [sortConfig, setSortConfig] = useState({ key: 'Tháng', direction: 'desc' });
+  
   const [formData, setFormData] = useState({
     'Tháng': new Date().toISOString().slice(0, 7),
     'Hạng mục': '',
@@ -224,42 +232,28 @@ function Financials() {
 
   const uniqueCategories = [...new Set(financials.map(f => f['Hạng mục']).filter(Boolean))];
 
-  const filteredFinancials = financials.filter(f => {
-    const text = searchText.toLowerCase().trim();
-    if (text && !(
-      String(f['Hạng mục'] || '').toLowerCase().includes(text) ||
-      String(f['Ghi chú'] || '').toLowerCase().includes(text) ||
-      String(f['Người duyệt'] || '').toLowerCase().includes(text)
-    )) return false;
-    if (filterType && f['Loại'] !== filterType) return false;
-    if (filterCategory && f['Hạng mục'] !== filterCategory) return false;
-    return true;
-  }).sort((a, b) => {
-    let aValue = a[sortConfig.key];
-    let bValue = b[sortConfig.key];
+  const handleSort = (key) => {
+    let column = key;
+    if (key === 'Tháng') column = 'thang';
+    if (key === 'Hạng mục') column = 'hang_muc';
+    if (key === 'Loại') column = 'loai';
+    if (key === 'Thực tế (tỷ)') column = 'thuc_te';
+    if (key === 'KH (tỷ)') column = 'ke_hoach';
+    
+    setFinancialsSort(prev => ({
+      column,
+      ascending: prev.column === column ? !prev.ascending : false
+    }));
+  };
 
-    if (sortConfig.key === 'Tháng') {
-      aValue = aValue ? new Date(aValue).getTime() : 0;
-      bValue = bValue ? new Date(bValue).getTime() : 0;
-    } else {
-      aValue = String(aValue || '').toLowerCase();
-      bValue = String(bValue || '').toLowerCase();
-    }
+  const handleSearchChange = (e) => {
+    setFinancialsSearch(e.target.value);
+    setFinancialsPage(1);
+  };
 
-    if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-    if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
-    return 0;
-  });
+  const clearFilters = () => { setFinancialsSearch(''); setFilterType(''); setFilterCategory(''); };
 
-  const clearFilters = () => { setSearchText(''); setFilterType(''); setFilterCategory(''); };
-
-  // Pagination Logic
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentFinancials = filteredFinancials.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPagesCount = Math.ceil(filteredFinancials.length / itemsPerPage);
-
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const totalPages = Math.ceil(financialsTotal / itemsPerPage);
 
   return (
     <div>

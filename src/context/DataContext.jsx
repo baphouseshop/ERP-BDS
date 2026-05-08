@@ -31,6 +31,16 @@ export const DataProvider = ({ children }) => {
   const [transSearch, setTransSearch] = useState('');
   const [transSort, setTransSort] = useState({ column: 'ngay_gd', ascending: false });
 
+  const [marketingPage, setMarketingPage] = useState(1);
+  const [marketingTotal, setMarketingTotal] = useState(0);
+  const [marketingSearch, setMarketingSearch] = useState('');
+  const [marketingSort, setMarketingSort] = useState({ column: 'thang', ascending: false });
+
+  const [financialsPage, setFinancialsPage] = useState(1);
+  const [financialsTotal, setFinancialsTotal] = useState(0);
+  const [financialsSearch, setFinancialsSearch] = useState('');
+  const [financialsSort, setFinancialsSort] = useState({ column: 'thang', ascending: false });
+
   const [dashboardStats, setDashboardStats] = useState(null);
   const itemsPerPage = 15;
   const fetchDataRef = useRef(null);
@@ -188,20 +198,18 @@ export const DataProvider = ({ children }) => {
         setTransactionsTotal(transCount || 0);
       }
 
-      // 5. Marketing & Financials
-      let mktQuery = supabase.from('marketing_campaigns').select('*').order('ma_chien_dich', { ascending: false });
+      // 5. Paginated Marketing & Financials
+      let mktQuery = supabase.from('marketing_campaigns').select('*', { count: 'exact' });
       mktQuery = applyDateFilter(mktQuery, globalFilter, 'created_at');
+      if (marketingSearch) mktQuery = mktQuery.or(`ten_chien_dich.ilike.%${marketingSearch}%,kenh.ilike.%${marketingSearch}%`);
       
-      let finQuery = supabase.from('financial_records').select('*').order('thang', { ascending: false });
-      finQuery = applyDateFilter(finQuery, globalFilter, 'created_at');
+      const mktRange = [(marketingPage - 1) * itemsPerPage, marketingPage * itemsPerPage - 1];
+      const { data: dbMkt, count: mktCount } = await mktQuery
+        .range(mktRange[0], mktRange[1])
+        .order(marketingSort.column, { ascending: marketingSort.ascending });
 
-      const [mktRes, finRes] = await Promise.all([
-        mktQuery,
-        finQuery
-      ]);
-
-      if (mktRes.data) {
-        setMarketing(mktRes.data.map(m => ({
+      if (dbMkt) {
+        setMarketing(dbMkt.map(m => ({
           "Tháng": m.thang, "Kênh": m.kenh, "Tên chiến dịch": m.ten_chien_dich,
           "CP (tr)": m.chi_phi ? (m.chi_phi / 1000000).toFixed(1) : 0,
           "Lead": m.so_lead, "Booking": m.so_booking, "Tỷ lệ CĐ": m.ty_le_chuyen_doi,
@@ -209,10 +217,20 @@ export const DataProvider = ({ children }) => {
           "CP/Book (tr)": m.chi_phi_moi_booking ? (m.chi_phi_moi_booking / 1000000).toFixed(1) : 0,
           "Click": m.luot_click, "Ghi chú": m.ghi_chu, "_id": m.ma_chien_dich
         })));
+        setMarketingTotal(mktCount || 0);
       }
 
-      if (finRes.data) {
-        setFinancials(finRes.data.map(f => ({
+      let finQuery = supabase.from('financial_records').select('*', { count: 'exact' });
+      finQuery = applyDateFilter(finQuery, globalFilter, 'created_at');
+      if (financialsSearch) finQuery = finQuery.or(`hang_muc.ilike.%${financialsSearch}%,loai.ilike.%${financialsSearch}%`);
+
+      const finRange = [(financialsPage - 1) * itemsPerPage, financialsPage * itemsPerPage - 1];
+      const { data: dbFin, count: finCount } = await finQuery
+        .range(finRange[0], finRange[1])
+        .order(financialsSort.column, { ascending: financialsSort.ascending });
+
+      if (dbFin) {
+        setFinancials(dbFin.map(f => ({
           "Tháng": f.thang, "Hạng mục": f.hang_muc, "Loại": f.loai,
           "Thực tế (tỷ)": f.thuc_te ? (f.thuc_te / 1000000000).toFixed(2) : 0,
           "KH (tỷ)": f.ke_hoach ? (f.ke_hoach / 1000000000).toFixed(2) : 0,
@@ -220,6 +238,7 @@ export const DataProvider = ({ children }) => {
           "Chênh lệch": f.chenh_lech ? (f.chenh_lech / 1000000000).toFixed(2) : 0,
           "Ghi chú": f.ghi_chu, "Người duyệt": getEmpName(f.nguoi_duyet_id), "_approver_id": f.nguoi_duyet_id, "_id": f.ma_tc
         })));
+        setFinancialsTotal(finCount || 0);
       }
 
       // 6. Sales Performance (Uses Aggregated Data from RPC)
@@ -254,7 +273,14 @@ export const DataProvider = ({ children }) => {
     } finally {
       setLoadingData(false);
     }
-  }, [globalFilter, leadsPage, leadsSearch, leadsSort, transactionsPage, transSearch, transSort, currentUser]);
+  }, [
+    globalFilter, 
+    leadsPage, leadsSearch, leadsSort, 
+    transactionsPage, transSearch, transSort, 
+    marketingPage, marketingSearch, marketingSort,
+    financialsPage, financialsSearch, financialsSort,
+    currentUser
+  ]);
 
   useEffect(() => {
     fetchDataRef.current = fetchData;
@@ -668,6 +694,8 @@ export const DataProvider = ({ children }) => {
     authLoading,
     leadsPage, setLeadsPage, leadsTotal, leadsSearch, setLeadsSearch, leadsSort, setLeadsSort,
     transactionsPage, setTransactionsPage, transactionsTotal, transSearch, setTransSearch, transSort, setTransSort,
+    marketingPage, setMarketingPage, marketingTotal, marketingSearch, setMarketingSearch, marketingSort, setMarketingSort,
+    financialsPage, setFinancialsPage, financialsTotal, financialsSearch, setFinancialsSearch, financialsSort, setFinancialsSort,
     dashboardStats, itemsPerPage,
     addLead, editLead, deleteLead, addMultipleLeads, updateLeads,
     addTransaction, editTransaction, deleteTransaction,
@@ -677,8 +705,11 @@ export const DataProvider = ({ children }) => {
     refreshData: () => fetchData()
   }), [
     globalFilter, allLeads, allTransactions, allMarketing, allFinancials, sales, staff,
-    loadingData, currentUser, session, authLoading, leadsPage, leadsTotal, leadsSearch, leadsSort,
+    loadingData, currentUser, session, authLoading, 
+    leadsPage, leadsTotal, leadsSearch, leadsSort,
     transactionsPage, transactionsTotal, transSearch, transSort,
+    marketingPage, marketingTotal, marketingSearch, marketingSort,
+    financialsPage, financialsTotal, financialsSearch, financialsSort,
     dashboardStats, addLead, editLead, deleteLead, addMultipleLeads, updateLeads,
     addTransaction, editTransaction, deleteTransaction,
     addMarketing, editMarketing, deleteMarketing,
