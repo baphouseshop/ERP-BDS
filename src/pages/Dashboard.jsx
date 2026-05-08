@@ -22,7 +22,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 function Dashboard() {
-  const { allSales, transactions, marketing, leads, financials, dashboardStats, staff } = useData();
+  const { sales, allSales, transactions, marketing, leads, financials, dashboardStats, staff } = useData();
 
   // Fallback for when stats are loading
   const stats = dashboardStats || {
