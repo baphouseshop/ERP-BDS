@@ -34,6 +34,7 @@ function Leads() {
   const [filterAgency, setFilterAgency] = useState('');
   const [filterSales, setFilterSales] = useState('');
   const [currentPage, setCurrentPage] = useState(leadsPage);
+  const [sortConfig, setSortConfig] = useState({ key: 'Ngày nhận', direction: 'desc' });
 
   // Unique values - ideally these should come from server, but using local slice as fallback
   const uniqueStatuses = [...new Set(leads.map(l => l['Trạng thái']).filter(Boolean))];

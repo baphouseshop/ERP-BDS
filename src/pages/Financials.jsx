@@ -443,7 +443,7 @@ function Financials() {
             {[...Array(totalPagesCount)].map((_, idx) => {
               const pageNum = idx + 1;
               if (totalPagesCount > 7) {
-                if (pageNum !== 1 && pageNum !== totalPages && (pageNum < currentPage - 1 || pageNum > currentPage + 1)) {
+                if (pageNum !== 1 && pageNum !== totalPagesCount && (pageNum < currentPage - 1 || pageNum > currentPage + 1)) {
                   if (pageNum === 2 && currentPage > 3) return <span key="dots1" style={{ color: 'var(--text-muted)' }}>...</span>;
                   if (pageNum === totalPagesCount - 1 && currentPage < totalPagesCount - 2) return <span key="dots2" style={{ color: 'var(--text-muted)' }}>...</span>;
                   return null;
