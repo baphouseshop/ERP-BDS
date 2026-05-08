@@ -89,13 +89,15 @@ export const DataProvider = ({ children }) => {
       setDashboardStats(statsData);
 
       // 2. Fetch Static Data
-      const [empRes, mktListRes] = await Promise.all([
+      const [empRes, mktListRes, kpiRes] = await Promise.all([
         supabase.from('employees').select('*').order('ho_ten', { ascending: true }),
-        supabase.from('marketing_campaigns').select('*')
+        supabase.from('marketing_campaigns').select('*'),
+        supabase.from('kpi_targets').select('*')
       ]);
 
       const employees = empRes.data || [];
       const campaigns = mktListRes.data || [];
+      const kpiTargets = kpiRes.data || [];
       setStaff(employees.map(emp => ({
         "Mã NV": emp.ma_nv,
         "Tên NV": emp.ho_ten,
@@ -220,20 +222,20 @@ export const DataProvider = ({ children }) => {
       // 6. Sales Performance (Uses Aggregated Data from RPC)
       const salesAgg = statsData?.sales_performance || {};
       const salesData = employees.map(emp => {
-        const initialSale = initialDb.sales.find(s => s["Tên NV"] === emp.ho_ten) || {};
-        const kpi = initialSale["KH DS (tỷ)"] || 10;
+        const kpiTarget = kpiTargets.find(k => k.employee_code === emp.ma_nv) || {};
+        const kpi = kpiTarget.kpi_revenue_billion || 10;
         const totalSales = (Number(salesAgg[emp.ma_nv] || 0)) / 1000000000;
         const pctKPI = kpi > 0 ? (totalSales / kpi) : 0;
         return {
           "Mã NV": emp.ma_nv, "Tên NV": emp.ho_ten, "Sàn": emp.phong_ban, "KH DS (tỷ)": kpi,
           "Doanh số (tỷ)": totalSales.toFixed(2), "DS thực (tỷ)": totalSales.toFixed(2), "% KPI": pctKPI,
           "XẾP LOẠI KPI": pctKPI >= 1 ? 'Xuất sắc' : pctKPI >= 0.8 ? 'Tốt' : 'Kém',
-          "Lương cứng (tr)": initialSale["Lương cứng (tr)"] || 5, "Gọi điện": initialSale["Gọi điện"] || 0,
-          "Site Visit": initialSale["Site Visit"] || 0, "KH Site Visit": initialSale["KH Site Visit"] || 5,
-          "HĐMB THỰC TẾ": initialSale["HĐMB THỰC TẾ"] || 0, "KH HĐMB": initialSale["KH HĐMB"] || 1,
-          "CỌC": initialSale["CỌC"] || 0, "KH CỌC": initialSale["KH CỌC"] || 2
+          "Lương cứng (tr)": kpiTarget.salary_million || 5, "Gọi điện": 0,
+          "Site Visit": 0, "KH Site Visit": kpiTarget.target_site_visits || 5,
+          "HĐMB THỰC TẾ": 0, "KH HĐMB": kpiTarget.target_contracts || 1,
+          "CỌC": 0, "KH CỌC": kpiTarget.target_deposits || 2
         };
-      }).filter(s => Number(s["Doanh số (tỷ)"]) > 0 || s["Sàn"] === 'Sales' || s["Sàn"] === 'Operations');
+      }).filter(s => isAdminOrBOD || s["Mã NV"] === currentUser.ma_nv);
       setSales(salesData);
 
     } catch (error) {
