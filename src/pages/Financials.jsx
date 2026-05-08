@@ -76,7 +76,6 @@ function Financials() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   
-  const itemsPerPage = 15;
   const [filterType, setFilterType] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   
@@ -247,7 +246,7 @@ function Financials() {
   };
 
 
-  const uniqueCategories = [...new Set(financials.map(f => f['Hạng mục']).filter(Boolean))];
+
 
   const handleSort = (key) => {
     let column = key;
@@ -263,14 +262,7 @@ function Financials() {
     }));
   };
 
-  const handleSearchChange = (e) => {
-    setFinancialsSearch(e.target.value);
-    setFinancialsPage(1);
-  };
 
-  const clearFilters = () => { setFinancialsSearch(''); setFilterType(''); setFilterCategory(''); };
-
-  const totalPages = Math.ceil(financialsTotal / itemsPerPage);
 
   return (
     <div>
