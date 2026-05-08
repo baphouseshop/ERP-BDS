@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
+import toast from 'react-hot-toast';
 
 function Staff() {
   const { staff, addStaff, editStaff, deleteStaff } = useData();
@@ -114,25 +115,25 @@ function Staff() {
     
     if (isEditMode) {
       if (formData['SĐT'] && staff.some(s => s['Mã NV'] !== formData['Mã NV'] && s['SĐT'] === formData['SĐT'])) {
-        alert('Số điện thoại này đã được sử dụng cho một nhân viên khác!');
+        toast.error('Số điện thoại này đã được sử dụng cho một nhân viên khác!');
         return;
       }
       if (formData['Email'] && staff.some(s => s['Mã NV'] !== formData['Mã NV'] && s['Email'] === formData['Email'])) {
-        alert('Email này đã được sử dụng cho một nhân viên khác!');
+        toast.error('Email này đã được sử dụng cho một nhân viên khác!');
         return;
       }
       editStaff(formData);
     } else {
       if (staff.some(s => s['Mã NV'] === formData['Mã NV'])) {
-        alert('Mã nhân viên đã tồn tại!');
+        toast.error('Mã nhân viên đã tồn tại!');
         return;
       }
       if (formData['SĐT'] && staff.some(s => s['SĐT'] === formData['SĐT'])) {
-        alert('Số điện thoại này đã tồn tại trong hệ thống!');
+        toast.error('Số điện thoại này đã tồn tại trong hệ thống!');
         return;
       }
       if (formData['Email'] && staff.some(s => s['Email'] === formData['Email'])) {
-        alert('Email này đã tồn tại trong hệ thống!');
+        toast.error('Email này đã tồn tại trong hệ thống!');
         return;
       }
       addStaff(formData);

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
+import toast from 'react-hot-toast';
 
 function Transactions() {
   const { 
@@ -143,12 +144,12 @@ function Transactions() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!isEditMode && transactions.some(t => t['Mã GD'] === formData['Mã GD'])) {
-       alert('Mã giao dịch này đã tồn tại trong hệ thống!');
+       toast.error('Mã giao dịch này đã tồn tại trong hệ thống!');
        return;
     }
     // Also check for duplicate Mã SP to prevent selling the same product twice unless it was cancelled
     if (transactions.some(t => t['Mã SP'] === formData['Mã SP'] && t['Mã GD'] !== formData['Mã GD'] && t['Trạng thái'] !== 'Đã hủy')) {
-       alert('Mã sản phẩm này đã được bán hoặc đặt cọc trong một giao dịch khác!');
+       toast.error('Mã sản phẩm này đã được bán hoặc đặt cọc trong một giao dịch khác!');
        return;
     }
     

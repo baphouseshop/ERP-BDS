@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { useData } from '../context/DataContext';
+import toast from 'react-hot-toast';
 
 function Leads() {
   const {
@@ -195,7 +196,7 @@ function Leads() {
       });
 
       if (duplicateLead) {
-        alert(`Số điện thoại này bị trùng với Lead: ${duplicateLead['Mã lead']} - ${duplicateLead['Họ tên']}`);
+        toast.error(`Số điện thoại này bị trùng với Lead: ${duplicateLead['Mã lead']} - ${duplicateLead['Họ tên']}`);
         return;
       }
     }

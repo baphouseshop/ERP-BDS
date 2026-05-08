@@ -13,6 +13,7 @@ import Login from './pages/Login';
 import { useData } from './context/DataContext';
 import { supabase } from './supabaseClient';
 import ErrorBoundary from './components/ErrorBoundary';
+import toast, { Toaster } from 'react-hot-toast';
 
 function DateFilter() {
   const { globalFilter, setGlobalFilter } = useData();
@@ -225,6 +226,16 @@ function App() {
 
   return (
     <div className="app-container">
+      <Toaster 
+        position="top-right" 
+        toastOptions={{
+          style: {
+            background: '#161922',
+            color: '#fff',
+            border: '1px solid #2a2e39',
+          },
+        }} 
+      />
       <TopBar />
       <div className="main-content">
         {loadingData ? (

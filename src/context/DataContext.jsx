@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, useCallback, useRef, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
+import toast from 'react-hot-toast';
 
 const DataContext = createContext();
 
@@ -376,7 +377,7 @@ export const DataProvider = ({ children }) => {
     };
     const { error } = await supabase.from('leads').insert([dbLead]);
     if (error) { 
-      alert("Lỗi: " + error.message); 
+      toast.error("Lỗi: " + error.message); 
     } else { 
       setLeads(prev => [newLead, ...prev]);
       setLeadsTotal(prev => prev + 1);
@@ -399,7 +400,7 @@ export const DataProvider = ({ children }) => {
     };
     const { error } = await supabase.from('leads').update(dbLead).eq('ma_lead', updatedLead["Mã lead"]);
     if (error) { 
-      alert("Lỗi: " + error.message); 
+      toast.error("Lỗi: " + error.message); 
     } else { 
       setLeads(prev => prev.map(l => l["Mã lead"] === updatedLead["Mã lead"] ? updatedLead : l));
     }
@@ -428,7 +429,7 @@ export const DataProvider = ({ children }) => {
     const { error } = await supabase.from('leads').upsert(dbLeads);
     
     if (error) { 
-      alert("Lỗi: " + error.message); 
+      toast.error("Lỗi: " + error.message); 
       // Rollback
       fetchData(); // Simplest way to sync back to DB state on error
     }
@@ -450,7 +451,7 @@ export const DataProvider = ({ children }) => {
     const { error } = await supabase.from('leads').upsert(dbLeads);
     
     if (error) { 
-      alert("Lỗi: " + error.message); 
+      toast.error("Lỗi: " + error.message); 
       // Rollback
       fetchData();
     }
@@ -472,7 +473,7 @@ export const DataProvider = ({ children }) => {
     };
     const { error } = await supabase.from('transactions').insert([dbTrans]);
     if (error) { 
-      alert("Lỗi: " + error.message); 
+      toast.error("Lỗi: " + error.message); 
     } else { 
       setTransactions(prev => [newTransaction, ...prev]);
       setTransactionsTotal(prev => prev + 1);
@@ -494,7 +495,7 @@ export const DataProvider = ({ children }) => {
     };
     const { error } = await supabase.from('transactions').update(dbTrans).eq('ma_gd', updatedTransaction["Mã GD"]);
     if (error) { 
-      alert("Lỗi: " + error.message); 
+      toast.error("Lỗi: " + error.message); 
     } else { 
       setTransactions(prev => prev.map(t => t["Mã GD"] === updatedTransaction["Mã GD"] ? updatedTransaction : t));
     }
@@ -590,7 +591,7 @@ export const DataProvider = ({ children }) => {
     };
     const { error } = await supabase.from('employees').insert([dbStaff]);
     if (error) { 
-      alert("Lỗi: " + error.message); 
+      toast.error("Lỗi: " + error.message); 
     } else { 
       setStaff(prev => [newStaff, ...prev]);
     }
@@ -610,7 +611,7 @@ export const DataProvider = ({ children }) => {
     };
     const { error } = await supabase.from('employees').update(dbStaff).eq('ma_nv', updatedStaff["Mã NV"]);
     if (error) { 
-      alert("Lỗi: " + error.message); 
+      toast.error("Lỗi: " + error.message); 
     } else { 
       setStaff(prev => prev.map(s => s["Mã NV"] === updatedStaff["Mã NV"] ? updatedStaff : s));
     }
