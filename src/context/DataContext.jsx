@@ -236,7 +236,15 @@ export const DataProvider = ({ children }) => {
           "HĐMB THỰC TẾ": 0, "KH HĐMB": kpiTarget.target_contracts || 1,
           "CỌC": 0, "KH CỌC": kpiTarget.target_deposits || 2
         };
-      }).filter(s => isAdminOrBOD || s["Mã NV"] === currentUser.ma_nv);
+      }).filter(s => {
+        // Chỉ hiển thị nhân viên thuộc bộ phận Sales/Operations
+        const isSalesStaff = ['Sales','Operations'].includes(s["Sàn"]);
+        if (!isSalesStaff) return false;
+        // Admin và BOD thấy tất cả
+        if (isAdminOrBOD) return true;
+        // Sales chỉ thấy chính mình
+        return s["Mã NV"] === currentUser.ma_nv;
+      });
       setSales(salesData);
 
     } catch (error) {
