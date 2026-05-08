@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect, useCallback, useRef } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback, useRef, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
 
 const DataContext = createContext();
@@ -337,7 +337,7 @@ export const DataProvider = ({ children }) => {
   }, [currentUser]);
 
   // --- MUTATION FUNCTIONS (Supabase Sync) ---
-  const addLead = async (newLead) => {
+  const addLead = useCallback(async (newLead) => {
     const dbLead = {
       ma_lead: newLead["Mã lead"],
       ngay_nhan: newLead["Ngày nhận"] || null,
@@ -360,9 +360,9 @@ export const DataProvider = ({ children }) => {
       setLeads(prev => [newLead, ...prev]);
       setLeadsTotal(prev => prev + 1);
     }
-  };
+  }, []);
 
-  const editLead = async (updatedLead) => {
+  const editLead = useCallback(async (updatedLead) => {
     const dbLead = {
       ho_ten: updatedLead["Họ tên"],
       sdt: updatedLead["SĐT (đầy đủ)"],
@@ -382,9 +382,9 @@ export const DataProvider = ({ children }) => {
     } else { 
       setLeads(prev => prev.map(l => l["Mã lead"] === updatedLead["Mã lead"] ? updatedLead : l));
     }
-  };
+  }, []);
 
-  const addMultipleLeads = async (newLeadsArray) => {
+  const addMultipleLeads = useCallback(async (newLeadsArray) => {
     const dbLeads = newLeadsArray.map(l => ({
       ma_lead: l["Mã lead"],
       ngay_nhan: l["Ngày nhận"],
@@ -407,9 +407,9 @@ export const DataProvider = ({ children }) => {
       setLeads(prev => [...newLeadsArray, ...prev]);
       setLeadsTotal(prev => prev + newLeadsArray.length);
     }
-  };
+  }, []);
 
-  const updateLeads = async (updatedLeadsArray) => {
+  const updateLeads = useCallback(async (updatedLeadsArray) => {
     const dbLeads = updatedLeadsArray.map(l => ({
       ma_lead: l["Mã lead"],
       nhan_vien_id: l["_employee_id"] || l["Mã NV"],
@@ -425,9 +425,9 @@ export const DataProvider = ({ children }) => {
         return up ? { ...l, ...up } : l;
       }));
     }
-  };
+  }, []);
 
-  const addTransaction = async (newTransaction) => {
+  const addTransaction = useCallback(async (newTransaction) => {
     const dbTrans = {
       ma_gd: newTransaction["Mã GD"],
       ngay_gd: newTransaction["Ngày GD"] || null,
@@ -448,9 +448,9 @@ export const DataProvider = ({ children }) => {
       setTransactions(prev => [newTransaction, ...prev]);
       setTransactionsTotal(prev => prev + 1);
     }
-  };
+  }, []);
 
-  const editTransaction = async (updatedTransaction) => {
+  const editTransaction = useCallback(async (updatedTransaction) => {
     const dbTrans = {
       ngay_gd: updatedTransaction["Ngày GD"] || null,
       khach_hang_id: updatedTransaction["Mã Lead"],
@@ -469,9 +469,9 @@ export const DataProvider = ({ children }) => {
     } else { 
       setTransactions(prev => prev.map(t => t["Mã GD"] === updatedTransaction["Mã GD"] ? updatedTransaction : t));
     }
-  };
+  }, []);
 
-  const addMarketing = async (newMarketing) => {
+  const addMarketing = useCallback(async (newMarketing) => {
     const dbMkt = {
       ma_chien_dich: newMarketing["Tên chiến dịch"],
       thang: newMarketing["Tháng"],
@@ -490,9 +490,9 @@ export const DataProvider = ({ children }) => {
     if (!error) {
       setMarketing(prev => [newMarketing, ...prev]);
     }
-  };
+  }, []);
 
-  const editMarketing = async (updatedMarketing) => {
+  const editMarketing = useCallback(async (updatedMarketing) => {
     const dbMkt = {
       thang: updatedMarketing["Tháng"],
       kenh: updatedMarketing["Kênh"],
@@ -510,9 +510,9 @@ export const DataProvider = ({ children }) => {
     if (!error) {
       setMarketing(prev => prev.map(m => m["_id"] === updatedMarketing["_id"] ? updatedMarketing : m));
     }
-  };
+  }, []);
 
-  const addFinancial = async (newFinancial) => {
+  const addFinancial = useCallback(async (newFinancial) => {
     const dbFin = {
       thang: newFinancial["Tháng"],
       hang_muc: newFinancial["Hạng mục"],
@@ -528,9 +528,9 @@ export const DataProvider = ({ children }) => {
     if (!error) {
       setFinancials(prev => [newFinancial, ...prev]);
     }
-  };
+  }, []);
 
-  const editFinancial = async (updatedFinancial) => {
+  const editFinancial = useCallback(async (updatedFinancial) => {
     const dbFin = {
       loai: updatedFinancial["Loại"],
       thuc_te: Number(updatedFinancial["Thực tế (tỷ)"]) * 1000000000,
@@ -544,9 +544,9 @@ export const DataProvider = ({ children }) => {
     if (!error) {
       setFinancials(prev => prev.map(f => f["_id"] === updatedFinancial["_id"] ? updatedFinancial : f));
     }
-  };
+  }, []);
 
-  const addStaff = async (newStaff) => {
+  const addStaff = useCallback(async (newStaff) => {
     const dbStaff = {
       ma_nv: newStaff["Mã NV"],
       ho_ten: newStaff["Tên NV"],
@@ -565,9 +565,9 @@ export const DataProvider = ({ children }) => {
     } else { 
       setStaff(prev => [newStaff, ...prev]);
     }
-  };
+  }, []);
 
-  const editStaff = async (updatedStaff) => {
+  const editStaff = useCallback(async (updatedStaff) => {
     const dbStaff = {
       ho_ten: updatedStaff["Tên NV"],
       phong_ban: updatedStaff["Sàn"],
@@ -585,66 +585,77 @@ export const DataProvider = ({ children }) => {
     } else { 
       setStaff(prev => prev.map(s => s["Mã NV"] === updatedStaff["Mã NV"] ? updatedStaff : s));
     }
-  };
+  }, []);
 
-  const deleteLead = async (id) => {
+  const deleteLead = useCallback(async (id) => {
     const { error } = await supabase.from('leads').delete().eq('ma_lead', id);
     if (!error) {
       setLeads(prev => prev.filter(l => l["Mã lead"] !== id));
       setLeadsTotal(prev => prev - 1);
     }
-  };
+  }, []);
 
-  const deleteTransaction = async (id) => {
+  const deleteTransaction = useCallback(async (id) => {
     const { error } = await supabase.from('transactions').delete().eq('ma_gd', id);
     if (!error) {
       setTransactions(prev => prev.filter(t => t["Mã GD"] !== id));
       setTransactionsTotal(prev => prev - 1);
     }
-  };
+  }, []);
 
-  const deleteStaff = async (id) => {
+  const deleteStaff = useCallback(async (id) => {
     const { error } = await supabase.from('employees').delete().eq('ma_nv', id);
     if (!error) {
       setStaff(prev => prev.filter(s => s["Mã NV"] !== id));
     }
-  };
+  }, []);
 
-  const deleteMarketing = async (id) => {
+  const deleteMarketing = useCallback(async (id) => {
     const { error } = await supabase.from('marketing_campaigns').delete().eq('ma_chien_dich', id);
     if (!error) {
       setMarketing(prev => prev.filter(m => m["_id"] !== id));
     }
-  };
+  }, []);
 
-  const deleteFinancial = async (id) => {
+  const deleteFinancial = useCallback(async (id) => {
     const { error } = await supabase.from('financial_records').delete().eq('ma_tc', id);
     if (!error) {
       setFinancials(prev => prev.filter(f => f["_id"] !== id));
     }
-  };
+  }, []);
+
+  const contextValue = useMemo(() => ({
+    globalFilter, setGlobalFilter,
+    leads: allLeads,
+    transactions: allTransactions,
+    marketing: allMarketing,
+    financials: allFinancials,
+    sales,
+    staff,
+    loadingData,
+    currentUser,
+    leadsPage, setLeadsPage, leadsTotal, leadsSearch, setLeadsSearch, leadsSort, setLeadsSort,
+    transactionsPage, setTransactionsPage, transactionsTotal, transSearch, setTransSearch, transSort, setTransSort,
+    dashboardStats, itemsPerPage,
+    addLead, editLead, deleteLead, addMultipleLeads, updateLeads,
+    addTransaction, editTransaction, deleteTransaction,
+    addMarketing, editMarketing, deleteMarketing,
+    addFinancial, editFinancial, deleteFinancial,
+    addStaff, editStaff, deleteStaff,
+    refreshData: () => fetchData()
+  }), [
+    globalFilter, allLeads, allTransactions, allMarketing, allFinancials, sales, staff,
+    loadingData, currentUser, leadsPage, leadsTotal, leadsSearch, leadsSort,
+    transactionsPage, transactionsTotal, transSearch, transSort,
+    dashboardStats, addLead, editLead, deleteLead, addMultipleLeads, updateLeads,
+    addTransaction, editTransaction, deleteTransaction,
+    addMarketing, editMarketing, deleteMarketing,
+    addFinancial, editFinancial, deleteFinancial,
+    addStaff, editStaff, deleteStaff, fetchData
+  ]);
 
   return (
-    <DataContext.Provider value={{
-      globalFilter, setGlobalFilter,
-      leads: allLeads,
-      transactions: allTransactions,
-      marketing: allMarketing,
-      financials: allFinancials,
-      sales,
-      staff,
-      loadingData,
-      currentUser,
-      leadsPage, setLeadsPage, leadsTotal, leadsSearch, setLeadsSearch, leadsSort, setLeadsSort,
-      transactionsPage, setTransactionsPage, transactionsTotal, transSearch, setTransSearch, transSort, setTransSort,
-      dashboardStats, itemsPerPage,
-      addLead, editLead, deleteLead, addMultipleLeads, updateLeads,
-      addTransaction, editTransaction, deleteTransaction,
-      addMarketing, editMarketing, deleteMarketing,
-      addFinancial, editFinancial, deleteFinancial,
-      addStaff, editStaff, deleteStaff,
-      refreshData: () => fetchData()
-    }}>
+    <DataContext.Provider value={contextValue}>
       {children}
     </DataContext.Provider>
   );
