@@ -13,6 +13,12 @@ function Leads() {
     setLeadsSearch,
     leadsSort,
     setLeadsSort,
+    leadsFilterStatus,
+    setLeadsFilterStatus,
+    leadsFilterSource,
+    setLeadsFilterSource,
+    leadsFilterAgency,
+    setLeadsFilterAgency,
     itemsPerPage,
     marketing,
     addLead,
@@ -28,14 +34,11 @@ function Leads() {
   const [duplicateWarning, setDuplicateWarning] = useState(null);
   const fileInputRef = useRef(null);
 
-  // --- FILTER STATE ---
-  // --- FILTER STATE ---
-  const [filterStatus, setFilterStatus] = useState('');
-  const [filterSource, setFilterSource] = useState('');
-  const [filterAgency, setFilterAgency] = useState('');
-  const [filterSales, setFilterSales] = useState('');
-  const [currentPage, setCurrentPage] = useState(leadsPage);
   const [sortConfig, setSortConfig] = useState({ key: 'Ngày nhận', direction: 'desc' });
+
+  const STATUS_OPTIONS = ['MỚI TIẾP NHẬN', 'ĐANG CHĂM SÓC', 'TIỀM NĂNG', 'ĐÃ LIÊN HỆ', 'ĐÃ CHỐT', 'KHÔNG NHU CẦU', 'TỪ CHỐI'];
+  const SOURCE_OPTIONS = ['Facebook Ads', 'Google Search', 'TikTok Ads', 'LinkedIn', 'Website', 'Giới thiệu', 'Khác'];
+  const AGENCY_OPTIONS = ['Internal', 'Sàn 1', 'Sàn 2', 'Đối tác'];
 
   // Debounced Search Logic
   const [localSearch, setLocalSearch] = useState(leadsSearch);
@@ -53,12 +56,6 @@ function Leads() {
   useEffect(() => {
     setLocalSearch(leadsSearch);
   }, [leadsSearch]);
-
-  // Unique values - ideally these should come from server, but using local slice as fallback
-  const uniqueStatuses = [...new Set(leads.map(l => l['Trạng thái']).filter(Boolean))];
-  const uniqueSources = [...new Set(leads.map(l => l['Nguồn']).filter(Boolean))];
-  const uniqueAgencies = [...new Set(leads.map(l => l['Tên sàn']).filter(Boolean))];
-  const uniqueSalesNames = [...new Set(leads.map(l => l['Sales phụ trách']).filter(Boolean))];
 
   const handleSort = (key) => {
     // Map UI keys to DB columns
@@ -79,8 +76,15 @@ function Leads() {
     setLeadsPage(pageNumber);
   };
 
-  const hasActiveFilters = leadsSearch || filterStatus || filterSource || filterAgency || filterSales;
-  const clearFilters = () => { setLeadsSearch(''); setFilterStatus(''); setFilterSource(''); setFilterAgency(''); setFilterSales(''); };
+  const hasActiveFilters = leadsSearch || leadsFilterStatus || leadsFilterSource || leadsFilterAgency;
+  const clearFilters = () => { 
+    setLocalSearch('');
+    setLeadsSearch(''); 
+    setLeadsFilterStatus(''); 
+    setLeadsFilterSource(''); 
+    setLeadsFilterAgency(''); 
+    setLeadsPage(1);
+  };
 
   const formatPhone = (phone) => {
     if (!phone) return '';
@@ -359,21 +363,17 @@ function Leads() {
       {/* FILTER BAR */}
       <div className="filter-bar">
         <input className="filter-input" placeholder="🔍 Tìm tên, SĐT, mã lead, mã NV..." value={localSearch} onChange={e => setLocalSearch(e.target.value)} />
-        <select className="filter-select" value={filterSales} onChange={e => setFilterSales(e.target.value)}>
-          <option value="">-- Sales --</option>
-          {uniqueSalesNames.map(s => <option key={s} value={s}>{s}</option>)}
-        </select>
-        <select className="filter-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+        <select className="filter-select" value={leadsFilterStatus} onChange={e => { setLeadsFilterStatus(e.target.value); setLeadsPage(1); }}>
           <option value="">-- Trạng thái --</option>
-          {uniqueStatuses.map(s => <option key={s} value={s}>{s}</option>)}
+          {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
-        <select className="filter-select" value={filterSource} onChange={e => setFilterSource(e.target.value)}>
+        <select className="filter-select" value={leadsFilterSource} onChange={e => { setLeadsFilterSource(e.target.value); setLeadsPage(1); }}>
           <option value="">-- Nguồn --</option>
-          {uniqueSources.map(s => <option key={s} value={s}>{s}</option>)}
+          {SOURCE_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
-        <select className="filter-select" value={filterAgency} onChange={e => setFilterAgency(e.target.value)}>
+        <select className="filter-select" value={leadsFilterAgency} onChange={e => { setLeadsFilterAgency(e.target.value); setLeadsPage(1); }}>
           <option value="">-- Tên sàn --</option>
-          {uniqueAgencies.map(s => <option key={s} value={s}>{s}</option>)}
+          {AGENCY_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
         {hasActiveFilters && <button className="btn-clear-filter" onClick={clearFilters}>✕ Xóa lọc</button>}
         <span className="filter-count">Tổng cộng: <strong>{leadsTotal}</strong> lead</span>

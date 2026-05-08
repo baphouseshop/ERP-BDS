@@ -41,6 +41,11 @@ export const DataProvider = ({ children }) => {
   const [financialsSearch, setFinancialsSearch] = useState('');
   const [financialsSort, setFinancialsSort] = useState({ column: 'thang', ascending: false });
 
+  // Leads Specific Filters (Server-side)
+  const [leadsFilterStatus, setLeadsFilterStatus] = useState('');
+  const [leadsFilterSource, setLeadsFilterSource] = useState('');
+  const [leadsFilterAgency, setLeadsFilterAgency] = useState('');
+
   const [dashboardStats, setDashboardStats] = useState(null);
   const itemsPerPage = 15;
   const fetchDataRef = useRef(null);
@@ -140,6 +145,11 @@ export const DataProvider = ({ children }) => {
       leadsQuery = applyDateFilter(leadsQuery, globalFilter, 'ngay_nhan');
       if (!isAdminOrBOD) leadsQuery = leadsQuery.eq('nhan_vien_id', currentUser.ma_nv);
       if (leadsSearch) leadsQuery = leadsQuery.or(`ho_ten.ilike.%${leadsSearch}%,sdt.ilike.%${leadsSearch}%,ma_lead.ilike.%${leadsSearch}%,nhan_vien_id.ilike.%${leadsSearch}%`);
+      
+      // Additional Leads Filters
+      if (leadsFilterStatus) leadsQuery = leadsQuery.eq('trang_thai', leadsFilterStatus);
+      if (leadsFilterSource) leadsQuery = leadsQuery.eq('nguon', leadsFilterSource);
+      if (leadsFilterAgency) leadsQuery = leadsQuery.eq('ten_san', leadsFilterAgency);
 
       const leadsRange = [(leadsPage - 1) * itemsPerPage, leadsPage * itemsPerPage - 1];
       const { data: dbLeads, count: leadsCount } = await leadsQuery
@@ -281,6 +291,7 @@ export const DataProvider = ({ children }) => {
   }, [
     globalFilter, 
     leadsPage, leadsSearch, leadsSort, 
+    leadsFilterStatus, leadsFilterSource, leadsFilterAgency,
     transactionsPage, transSearch, transSort, 
     marketingPage, marketingSearch, marketingSort,
     financialsPage, financialsSearch, financialsSort,
@@ -702,6 +713,9 @@ export const DataProvider = ({ children }) => {
     session,
     authLoading,
     leadsPage, setLeadsPage, leadsTotal, leadsSearch, setLeadsSearch, leadsSort, setLeadsSort,
+    leadsFilterStatus, setLeadsFilterStatus,
+    leadsFilterSource, setLeadsFilterSource,
+    leadsFilterAgency, setLeadsFilterAgency,
     transactionsPage, setTransactionsPage, transactionsTotal, transSearch, setTransSearch, transSort, setTransSort,
     marketingPage, setMarketingPage, marketingTotal, marketingSearch, setMarketingSearch, marketingSort, setMarketingSort,
     financialsPage, setFinancialsPage, financialsTotal, financialsSearch, setFinancialsSearch, financialsSort, setFinancialsSort,
