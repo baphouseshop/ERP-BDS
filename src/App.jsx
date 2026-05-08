@@ -142,9 +142,9 @@ function DateFilter() {
   );
 }
 
-function TopBar({ session }) {
+function TopBar() {
   const location = useLocation();
-  const { currentUser } = useData();
+  const { currentUser, session } = useData();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -207,26 +207,9 @@ function TopBar({ session }) {
 }
 
 function App() {
-  const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const { currentUser, loadingData } = useData();
+  const { currentUser, loadingData, session, authLoading } = useData();
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  if (loading) {
+  if (authLoading) {
     return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>Loading...</div>;
   }
 
@@ -242,7 +225,7 @@ function App() {
 
   return (
     <div className="app-container">
-      <TopBar session={session} />
+      <TopBar />
       <div className="main-content">
         {loadingData ? (
            <div style={{ padding: '20px', color: 'var(--text-primary)' }}>Đang tải dữ liệu...</div>

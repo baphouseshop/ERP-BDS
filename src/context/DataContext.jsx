@@ -14,6 +14,8 @@ export const DataProvider = ({ children }) => {
   const [staff, setStaff] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
+  const [session, setSession] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
   const [globalFilter, setGlobalFilter] = useState('all');
 
@@ -268,48 +270,53 @@ export const DataProvider = ({ children }) => {
 
   useEffect(() => {
     const handleAuth = async () => {
+      setAuthLoading(true);
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        setSession(currentSession);
+        if (currentSession) {
+          const { data: profile } = await supabase.from('profiles').select('*').eq('id', currentSession.user.id).single();
           if (profile) {
-            // Capitalize role to match App.jsx requirements
             const normalizedRole = profile.role ? (profile.role.charAt(0).toUpperCase() + profile.role.slice(1).toLowerCase()) : 'Admin';
             setCurrentUser({
-              id: session.user.id,
-              email: session.user.email,
+              id: currentSession.user.id,
+              email: currentSession.user.email,
               role: normalizedRole === 'Admin' ? 'Admin' : (profile.role || 'Admin'),
               ma_nv: profile.employee_code || 'ADMIN01',
-              full_name: profile.full_name || session.user.email.split('@')[0]
+              full_name: profile.full_name || currentSession.user.email.split('@')[0]
             });
           } else {
-            console.warn('Profile not found. Defaulting to Admin.');
             setCurrentUser({
-              id: session.user.id,
-              email: session.user.email,
+              id: currentSession.user.id,
+              email: currentSession.user.email,
               role: 'Admin',
               ma_nv: 'ADMIN01',
-              full_name: session.user.email.split('@')[0]
+              full_name: currentSession.user.email.split('@')[0]
             });
           }
         } else {
-          // No session - default to Guest Admin for development or redirect to login
-          setCurrentUser({ role: 'Admin', ma_nv: 'ADMIN01', full_name: 'Guest Admin' });
+          setCurrentUser(null);
         }
       } catch (err) {
         console.error('Auth error:', err);
-        setCurrentUser({ role: 'Admin', ma_nv: 'ADMIN01', full_name: 'Guest Admin' });
+        setCurrentUser(null);
+        setSession(null);
+      } finally {
+        setAuthLoading(false);
       }
     };
 
     handleAuth();
 
-    const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange((event, newSession) => {
+      setSession(newSession);
       if (event === 'SIGNED_IN') handleAuth();
       if (event === 'SIGNED_OUT') {
         setCurrentUser(null);
+        setSession(null);
         setLeads([]);
         setTransactions([]);
+        setAuthLoading(false);
       }
     });
 
@@ -634,6 +641,8 @@ export const DataProvider = ({ children }) => {
     staff,
     loadingData,
     currentUser,
+    session,
+    authLoading,
     leadsPage, setLeadsPage, leadsTotal, leadsSearch, setLeadsSearch, leadsSort, setLeadsSort,
     transactionsPage, setTransactionsPage, transactionsTotal, transSearch, setTransSearch, transSort, setTransSort,
     dashboardStats, itemsPerPage,
@@ -645,7 +654,7 @@ export const DataProvider = ({ children }) => {
     refreshData: () => fetchData()
   }), [
     globalFilter, allLeads, allTransactions, allMarketing, allFinancials, sales, staff,
-    loadingData, currentUser, leadsPage, leadsTotal, leadsSearch, leadsSort,
+    loadingData, currentUser, session, authLoading, leadsPage, leadsTotal, leadsSearch, leadsSort,
     transactionsPage, transactionsTotal, transSearch, transSort,
     dashboardStats, addLead, editLead, deleteLead, addMultipleLeads, updateLeads,
     addTransaction, editTransaction, deleteTransaction,
