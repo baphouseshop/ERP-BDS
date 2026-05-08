@@ -165,15 +165,15 @@ function TopBar() {
   const role = currentUser?.role || 'Admin';
 
   const tabConfig = [
-    { path: '/', label: 'TỔNG QUAN', roles: ['Admin', 'BOD', 'Sales', 'Marketing', 'Kế toán', 'HR', 'IT', 'Hành chính'] },
-    { path: '/financials', label: 'TÀI CHÍNH', roles: ['Admin', 'BOD', 'Kế toán', 'IT'] },
-    { path: '/sales', label: 'SALES TEAM', roles: ['Admin', 'BOD', 'Sales', 'Marketing', 'IT'] },
-    { path: '/transactions', label: 'GIAO DỊCH', roles: ['Admin', 'BOD', 'Sales', 'Kế toán', 'IT'] },
-    { path: '/marketing', label: 'MARKETING', roles: ['Admin', 'BOD', 'Marketing', 'IT'] },
-    { path: '/leads', label: 'CRM LEADS', roles: ['Admin', 'BOD', 'Sales', 'Marketing', 'IT'] },
-    { path: '/staff', label: 'NHÂN SỰ', roles: ['Admin', 'BOD', 'HR', 'IT'] },
-    { path: '/logs', label: 'LỊCH SỬ', roles: ['Admin', 'BOD', 'IT'] },
-    { path: '/settings', label: 'CÀI ĐẶT', roles: ['Admin', 'BOD', 'IT'] },
+    { path: '/', label: 'TỔNG QUAN', roles: ['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'Sales', 'Marketing', 'Kế toán', 'HR', 'IT', 'Hành chính'] },
+    { path: '/financials', label: 'TÀI CHÍNH', roles: ['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'Kế toán', 'IT'] },
+    { path: '/sales', label: 'SALES TEAM', roles: ['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'Sales', 'Marketing', 'IT'] },
+    { path: '/transactions', label: 'GIAO DỊCH', roles: ['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'Sales', 'Kế toán', 'IT'] },
+    { path: '/marketing', label: 'MARKETING', roles: ['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'Marketing', 'IT'] },
+    { path: '/leads', label: 'CRM LEADS', roles: ['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'Sales', 'Marketing', 'IT'] },
+    { path: '/staff', label: 'NHÂN SỰ', roles: ['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'HR', 'IT'] },
+    { path: '/logs', label: 'LỊCH SỬ', roles: ['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'IT'] },
+    { path: '/settings', label: 'CÀI ĐẶT', roles: ['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'IT'] },
   ];
 
   return (
@@ -243,15 +243,15 @@ function App() {
         ) : (
           <ErrorBoundary>
             <Routes>
-              <Route path="/" element={checkAccess(['Admin', 'BOD', 'Sales', 'Marketing', 'Kế toán', 'HR', 'IT', 'Hành chính']) ? <Dashboard /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
-              <Route path="/leads" element={checkAccess(['Admin', 'BOD', 'Sales', 'Marketing', 'IT']) ? <Leads /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
-              <Route path="/transactions" element={checkAccess(['Admin', 'BOD', 'Sales', 'Kế toán', 'IT']) ? <Transactions /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
-              <Route path="/sales" element={checkAccess(['Admin', 'BOD', 'Sales', 'Marketing', 'IT']) ? <Sales /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
-              <Route path="/marketing" element={checkAccess(['Admin', 'BOD', 'Marketing', 'IT']) ? <Marketing /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
-              <Route path="/financials" element={checkAccess(['Admin', 'BOD', 'Kế toán', 'IT']) ? <Financials /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
-              <Route path="/staff" element={checkAccess(['Admin', 'BOD', 'HR', 'IT']) ? <Staff /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
-              <Route path="/logs" element={checkAccess(['Admin', 'BOD', 'IT']) ? <Logs /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
-              <Route path="/settings" element={checkAccess(['Admin', 'BOD', 'IT']) ? <Settings /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
+              <Route path="/" element={checkAccess(['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'Sales', 'Marketing', 'Kế toán', 'HR', 'IT', 'Hành chính']) ? <Dashboard /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
+              <Route path="/leads" element={checkAccess(['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'Sales', 'Marketing', 'IT']) ? <Leads /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
+              <Route path="/transactions" element={checkAccess(['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'Sales', 'Kế toán', 'IT']) ? <Transactions /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
+              <Route path="/sales" element={checkAccess(['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'Sales', 'Marketing', 'IT']) ? <Sales /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
+              <Route path="/marketing" element={checkAccess(['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'Marketing', 'IT']) ? <Marketing /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
+              <Route path="/financials" element={checkAccess(['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'Kế toán', 'IT']) ? <Financials /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
+              <Route path="/staff" element={checkAccess(['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'HR', 'IT']) ? <Staff /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
+              <Route path="/logs" element={checkAccess(['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'IT']) ? <Logs /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
+              <Route path="/settings" element={checkAccess(['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'IT']) ? <Settings /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
             </Routes>
           </ErrorBoundary>
         )}

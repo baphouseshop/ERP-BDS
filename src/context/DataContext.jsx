@@ -129,13 +129,17 @@ export const DataProvider = ({ children }) => {
       const getCampaignName = (id) => campaigns.find(c => c.ma_chien_dich == id)?.ten_chien_dich || id || "";
 
       const userRole = (currentUser.role || 'Admin').toLowerCase();
-      const isAdminOrBOD = ['admin', 'bod'].includes(userRole);
+      // Các quyền quản lý/admin được xem toàn bộ dữ liệu
+      const isAdminOrBOD = [
+        'admin', 'bod', 'giám đốc', 'giám đốc sàn', 
+        'it', 'kế toán', 'hr', 'marketing', 'hành chính'
+      ].includes(userRole);
 
       // 3. Fetch Paginated Leads
       let leadsQuery = supabase.from('leads').select('*', { count: 'exact' });
       leadsQuery = applyDateFilter(leadsQuery, globalFilter, 'ngay_nhan');
       if (!isAdminOrBOD) leadsQuery = leadsQuery.eq('nhan_vien_id', currentUser.ma_nv);
-      if (leadsSearch) leadsQuery = leadsQuery.or(`ho_ten.ilike.%${leadsSearch}%,sdt.ilike.%${leadsSearch}%,ma_lead.ilike.%${leadsSearch}%`);
+      if (leadsSearch) leadsQuery = leadsQuery.or(`ho_ten.ilike.%${leadsSearch}%,sdt.ilike.%${leadsSearch}%,ma_lead.ilike.%${leadsSearch}%,nhan_vien_id.ilike.%${leadsSearch}%`);
 
       const leadsRange = [(leadsPage - 1) * itemsPerPage, leadsPage * itemsPerPage - 1];
       const { data: dbLeads, count: leadsCount } = await leadsQuery
