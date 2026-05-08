@@ -143,7 +143,6 @@ function DateFilter() {
 }
 
 function TopBar() {
-  const location = useLocation();
   const { currentUser, session } = useData();
 
   const handleLogout = async () => {
