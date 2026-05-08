@@ -642,6 +642,8 @@ export const DataProvider = ({ children }) => {
     if (error) { 
       toast.error("Lỗi: " + error.message); 
     } else { 
+      // Sync role to profiles if employee code matches
+      await supabase.from('profiles').update({ role: updatedStaff["Quyền"] }).eq('employee_code', updatedStaff["Mã NV"]);
       setStaff(prev => prev.map(s => s["Mã NV"] === updatedStaff["Mã NV"] ? updatedStaff : s));
     }
   }, []);

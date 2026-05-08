@@ -197,7 +197,7 @@ function TopBar() {
         </div>
       </div>
       <div className="nav-tabs">
-        {tabConfig.filter(tab => tab.roles.includes(role)).map(tab => (
+        {tabConfig.filter(tab => tab.roles.some(r => r.toLowerCase() === role.toLowerCase())).map(tab => (
           <NavLink key={tab.path} to={tab.path} className={({ isActive }) => `nav-tab ${isActive ? 'active' : ''}`} end={tab.path === '/'}>
             {tab.label}
           </NavLink>
@@ -221,7 +221,7 @@ function App() {
   const role = currentUser?.role || 'Admin';
 
   const checkAccess = (allowedRoles) => {
-    return allowedRoles.includes(role);
+    return allowedRoles.some(r => r.toLowerCase() === role.toLowerCase());
   };
 
   return (
