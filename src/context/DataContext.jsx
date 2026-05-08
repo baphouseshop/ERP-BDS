@@ -88,7 +88,6 @@ export const DataProvider = ({ children }) => {
         p_ma_nv: currentUser.ma_nv || ''
       });
       if (statsError) throw statsError;
-      console.log('statsData:', statsData);
       setDashboardStats(statsData);
 
       // 2. Fetch Static Data
