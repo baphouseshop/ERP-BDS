@@ -273,10 +273,15 @@ export const DataProvider = ({ children }) => {
           "CỌC": 0, "KH CỌC": kpiTarget.target_deposits || 2
         };
       }).filter(s => {
-        // Chỉ hiển thị nhân viên thuộc bộ phận Sales/Operations
-        const isSalesStaff = ['Sales','Operations'].includes(s["Sàn"]);
+        // Hiển thị nhân viên thuộc bộ phận Sales/Operations hoặc các Sàn
+        const dept = (s["Sàn"] || "").toLowerCase();
+        const role = (s["Chức vụ"] || "").toLowerCase();
+        const isSalesStaff = 
+          ['sales','operations','kinh doanh','sàn','đại lý'].some(keyword => dept.includes(keyword)) ||
+          ['sale','leader','giám đốc','trưởng phòng'].some(keyword => role.includes(keyword));
+        
         if (!isSalesStaff) return false;
-        // Admin và BOD thấy tất cả
+        // Admin và BOD thấy tất cả những người thuộc bộ phận sales
         if (isAdminOrBOD) return true;
         // Sales chỉ thấy chính mình
         return s["Mã NV"] === currentUser.ma_nv;
