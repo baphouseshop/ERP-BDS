@@ -81,12 +81,14 @@ export const DataProvider = ({ children }) => {
       const [start, end] = applyDateRange(globalFilter);
 
       // 1. Fetch Dashboard Stats (RPC)
-      const { data: statsData } = await supabase.rpc('get_dashboard_stats', {
+      const { data: statsData, error: statsError } = await supabase.rpc('get_dashboard_stats', {
         p_start_date: start || '2000-01-01T00:00:00Z',
         p_end_date: end || '2099-12-31T23:59:59Z',
         p_role: currentUser.role,
         p_ma_nv: currentUser.ma_nv || ''
       });
+      if (statsError) throw statsError;
+      console.log('statsData:', statsData);
       setDashboardStats(statsData);
 
       // 2. Fetch Static Data
