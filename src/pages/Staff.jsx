@@ -335,6 +335,13 @@ function Staff() {
                     <option value="Sale">Sale</option>
                     <option value="Teamlead">Teamlead</option>
                     <option value="Giám đốc sàn">Giám đốc sàn</option>
+                    <option value="Giám đốc">Giám đốc</option>
+                    <option value="HR">HR</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Kế toán">Kế toán</option>
+                    <option value="IT">IT</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Hành chính">Hành chính</option>
                   </select>
                 </div>
                 <div className="form-group">
