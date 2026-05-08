@@ -269,10 +269,9 @@ export const DataProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    const handleAuth = async () => {
+    const handleAuth = async (currentSession) => {
       setAuthLoading(true);
       try {
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
         setSession(currentSession);
         if (currentSession) {
           const { data: profile } = await supabase.from('profiles').select('*').eq('id', currentSession.user.id).single();
@@ -306,14 +305,12 @@ export const DataProvider = ({ children }) => {
       }
     };
 
-    handleAuth();
-
     const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange((event, newSession) => {
-      setSession(newSession);
-      if (event === 'SIGNED_IN') handleAuth();
-      if (event === 'SIGNED_OUT') {
-        setCurrentUser(null);
+      if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED') {
+        handleAuth(newSession);
+      } else if (event === 'SIGNED_OUT') {
         setSession(null);
+        setCurrentUser(null);
         setLeads([]);
         setTransactions([]);
         setAuthLoading(false);
