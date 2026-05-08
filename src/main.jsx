@@ -5,12 +5,16 @@ import App from './App.jsx'
 import './index.css'
 import { DataProvider } from './context/DataContext'
 
+import ErrorBoundary from './components/ErrorBoundary.jsx'
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <DataProvider>
-      <HashRouter>
-        <App />
-      </HashRouter>
-    </DataProvider>
+    <ErrorBoundary>
+      <DataProvider>
+        <HashRouter>
+          <App />
+        </HashRouter>
+      </DataProvider>
+    </ErrorBoundary>
   </React.StrictMode>,
 )

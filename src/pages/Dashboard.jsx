@@ -22,11 +22,17 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 function Dashboard() {
-  const { sales, transactions, marketing, leads, financials } = useData();
+  const { sales, transactions, marketing, leads, financials, dashboardStats } = useData();
+
+  // Fallback for when stats are loading
+  const stats = dashboardStats || {
+    leads: { total: 0, unassigned: 0, status_counts: {} },
+    transactions: { total: 0, completed: 0, deposited: 0, booking: 0, zone_counts: {} }
+  };
 
   // --- KPI CALCULATIONS ---
   
-  // 1. Doanh thu — match both Vietnamese mapped names AND English Supabase originals
+  // 1. Doanh thu
   const revenueItems = financials.filter(f => 
     f['Hạng mục'] === 'Revenue' || f['Hạng mục'] === 'Doanh thu thực thu' || f['Hạng mục'] === 'Doanh thu HĐMB'
   );
@@ -34,7 +40,7 @@ function Dashboard() {
   const doanhThuKH = Number(revenueItems.reduce((sum, f) => sum + Number(f['KH (tỷ)'] || 0), 0)).toFixed(2);
   const doanhThuPercent = doanhThuKH > 0 ? Math.round((doanhThu / doanhThuKH) * 100) : 0;
 
-  // 2. Lợi nhuận gộp — match both 'Expense' (Supabase) and 'Chi phí' (Vietnamese)
+  // 2. Lợi nhuận gộp
   const expenseItems = financials.filter(f => 
     f['Loại'] === 'Expense' || f['Loại'] === 'Chi phí'
   );
@@ -42,16 +48,16 @@ function Dashboard() {
   const loiNhuan = (doanhThu - chiPhi).toFixed(2);
   const margin = doanhThu > 0 ? ((loiNhuan / doanhThu) * 100).toFixed(1) : 0;
 
-  // 3. Giao dịch — match all possible status variants
-  const totalGD = transactions.length;
-  const countHDMB = transactions.filter(t => t['Trạng thái'] === 'Đã ký HĐMB' || t['Trạng thái'] === 'Completed').length;
-  const countCoc = transactions.filter(t => t['Trạng thái'] === 'Đã đặt cọc').length;
-  const countGiuCho = transactions.filter(t => t['Trạng thái'] === 'Giữ chỗ' || t['Trạng thái'] === 'Đang giữ chỗ').length;
+  // 3. Giao dịch — using pre-aggregated stats
+  const totalGD = stats.transactions.total;
+  const countHDMB = stats.transactions.completed;
+  const countCoc = stats.transactions.deposited;
+  const countGiuCho = stats.transactions.booking;
 
-  // 4. Tổng Lead
-  const totalLeads = leads.length;
-  const chuaPhanCongLeads = leads.filter(l => l['Ghi chú']?.includes('Chưa phân công') || !l['Sales phụ trách']);
-  const daPhanCong = totalLeads - chuaPhanCongLeads.length;
+  // 4. Tổng Lead — using pre-aggregated stats
+  const totalLeads = stats.leads.total;
+  const unassignedLeadsCount = stats.leads.unassigned;
+  const daPhanCong = totalLeads - unassignedLeadsCount;
 
   // 5. Booking MKT
   const totalBooking = marketing.reduce((sum, m) => sum + Number(m['Booking'] || 0), 0);
@@ -63,11 +69,10 @@ function Dashboard() {
   const insights = [];
 
   // Unassigned leads insight
-  if (chuaPhanCongLeads.length > 0) {
-    const unassignedIds = chuaPhanCongLeads.map(l => l['Mã lead']).slice(0, 5).join(' • ');
+  if (unassignedLeadsCount > 0) {
     insights.push({
       type: 'danger',
-      title: `${chuaPhanCongLeads.length} lead chưa phân công — ${unassignedIds}${chuaPhanCongLeads.length > 5 ? '...' : ''}`,
+      title: `${unassignedLeadsCount} lead chưa phân công`,
       desc: 'Phân công sales ngay trong ngày để không bỏ lỡ cơ hội tiếp cận.'
     });
   }
@@ -75,7 +80,7 @@ function Dashboard() {
   // Sales KPI insights
   sales.forEach(s => {
     const thucTe = Number(s['Doanh số (tỷ)'] || 0);
-    const kpi = Number(s['KH DS (tỷ)'] || 1); // Fixed KPI field name from db.json
+    const kpi = Number(s['KH DS (tỷ)'] || 1);
     const percent = Math.round((thucTe / kpi) * 100);
     if (percent < 70) {
       insights.push({
@@ -93,7 +98,7 @@ function Dashboard() {
     const cp = Number(m['CP (tr)']);
     const bk = Number(m['Booking']);
     if (cp > 0 && bk > 0) {
-      const rate = bk / cp; // Bookings per million
+      const rate = bk / cp;
       if (rate > bestMktRate) {
         bestMktRate = rate;
         bestMkt = m;
@@ -115,13 +120,11 @@ function Dashboard() {
 
   // --- CHARTS DATA ---
   
-  // 1. Lead Status
-  const statusCounts = {};
-  leads.forEach(l => {
-    const status = l['Trạng thái'];
-    statusCounts[status] = (statusCounts[status] || 0) + 1;
-  });
-  const leadStatusData = Object.keys(statusCounts).map(k => ({ name: k, value: statusCounts[k] }));
+  // 1. Lead Status (from RPC stats)
+  const leadStatusData = Object.keys(stats.leads.status_counts).map(k => ({ 
+    name: k, 
+    value: stats.leads.status_counts[k] 
+  }));
   const PIE_COLORS = ['#b366ff', '#ccff00', '#00cc66', '#00e5ff', '#ff4d94', '#ffcc00'];
 
   // 2. Booking by Channel
@@ -130,28 +133,25 @@ function Dashboard() {
     Booking: Number(m['Booking'] || 0)
   }));
 
-  // 3. Transactions by Zone
-  const zoneCounts = {};
-  transactions.forEach(t => {
-    const zone = t['Phân khu'] || 'Khác';
-    zoneCounts[zone] = (zoneCounts[zone] || 0) + 1;
-  });
-  const zoneData = Object.keys(zoneCounts).map(k => ({ name: k, value: zoneCounts[k] }));
+  // 3. Transactions by Zone (from RPC stats)
+  const zoneData = Object.keys(stats.transactions.zone_counts).map(k => ({ 
+    name: k, 
+    value: stats.transactions.zone_counts[k] 
+  }));
   const ZONE_COLORS = ['#ff4d94', '#4da6ff', '#00e5ff'];
 
   // 4. Funnel
   const funnelData = [
     { name: 'Lead Marketing', value: totalLeadMkt, fill: '#ccff00' },
     { name: 'Lead CRM', value: totalLeads, fill: '#b366ff' },
-    { name: 'Đã liên hệ+', value: leads.filter(l => l['Trạng thái'] !== 'MỚI TIẾP NHẬN').length, fill: '#00e5ff' },
     { name: 'Booking MKT', value: totalBooking, fill: '#4da6ff' },
     { name: 'Giao dịch', value: totalGD, fill: '#ffcc00' },
     { name: 'Đã ký HĐMB', value: countHDMB, fill: '#ff4d94' }
-  ].reverse(); // reverse for vertical bar chart layout (bottom up visually)
+  ].reverse();
 
   // 5. Sales vs KPI
   const salesData = sales.map(s => ({
-    name: s['Tên NV'].split(' ').pop(), // Just first name
+    name: s['Tên NV'].split(' ').pop(), 
     'Thực tế (tỷ)': Number(s['DS thực (tỷ)'] || 0),
     'KPI (tỷ)': Number(s['KH DS (tỷ)'] || 0)
   }));

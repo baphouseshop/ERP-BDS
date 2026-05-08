@@ -2,75 +2,48 @@ import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
 
 function Transactions() {
-  const { transactions, leads, staff, addTransaction, editTransaction, deleteTransaction } = useData();
+  const { 
+    transactions, 
+    transactionsTotal, 
+    transactionsPage, 
+    setTransactionsPage, 
+    transSearch,
+    setTransSearch,
+    transSort,
+    setTransSort,
+    dashboardStats,
+    itemsPerPage,
+    leads, 
+    staff, 
+    addTransaction, 
+    editTransaction, 
+    deleteTransaction 
+  } = useData();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
 
   // --- FILTER STATE ---
-  const [searchText, setSearchText] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [filterZone, setFilterZone] = useState('');
   const [filterSales, setFilterSales] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 15;
-  const [sortConfig, setSortConfig] = useState({ key: '_created_at', direction: 'desc' });
-
-  const uniqueStatuses = [...new Set(transactions.map(t => t['Trạng thái']).filter(Boolean))];
-  const uniqueZones = [...new Set(transactions.map(t => t['Phân khu']).filter(Boolean))];
-  const uniqueSalesNames = [...new Set(transactions.map(t => t['Sales']).filter(Boolean))];
-
-  const filteredTransactions = transactions.filter(t => {
-    const text = searchText.toLowerCase().trim();
-    if (text && !(
-      String(t['Mã GD'] || '').toLowerCase().includes(text) ||
-      String(t['Khách hàng'] || '').toLowerCase().includes(text) ||
-      String(t['Sales'] || '').toLowerCase().includes(text) ||
-      String(t['Mã nhân viên'] || '').toLowerCase().includes(text) ||
-      String(t['Mã SP'] || '').toLowerCase().includes(text) ||
-      String(t['Mã Lead'] || '').toLowerCase().includes(text)
-    )) return false;
-    if (filterStatus && t['Trạng thái'] !== filterStatus) return false;
-    if (filterZone && t['Phân khu'] !== filterZone) return false;
-    if (filterSales && t['Sales'] !== filterSales) return false;
-    return true;
-  }).sort((a, b) => {
-    if (!sortConfig.key) return 0;
-    
-    let aValue = a[sortConfig.key];
-    let bValue = b[sortConfig.key];
-
-    // Handle date sorting
-    if (['_created_at', 'Ngày GD'].includes(sortConfig.key)) {
-      aValue = aValue ? new Date(aValue).getTime() : 0;
-      bValue = bValue ? new Date(bValue).getTime() : 0;
-    } else if (['Giá (VNĐ)', 'Tiền cọc', 'Hoa hồng'].includes(sortConfig.key)) {
-      aValue = Number(aValue || 0);
-      bValue = Number(bValue || 0);
-    } else {
-      aValue = String(aValue || '').toLowerCase();
-      bValue = String(bValue || '').toLowerCase();
-    }
-
-    if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-    if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
-    return 0;
-  });
+  const [currentPage, setCurrentPage] = useState(transactionsPage);
 
   const handleSort = (key) => {
-    let direction = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
-    setSortConfig({ key, direction });
+    const keyMap = { 'Mã GD': 'ma_gd', 'Ngày GD': 'ngay_gd', 'Giá (VNĐ)': 'gia', 'Trạng thái': 'trang_thai' };
+    const dbKey = keyMap[key] || 'ngay_gd';
+    setTransSort({ column: dbKey, ascending: transSort.column === dbKey ? !transSort.ascending : false });
   };
 
-  // Pagination Logic
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentTransactions = filteredTransactions.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+  const currentTransactions = transactions; 
 
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  // Pagination Logic
+  const currentTransactions = transactions; // Already paginated from server
+  const totalPages = Math.ceil(transactionsTotal / itemsPerPage);
+
+  const paginate = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    setTransactionsPage(pageNumber);
+  };
 
   const hasActiveFilters = searchText || filterStatus || filterZone || filterSales;
   const clearFilters = () => { setSearchText(''); setFilterStatus(''); setFilterZone(''); setFilterSales(''); };
@@ -210,7 +183,7 @@ function Transactions() {
 
       {/* FILTER BAR */}
       <div className="filter-bar">
-        <input className="filter-input" placeholder="🔍 Tìm khách hàng, mã GD, mã NV, mã Lead..." value={searchText} onChange={e => setSearchText(e.target.value)} />
+        <input className="filter-input" placeholder="🔍 Tìm khách hàng, mã GD, mã NV, mã Lead..." value={transSearch} onChange={e => { setTransSearch(e.target.value); setTransactionsPage(1); }} />
         <select className="filter-select" value={filterSales} onChange={e => setFilterSales(e.target.value)}>
           <option value="">-- Sales --</option>
           {uniqueSalesNames.map(s => <option key={s} value={s}>{s}</option>)}
@@ -224,7 +197,7 @@ function Transactions() {
           {uniqueZones.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
         {hasActiveFilters && <button className="btn-clear-filter" onClick={clearFilters}>✕ Xóa lọc</button>}
-        <span className="filter-count">Hiển thị <strong>{filteredTransactions.length}</strong>/{transactions.length}</span>
+        <span className="filter-count">Tổng cộng: <strong>{transactionsTotal}</strong> giao dịch</span>
       </div>
 
       <div className="table-container">
@@ -233,10 +206,10 @@ function Transactions() {
             <tr>
               <th>Thao tác</th>
               <th onClick={() => handleSort('Mã GD')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                Mã GD {sortConfig.key === 'Mã GD' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+                 Mã GD {transSort.column === 'ma_gd' ? (transSort.ascending ? '🔼' : '🔽') : '↕️'}
               </th>
               <th onClick={() => handleSort('Khách hàng')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                Khách hàng {sortConfig.key === 'Khách hàng' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+                Khách hàng ↕️
               </th>
               <th onClick={() => handleSort('Ngày GD')} style={{ cursor: 'pointer', userSelect: 'none' }}>
                 Ngày {sortConfig.key === 'Ngày GD' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
@@ -320,15 +293,15 @@ function Transactions() {
           </tbody>
           <tfoot>
             <tr>
-              <td colSpan="4" style={{ textAlign: 'right', fontWeight: 'bold', color: 'var(--text-muted)', paddingTop: '15px', borderBottom: 'none' }}>TỔNG {hasActiveFilters ? '(đã lọc)' : ''}</td>
+              <td colSpan="4" style={{ textAlign: 'right', fontWeight: 'bold', color: 'var(--text-muted)', paddingTop: '15px', borderBottom: 'none' }}>TỔNG (Trang này)</td>
               <td style={{ color: 'var(--accent)', fontWeight: 'bold', fontSize: '15px', paddingTop: '15px', borderBottom: 'none' }}>
-                {formatTy(filteredTransactions.reduce((sum, t) => sum + Number(t['Giá (VNĐ)'] || 0), 0))}
+                {formatTy(transactions.reduce((sum, t) => sum + Number(t['Giá (VNĐ)'] || 0), 0))}
               </td>
               <td style={{ fontWeight: 'bold', paddingTop: '15px', borderBottom: 'none' }}>
-                {formatTr(filteredTransactions.reduce((sum, t) => sum + Number(t['Tiền cọc'] || 0), 0))}
+                {formatTr(transactions.reduce((sum, t) => sum + Number(t['Tiền cọc'] || 0), 0))}
               </td>
               <td style={{ color: 'var(--warning)', fontWeight: 'bold', fontSize: '15px', paddingTop: '15px', borderBottom: 'none' }}>
-                {formatTr(filteredTransactions.reduce((sum, t) => sum + Number(t['Hoa hồng'] || 0), 0))}
+                {formatTr(transactions.reduce((sum, t) => sum + Number(t['Hoa hồng'] || 0), 0))}
               </td>
               <td colSpan="3" style={{ borderBottom: 'none' }}></td>
             </tr>

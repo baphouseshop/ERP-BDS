@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { supabase } from '../supabaseClient';
 import initialDb from '../data/db.json';
 
@@ -16,233 +16,299 @@ export const DataProvider = ({ children }) => {
   const [loadingData, setLoadingData] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
 
-  const [globalFilter, setGlobalFilter] = useState('all'); // Changed from month:04/2026 to 'all' so new data isn't hidden
+  const [globalFilter, setGlobalFilter] = useState('all');
+  
+  // Pagination, Search & Sort State
+  const [leadsPage, setLeadsPage] = useState(1);
+  const [leadsTotal, setLeadsTotal] = useState(0);
+  const [leadsSearch, setLeadsSearch] = useState('');
+  const [leadsSort, setLeadsSort] = useState({ column: 'ngay_nhan', ascending: false });
+  
+  const [transactionsPage, setTransactionsPage] = useState(1);
+  const [transactionsTotal, setTransactionsTotal] = useState(0);
+  const [transSearch, setTransSearch] = useState('');
+  const [transSort, setTransSort] = useState({ column: 'ngay_gd', ascending: false });
+  
+  const [dashboardStats, setDashboardStats] = useState(null);
+  const itemsPerPage = 15;
+
+  // --- SERVER-SIDE FILTER HELPERS ---
+  const applyDateRange = (filter) => {
+    if (!filter || filter === 'all') return [null, null];
+    const [type, val] = filter.split(':');
+    let start, end;
+    
+    if (type === 'day') {
+      const [d, m, y] = val.split('/');
+      const dateStr = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+      start = `${dateStr}T00:00:00+07:00`;
+      end = `${dateStr}T23:59:59+07:00`;
+    } else if (type === 'month') {
+      const [m, y] = val.split('/');
+      const monthStr = m.padStart(2, '0');
+      const lastDay = new Date(parseInt(y), parseInt(m), 0).getDate();
+      start = `${y}-${monthStr}-01T00:00:00+07:00`;
+      end = `${y}-${monthStr}-${lastDay.toString().padStart(2, '0')}T23:59:59+07:00`;
+    } else if (type === 'quarter') {
+      const parts = val.split('/');
+      const quarterNum = parseInt(parts[0].replace('Q', ''));
+      const year = parts[1];
+      const startMonth = (quarterNum - 1) * 3 + 1;
+      const endMonth = quarterNum * 3;
+      const lastDay = new Date(parseInt(year), endMonth, 0).getDate();
+      start = `${year}-${startMonth.toString().padStart(2, '0')}-01T00:00:00+07:00`;
+      end = `${year}-${endMonth.toString().padStart(2, '0')}-${lastDay.toString().padStart(2, '0')}T23:59:59+07:00`;
+    } else if (type === 'year') {
+      start = `${val}-01-01T00:00:00+07:00`;
+      end = `${val}-12-31T23:59:59+07:00`;
+    }
+    return [start, end];
+  };
+
+  const applyDateFilter = (query, filter, dateColumn) => {
+    const [start, end] = applyDateRange(filter);
+    if (start && end) return query.gte(dateColumn, start).lte(dateColumn, end);
+    return query;
+  };
+
+  const fetchData = useCallback(async () => {
+    if (!currentUser) return;
+    setLoadingData(true);
+    try {
+      const [start, end] = applyDateRange(globalFilter);
+
+      // 1. Fetch Dashboard Stats (RPC)
+      const { data: statsData } = await supabase.rpc('get_dashboard_stats', {
+        p_start_date: start || '2000-01-01T00:00:00Z',
+        p_end_date: end || '2099-12-31T23:59:59Z',
+        p_role: currentUser.role,
+        p_ma_nv: currentUser.ma_nv || ''
+      });
+      setDashboardStats(statsData);
+
+      // 2. Fetch Static Data
+      const [empRes, mktListRes] = await Promise.all([
+        supabase.from('employees').select('*').order('ho_ten', { ascending: true }),
+        supabase.from('marketing_campaigns').select('*')
+      ]);
+
+      const employees = empRes.data || [];
+      const campaigns = mktListRes.data || [];
+      setStaff(employees.map(emp => ({
+        "Mã NV": emp.ma_nv,
+        "Tên NV": emp.ho_ten,
+        "Sàn": emp.phong_ban,
+        "Chức vụ": emp.chuc_vu || "",
+        "SĐT": emp.sdt ? (String(emp.sdt).startsWith('0') ? String(emp.sdt) : '0' + String(emp.sdt)) : "",
+        "Email": emp.email || "",
+        "Ngày vào làm": emp.ngay_vao_lam || "",
+        "Trạng thái": emp.trang_thai || "Active",
+        "Lương (VNĐ)": emp.luong || 0,
+        "Quản lý (Mã NV)": emp.quan_ly_id || "",
+        "_created_at": emp.created_at
+      })));
+
+      const getEmpName = (id) => employees.find(e => e.ma_nv == id)?.ho_ten || id || "";
+      const getCampaignName = (id) => campaigns.find(c => c.ma_chien_dich == id)?.ten_chien_dich || id || "";
+
+      // 3. Fetch Paginated Leads
+      let leadsQuery = supabase.from('leads').select('*', { count: 'exact' });
+      leadsQuery = applyDateFilter(leadsQuery, globalFilter, 'ngay_nhan');
+      if (!['Admin', 'BOD'].includes(currentUser.role)) leadsQuery = leadsQuery.eq('nhan_vien_id', currentUser.ma_nv);
+      if (leadsSearch) leadsQuery = leadsQuery.or(`ho_ten.ilike.%${leadsSearch}%,sdt.ilike.%${leadsSearch}%,ma_lead.ilike.%${leadsSearch}%`);
+
+      const leadsRange = [(leadsPage - 1) * itemsPerPage, leadsPage * itemsPerPage - 1];
+      const { data: dbLeads, count: leadsCount } = await leadsQuery
+        .range(leadsRange[0], leadsRange[1])
+        .order(leadsSort.column, { ascending: leadsSort.ascending });
+
+      if (dbLeads) {
+        setLeads(dbLeads.map(l => ({
+          "Mã lead": l.ma_lead || "CHƯA CÓ",
+          "Ngày nhận": l.ngay_nhan,
+          "Họ tên": l.ho_ten,
+          "SĐT (đầy đủ)": l.sdt,
+          "SĐT (ẩn)": l.sdt ? l.sdt.substring(0, l.sdt.length - 3) + "***" : "",
+          "Nguồn": l.nguon || "Khác",
+          "Chiến dịch": getCampaignName(l.chien_dich_id),
+          "_campaign_id": l.chien_dich_id,
+          "Nhu cầu": l.nhu_cau,
+          "Trạng thái": l.trang_thai,
+          "Sales phụ trách": getEmpName(l.nhan_vien_id),
+          "Mã NV": l.nhan_vien_id,
+          "_employee_id": l.nhan_vien_id || null,
+          "Tên sàn": l.ten_san || "Nội bộ",
+          "Ngày hẹn": l.ngay_hen,
+          "Ngày FU": l.ngay_fu,
+          "Ghi chú": l.ghi_chu,
+          "_created_at": l.created_at
+        })));
+        setLeadsTotal(leadsCount || 0);
+      }
+
+      // 4. Fetch Paginated Transactions
+      let transQuery = supabase.from('transactions').select('*', { count: 'exact' });
+      transQuery = applyDateFilter(transQuery, globalFilter, 'ngay_gd');
+      if (!['Admin', 'BOD', 'Kế toán'].includes(currentUser.role)) transQuery = transQuery.eq('nhan_vien_id', currentUser.ma_nv);
+      if (transSearch) transQuery = transQuery.or(`ma_gd.ilike.%${transSearch}%,ma_sp.ilike.%${transSearch}%,khach_hang_id.ilike.%${transSearch}%`);
+
+      const transRange = [(transactionsPage - 1) * itemsPerPage, transactionsPage * itemsPerPage - 1];
+      const { data: dbTrans, count: transCount } = await transQuery
+        .range(transRange[0], transRange[1])
+        .order(transSort.column, { ascending: transSort.ascending });
+
+      if (dbTrans) {
+        const leadIds = [...new Set(dbTrans.map(t => t.khach_hang_id).filter(Boolean))];
+        const { data: leadNames } = await supabase.from('leads').select('ma_lead, ho_ten').in('ma_lead', leadIds);
+        const getLeadName = (id) => leadNames?.find(l => l.ma_lead === id)?.ho_ten || id;
+
+        setTransactions(dbTrans.map(t => ({
+          "Mã GD": t.ma_gd,
+          "Ngày GD": t.ngay_gd,
+          "Mã SP": t.ma_sp,
+          "Phân khu": t.phan_khu,
+          "Giá (VNĐ)": t.gia,
+          "Tiền cọc": t.tien_coc,
+          "Hoa hồng": t.hoa_hong,
+          "Trạng thái": t.trang_thai,
+          "Ghi chú": t.ghi_chu,
+          "Sales": getEmpName(t.nhan_vien_id),
+          "Mã nhân viên": t.nhan_vien_id,
+          "Khách hàng": getLeadName(t.khach_hang_id),
+          "Mã Lead": t.khach_hang_id,
+          "_created_at": t.created_at
+        })));
+        setTransactionsTotal(transCount || 0);
+      }
+
+      // 5. Marketing & Financials
+      const [mktRes, finRes] = await Promise.all([
+        supabase.from('marketing_campaigns').select('*').order('created_at', { ascending: false }),
+        supabase.from('financial_records').select('*').order('thang', { ascending: false })
+      ]);
+
+      if (mktRes.data) {
+        setMarketing(mktRes.data.map(m => ({
+          "Tháng": m.thang, "Kênh": m.kenh, "Tên chiến dịch": m.ten_chien_dich,
+          "CP (tr)": m.chi_phi ? (m.chi_phi / 1000000).toFixed(1) : 0,
+          "Lead": m.so_lead, "Booking": m.so_booking, "Tỷ lệ CĐ": m.ty_le_chuyen_doi,
+          "CPL (tr)": m.chi_phi_moi_lead ? (m.chi_phi_moi_lead / 1000000).toFixed(1) : 0,
+          "CP/Book (tr)": m.chi_phi_moi_booking ? (m.chi_phi_moi_booking / 1000000).toFixed(1) : 0,
+          "Click": m.luot_click, "Ghi chú": m.ghi_chu, "_id": m.ma_chien_dich
+        })));
+      }
+
+      if (finRes.data) {
+        setFinancials(finRes.data.map(f => ({
+          "Tháng": f.thang, "Hạng mục": f.hang_muc, "Loại": f.loai,
+          "Thực tế (tỷ)": f.thuc_te ? (f.thuc_te / 1000000000).toFixed(2) : 0,
+          "KH (tỷ)": f.ke_hoach ? (f.ke_hoach / 1000000000).toFixed(2) : 0,
+          "% Hoàn thành": f.ty_le_hoan_thanh,
+          "Chênh lệch": f.chenh_lech ? (f.chenh_lech / 1000000000).toFixed(2) : 0,
+          "Ghi chú": f.ghi_chu, "Người duyệt": getEmpName(f.nguoi_duyet_id), "_approver_id": f.nguoi_duyet_id, "_id": f.ma_tc
+        })));
+      }
+
+      // 6. Sales Performance (Now uses Aggregated DS for all employees)
+      const { data: salesAgg } = await supabase.from('transactions').select('nhan_vien_id, gia');
+      const salesData = employees.map(emp => {
+        const initialSale = initialDb.sales.find(s => s["Tên NV"] === emp.ho_ten) || {};
+        const kpi = initialSale["KH DS (tỷ)"] || 10;
+        const totalSales = (salesAgg?.filter(t => t.nhan_vien_id === emp.ma_nv).reduce((sum, t) => sum + Number(t.gia || 0), 0) || 0) / 1000000000;
+        const pctKPI = kpi > 0 ? (totalSales / kpi) : 0;
+        return {
+          "Mã NV": emp.ma_nv, "Tên NV": emp.ho_ten, "Sàn": emp.phong_ban, "KH DS (tỷ)": kpi,
+          "Doanh số (tỷ)": totalSales.toFixed(2), "DS thực (tỷ)": totalSales.toFixed(2), "% KPI": pctKPI,
+          "XẾP LOẠI KPI": pctKPI >= 1 ? 'Xuất sắc' : pctKPI >= 0.8 ? 'Tốt' : 'Kém',
+          "Lương cứng (tr)": initialSale["Lương cứng (tr)"] || 5, "Gọi điện": initialSale["Gọi điện"] || 0,
+          "Site Visit": initialSale["Site Visit"] || 0, "KH Site Visit": initialSale["KH Site Visit"] || 5,
+          "HĐMB THỰC TẾ": initialSale["HĐMB THỰC TẾ"] || 0, "KH HĐMB": initialSale["KH HĐMB"] || 1,
+          "CỌC": initialSale["CỌC"] || 0, "KH CỌC": initialSale["KH CỌC"] || 2
+        };
+      }).filter(s => Number(s["Doanh số (tỷ)"]) > 0 || s["Sàn"] === 'Sales' || s["Sàn"] === 'Operations');
+      setSales(salesData);
+
+    } catch (error) {
+      console.error("Critical error in fetchData:", error);
+    } finally {
+      setLoadingData(false);
+    }
+  }, [globalFilter, leadsPage, leadsSearch, leadsSort, transactionsPage, transSearch, transSort, currentUser]);
+
+  const subscribeToTable = (tableName) => {
+    return supabase
+      .channel(`${tableName}-realtime`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: tableName }, (payload) => {
+        const userCode = currentUser?.ma_nv;
+        const isAdmin = ['Admin', 'BOD'].includes(currentUser?.role);
+        
+        let isRelevant = isAdmin;
+        if (!isRelevant && tableName === 'leads') {
+          isRelevant = payload.new?.nhan_vien_id === userCode || payload.old?.nhan_vien_id === userCode;
+        } else if (!isRelevant && tableName === 'transactions') {
+          isRelevant = payload.new?.nhan_vien_id === userCode || payload.old?.nhan_vien_id === userCode || currentUser?.role === 'Kế toán';
+        }
+
+        if (isRelevant) {
+          fetchData();
+        }
+      })
+      .subscribe();
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoadingData(true);
-      try {
-        // Fetch data including employees to map names
-        const [leadsRes, transRes, mktRes, finRes, empRes] = await Promise.all([
-          supabase.from('leads').select('*'),
-          supabase.from('transactions').select('*'),
-          supabase.from('marketing_campaigns').select('*'),
-          supabase.from('financial_records').select('*'),
-          supabase.from('employees').select('*')
-        ]);
-
-        const employees = empRes.data || [];
-        const campaigns = mktRes.data || [];
-
-        // Helper to find employee name (using new Vietnamese column names)
-        const getEmpName = (id) => {
-          if (!id) return "";
-          const emp = employees.find(e => e.ma_nv == id);
-          return emp ? emp.ho_ten : id;
-        };
-
-        // Helper to find campaign name
-        const getCampaignName = (id) => {
-          if (!id) return "";
-          const camp = campaigns.find(c => c.ma_chien_dich == id);
-          return camp ? camp.ten_chien_dich : id;
-        };
-
-        // Helper to find lead/customer name
-        const leadsData = leadsRes.data || [];
-        const getLeadName = (id) => {
-          if (!id) return "";
-          const lead = leadsData.find(l => l.ma_lead == id);
-          return lead ? lead.ho_ten : id;
-        };
-
-        if (leadsRes.data) {
-          setLeads(leadsRes.data.map(dbLead => ({
-            "Mã lead": dbLead.ma_lead || "CHƯA CÓ",
-            "Ngày nhận": dbLead.ngay_nhan,
-            "Họ tên": dbLead.ho_ten,
-            "SĐT (đầy đủ)": dbLead.sdt,
-            "SĐT (ẩn)": dbLead.sdt ? dbLead.sdt.substring(0, dbLead.sdt.length - 3) + "***" : "",
-            "Nguồn": dbLead.nguon || "Khác",
-            "Chiến dịch": getCampaignName(dbLead.chien_dich_id),
-            "_campaign_id": dbLead.chien_dich_id,
-            "Nhu cầu": dbLead.nhu_cau,
-            "Trạng thái": dbLead.trang_thai,
-            "Sales phụ trách": getEmpName(dbLead.nhan_vien_id),
-            "Mã NV": dbLead.nhan_vien_id,
-            "_employee_id": dbLead.nhan_vien_id || null, // Internal: used for RBAC filtering
-            "Tên sàn": dbLead.ten_san || "Nội bộ",
-            "Ngày hẹn": dbLead.ngay_hen,
-            "Ngày FU": dbLead.ngay_fu,
-            "Ghi chú": dbLead.ghi_chu,
-            "_created_at": dbLead.created_at
-          })));
+    const handleAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+        if (profile) {
+          setCurrentUser({
+            id: session.user.id,
+            email: session.user.email,
+            role: profile.role,
+            ma_nv: profile.employee_code
+          });
         }
-
-        if (transRes.data) {
-          setTransactions(transRes.data.map(dbTrans => ({
-            "Mã GD": dbTrans.ma_gd,
-            "Ngày GD": dbTrans.ngay_gd,
-            "Mã SP": dbTrans.ma_sp,
-            "Phân khu": dbTrans.phan_khu,
-            "Giá (VNĐ)": dbTrans.gia,
-            "Tiền cọc": dbTrans.tien_coc,
-            "Hoa hồng": dbTrans.hoa_hong,
-            "Trạng thái": dbTrans.trang_thai,
-            "Ghi chú": dbTrans.ghi_chu,
-            "Sales": getEmpName(dbTrans.nhan_vien_id),
-            "Mã nhân viên": dbTrans.nhan_vien_id,
-            "Khách hàng": getLeadName(dbTrans.khach_hang_id),
-            "Mã Lead": dbTrans.khach_hang_id,
-            "_created_at": dbTrans.created_at
-          })));
-        }
-
-        if (mktRes.data) {
-          setMarketing(mktRes.data.map(dbMkt => ({
-            "Tháng": dbMkt.thang,
-            "Kênh": dbMkt.kenh,
-            "Tên chiến dịch": dbMkt.ten_chien_dich,
-            "CP (tr)": dbMkt.chi_phi ? (dbMkt.chi_phi / 1000000).toFixed(1) : 0,
-            "Lead": dbMkt.so_lead,
-            "Booking": dbMkt.so_booking,
-            "Tỷ lệ CĐ": dbMkt.ty_le_chuyen_doi,
-            "CPL (tr)": dbMkt.chi_phi_moi_lead ? (dbMkt.chi_phi_moi_lead / 1000000).toFixed(1) : 0,
-            "CP/Book (tr)": dbMkt.chi_phi_moi_booking ? (dbMkt.chi_phi_moi_booking / 1000000).toFixed(1) : 0,
-            "Click": dbMkt.luot_click,
-            "Ghi chú": dbMkt.ghi_chu,
-            "_id": dbMkt.ma_chien_dich,
-            "_created_at": dbMkt.created_at
-          })));
-        }
-
-        if (finRes.data) {
-          setFinancials(finRes.data.map(dbFin => ({
-            "Tháng": dbFin.thang,
-            "Hạng mục": dbFin.hang_muc,
-            "Loại": dbFin.loai,
-            "Thực tế (tỷ)": dbFin.thuc_te ? (dbFin.thuc_te / 1000000000).toFixed(2) : 0,
-            "KH (tỷ)": dbFin.ke_hoach ? (dbFin.ke_hoach / 1000000000).toFixed(2) : 0,
-            "% Hoàn thành": dbFin.ty_le_hoan_thanh,
-            "Chênh lệch": dbFin.chenh_lech ? (dbFin.chenh_lech / 1000000000).toFixed(2) : 0,
-            "Ghi chú": dbFin.ghi_chu,
-            "Người duyệt": getEmpName(dbFin.nguoi_duyet_id),
-            "_approver_id": dbFin.nguoi_duyet_id,
-            "_id": dbFin.ma_tc,
-            "_created_at": dbFin.created_at
-          })));
-        }
-
-        // Map and set staff from employees
-        if (empRes.data) {
-          setStaff(empRes.data.map(emp => ({
-            "Mã NV": emp.ma_nv,
-            "Tên NV": emp.ho_ten,
-            "Sàn": emp.phong_ban,
-            "Chức vụ": emp.chuc_vu || "",
-            "SĐT": emp.sdt ? (String(emp.sdt).startsWith('0') ? String(emp.sdt) : '0' + String(emp.sdt)) : "",
-            "Email": emp.email || "",
-            "Ngày vào làm": emp.ngay_vao_lam || "",
-            "Trạng thái": emp.trang_thai || "Active",
-            "Lương (VNĐ)": emp.luong || 0,
-            "Quản lý (Mã NV)": emp.quan_ly_id || "",
-            "_created_at": emp.created_at
-          })));
-
-          // Dynamically calculate sales from employees
-          const salesData = empRes.data.map(emp => {
-            const initialSale = initialDb.sales.find(s => s["Tên NV"] === emp.ho_ten) || {};
-            const kpi = initialSale["KH DS (tỷ)"] || 10; // Default 10 tỷ
-            const empTrans = transRes.data ? transRes.data.filter(t => t.nhan_vien_id === emp.ma_nv) : [];
-            const totalSales = empTrans.reduce((sum, t) => sum + Number(t.gia || 0), 0) / 1000000000;
-            const pctKPI = kpi > 0 ? (totalSales / kpi) : 0;
-            let rating = 'Kém';
-            if (pctKPI >= 1) rating = 'Xuất sắc';
-            else if (pctKPI >= 0.8) rating = 'Tốt';
-
-            return {
-              "Mã NV": emp.ma_nv,
-              "Tên NV": emp.ho_ten,
-              "Sàn": emp.phong_ban,
-              "KH DS (tỷ)": kpi,
-              "Doanh số (tỷ)": totalSales.toFixed(2),
-              "DS thực (tỷ)": totalSales.toFixed(2),
-              "% KPI": pctKPI,
-              "XẾP LOẠI KPI": rating,
-              "Lương cứng (tr)": initialSale["Lương cứng (tr)"] || 5,
-              "Gọi điện": initialSale["Gọi điện"] || Math.floor(Math.random() * 50),
-              "Site Visit": initialSale["Site Visit"] || 0,
-              "KH Site Visit": initialSale["KH Site Visit"] || 5,
-              "HĐMB THỰC TẾ": initialSale["HĐMB THỰC TẾ"] || 0,
-              "KH HĐMB": initialSale["KH HĐMB"] || 1,
-              "CỌC": initialSale["CỌC"] || 0,
-              "KH CỌC": initialSale["KH CỌC"] || 2
-            };
-          }).filter(s => s["Doanh số (tỷ)"] > 0 || s["Sàn"] === 'Sales' || s["Sàn"] === 'Operations');
-          
-          setSales(salesData);
-        }
-      } catch (error) {
-        console.error("Error fetching data from Supabase:", error);
-      }
-
-      // Determine current user and role
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session && session.user && empRes?.data) {
-          const userEmail = session.user.email;
-          const userEmp = empRes.data.find(emp => emp.email === userEmail);
-          
-          let role = 'Admin';
-          if (userEmp) {
-             const dept = userEmp.phong_ban || '';
-             if (dept.includes('BOD') || dept.includes('Admin')) role = 'Admin';
-             else if (dept.includes('Sales') || dept.includes('Sàn')) role = 'Sales';
-             else if (dept.includes('Marketing')) role = 'Marketing';
-             else if (dept.includes('Kế toán') || dept.includes('Finance')) role = 'Kế toán';
-             else if (dept.includes('HR') || dept.includes('Nhân sự')) role = 'HR';
-             else role = dept || 'User';
-          }
-          
-          setCurrentUser({ ...(userEmp || {}), id: userEmp?.ma_nv, email: userEmail, role });
-        } else {
-          setCurrentUser({ role: 'Admin' }); // Default role for local testing or unrecognized users
-        }
-      } catch (error) {
-        console.error("Error setting current user:", error);
+      } else {
         setCurrentUser({ role: 'Admin' });
       }
-
-      setLoadingData(false);
     };
 
-    // First check if session exists right now
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        fetchData();
-      } else {
-        setLoadingData(false);
-      }
-    });
+    handleAuth();
 
-    // Listen for login/logout events
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        fetchData();
-      } else {
-        // Clear data on logout
+    const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN') handleAuth();
+      if (event === 'SIGNED_OUT') {
+        setCurrentUser(null);
         setLeads([]);
         setTransactions([]);
-        setMarketing([]);
-        setFinancials([]);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      authSub.unsubscribe();
+    };
   }, []);
 
-  // --- MUTATION FUNCTIONS (Supabase Sync) ---
+  useEffect(() => {
+    if (currentUser) {
+      fetchData();
+    }
+  }, [fetchData]);
 
+  useEffect(() => {
+    let leadSub, transSub;
+    if (currentUser) {
+      leadSub = subscribeToTable('leads');
+      transSub = subscribeToTable('transactions');
+    }
+    return () => {
+      leadSub?.unsubscribe();
+      transSub?.unsubscribe();
+    };
+  }, [currentUser]);
+
+  // --- MUTATION FUNCTIONS (Supabase Sync) ---
   const addLead = async (newLead) => {
     const dbLead = {
       ma_lead: newLead["Mã lead"],
@@ -250,7 +316,7 @@ export const DataProvider = ({ children }) => {
       ho_ten: newLead["Họ tên"],
       sdt: newLead["SĐT (đầy đủ)"],
       nguon: newLead["Nguồn"],
-      chien_dich_id: newLead["_campaign_id"] || null, // Map from campaign name if needed
+      chien_dich_id: newLead["_campaign_id"] || null,
       nhu_cau: newLead["Nhu cầu"],
       trang_thai: newLead["Trạng thái"],
       nhan_vien_id: newLead["Mã NV"] || null,
@@ -259,18 +325,8 @@ export const DataProvider = ({ children }) => {
       ngay_fu: newLead["Ngày FU"] || null,
       ghi_chu: newLead["Ghi chú"]
     };
-
-    if (currentUser?.name) {
-      await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
-    }
-
     const { error } = await supabase.from('leads').insert([dbLead]);
-    if (!error) {
-      setLeads(prev => [newLead, ...prev]);
-    } else {
-      console.error("Error adding lead:", error);
-      alert("Lỗi khi thêm Lead: " + error.message);
-    }
+    if (error) { alert("Lỗi: " + error.message); } else { fetchData(); }
   };
 
   const editLead = async (updatedLead) => {
@@ -287,20 +343,8 @@ export const DataProvider = ({ children }) => {
       ngay_fu: updatedLead["Ngày FU"] || null,
       ghi_chu: updatedLead["Ghi chú"]
     };
-
-    if (currentUser?.name) {
-      await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
-    }
-
     const { error } = await supabase.from('leads').update(dbLead).eq('ma_lead', updatedLead["Mã lead"]);
-    if (!error) {
-      setLeads(prev => prev.map(l => 
-        l['Mã lead'] === updatedLead['Mã lead'] ? updatedLead : l
-      ));
-    } else {
-      console.error("Error editing lead:", error);
-      alert("Lỗi khi cập nhật Lead: " + error.message);
-    }
+    if (error) { alert("Lỗi: " + error.message); } else { fetchData(); }
   };
 
   const addMultipleLeads = async (newLeadsArray) => {
@@ -319,43 +363,19 @@ export const DataProvider = ({ children }) => {
       ngay_fu: l["Ngày FU"] || null,
       ghi_chu: l["Ghi chú"]
     }));
-
     const { error } = await supabase.from('leads').upsert(dbLeads);
-    if (!error) {
-      setLeads(prevLeads => {
-        let updatedLeads = [...prevLeads];
-        newLeadsArray.forEach(newLead => {
-          const existingIndex = updatedLeads.findIndex(l => l['Mã lead'] === newLead['Mã lead']);
-          if (existingIndex !== -1) {
-            updatedLeads[existingIndex] = newLead;
-          } else {
-            updatedLeads.unshift(newLead);
-          }
-        });
-        return updatedLeads;
-      });
-    } else {
-      console.error("Error batch adding leads:", error);
-      alert("Lỗi khi nhập dữ liệu Lead: " + error.message);
-    }
+    if (error) { alert("Lỗi: " + error.message); } else { fetchData(); }
   };
 
   const updateLeads = async (updatedLeadsArray) => {
-    // This is used for "Distribute Leads" which updates multiple records
     const dbLeads = updatedLeadsArray.map(l => ({
       ma_lead: l["Mã lead"],
-      nhan_vien_id: l["_employee_id"] || l["Mã NV"], // Use internal ID if available
+      nhan_vien_id: l["_employee_id"] || l["Mã NV"],
       trang_thai: l["Trạng thái"],
       ghi_chu: l["Ghi chú"]
     }));
-
     const { error } = await supabase.from('leads').upsert(dbLeads);
-    if (!error) {
-      setLeads(updatedLeadsArray);
-    } else {
-      console.error("Error updating leads:", error);
-      alert("Lỗi khi cập nhật danh sách Lead: " + error.message);
-    }
+    if (error) { alert("Lỗi: " + error.message); } else { fetchData(); }
   };
 
   const addTransaction = async (newTransaction) => {
@@ -372,18 +392,8 @@ export const DataProvider = ({ children }) => {
       trang_thai: newTransaction["Trạng thái"],
       ghi_chu: newTransaction["Ghi chú"]
     };
-
-    if (currentUser?.name) {
-      await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
-    }
-
     const { error } = await supabase.from('transactions').insert([dbTrans]);
-    if (!error) {
-      setTransactions(prev => [newTransaction, ...prev]);
-    } else {
-      console.error("Error adding transaction:", error);
-      alert("Lỗi khi thêm giao dịch: " + error.message);
-    }
+    if (error) { alert("Lỗi: " + error.message); } else { fetchData(); }
   };
 
   const editTransaction = async (updatedTransaction) => {
@@ -399,25 +409,13 @@ export const DataProvider = ({ children }) => {
       trang_thai: updatedTransaction["Trạng thái"],
       ghi_chu: updatedTransaction["Ghi chú"]
     };
-
-    if (currentUser?.name) {
-      await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
-    }
-
     const { error } = await supabase.from('transactions').update(dbTrans).eq('ma_gd', updatedTransaction["Mã GD"]);
-    if (!error) {
-      setTransactions(prev => prev.map(t => 
-        t['Mã GD'] === updatedTransaction['Mã GD'] ? updatedTransaction : t
-      ));
-    } else {
-      console.error("Error editing transaction:", error);
-      alert("Lỗi khi cập nhật giao dịch: " + error.message);
-    }
+    if (error) { alert("Lỗi: " + error.message); } else { fetchData(); }
   };
 
   const addMarketing = async (newMarketing) => {
     const dbMkt = {
-      ma_chien_dich: newMarketing["Tên chiến dịch"], // Assuming name is ID if no ID provided
+      ma_chien_dich: newMarketing["Tên chiến dịch"],
       thang: newMarketing["Tháng"],
       kenh: newMarketing["Kênh"],
       ten_chien_dich: newMarketing["Tên chiến dịch"],
@@ -430,17 +428,8 @@ export const DataProvider = ({ children }) => {
       luot_click: Number(newMarketing["Click"]),
       ghi_chu: newMarketing["Ghi chú"]
     };
-
-    if (currentUser?.name) {
-      await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
-    }
-
     const { error } = await supabase.from('marketing_campaigns').insert([dbMkt]);
-    if (!error) {
-      setMarketing(prev => [newMarketing, ...prev]);
-    } else {
-      console.error("Error adding marketing:", error);
-    }
+    if (!error) fetchData();
   };
 
   const editMarketing = async (updatedMarketing) => {
@@ -457,20 +446,8 @@ export const DataProvider = ({ children }) => {
       luot_click: Number(updatedMarketing["Click"]),
       ghi_chu: updatedMarketing["Ghi chú"]
     };
-
-    if (currentUser?.name) {
-      await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
-    }
-
-    const { error } = await supabase.from('marketing_campaigns').update(dbMkt).eq('ma_chien_dich', updatedMarketing["_id"] || updatedMarketing["Tên chiến dịch"]);
-    if (!error) {
-      setMarketing(prev => prev.map(m => 
-        m['_id'] === updatedMarketing['_id'] ? updatedMarketing : m
-      ));
-    } else {
-      console.error("Error editing marketing:", error);
-      alert("Lỗi khi cập nhật chiến dịch: " + error.message);
-    }
+    const { error } = await supabase.from('marketing_campaigns').update(dbMkt).eq('ma_chien_dich', updatedMarketing["_id"]);
+    if (!error) fetchData();
   };
 
   const addFinancial = async (newFinancial) => {
@@ -485,17 +462,8 @@ export const DataProvider = ({ children }) => {
       ghi_chu: newFinancial["Ghi chú"],
       nguoi_duyet_id: newFinancial["_approver_id"]
     };
-
-    if (currentUser?.name) {
-      await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
-    }
-
     const { error } = await supabase.from('financial_records').insert([dbFin]);
-    if (!error) {
-      setFinancials(prev => [newFinancial, ...prev]);
-    } else {
-      console.error("Error adding financial:", error);
-    }
+    if (!error) fetchData();
   };
 
   const editFinancial = async (updatedFinancial) => {
@@ -508,21 +476,8 @@ export const DataProvider = ({ children }) => {
       ghi_chu: updatedFinancial["Ghi chú"],
       nguoi_duyet_id: updatedFinancial["_approver_id"]
     };
-
-    if (currentUser?.name) {
-      await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
-    }
-
-    const { error } = await supabase.from('financial_records').update(dbFin).eq('ma_tc', updatedFinancial["_id"] || "");
-    
-    if (!error) {
-      setFinancials(prev => prev.map(f => 
-        f['_id'] === updatedFinancial['_id'] ? updatedFinancial : f
-      ));
-    } else {
-      console.error("Error editing financial:", error);
-      alert("Lỗi khi cập nhật tài chính: " + error.message);
-    }
+    const { error } = await supabase.from('financial_records').update(dbFin).eq('ma_tc', updatedFinancial["_id"]);
+    if (!error) fetchData();
   };
 
   const addStaff = async (newStaff) => {
@@ -538,18 +493,8 @@ export const DataProvider = ({ children }) => {
       luong: Number(newStaff["Lương (VNĐ)"]),
       quan_ly_id: newStaff["Quản lý (Mã NV)"]
     };
-
-    if (currentUser?.name) {
-      await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
-    }
-
     const { error } = await supabase.from('employees').insert([dbStaff]);
-    if (!error) {
-      setStaff(prev => [newStaff, ...prev]);
-    } else {
-      console.error("Error adding staff:", error);
-      alert("Lỗi khi thêm nhân viên: " + error.message);
-    }
+    if (error) { alert("Lỗi: " + error.message); } else { fetchData(); }
   };
 
   const editStaff = async (updatedStaff) => {
@@ -564,171 +509,55 @@ export const DataProvider = ({ children }) => {
       luong: Number(updatedStaff["Lương (VNĐ)"]),
       quan_ly_id: updatedStaff["Quản lý (Mã NV)"]
     };
-
-    if (currentUser?.name) {
-      await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
-    }
-
     const { error } = await supabase.from('employees').update(dbStaff).eq('ma_nv', updatedStaff["Mã NV"]);
-    if (!error) {
-      setStaff(prev => prev.map(s => 
-        s['Mã NV'] === updatedStaff['Mã NV'] ? updatedStaff : s
-      ));
-    } else {
-      console.error("Error editing staff:", error);
-      alert("Lỗi khi cập nhật nhân viên: " + error.message);
-    }
+    if (error) { alert("Lỗi: " + error.message); } else { fetchData(); }
   };
 
   const deleteLead = async (id) => {
-    if (currentUser?.name) {
-      await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
-    }
-
     const { error } = await supabase.from('leads').delete().eq('ma_lead', id);
-    if (!error) {
-      setLeads(prev => prev.filter(l => l['Mã lead'] !== id));
-    } else {
-      console.error("Error deleting lead:", error);
-      alert("Lỗi khi xóa Lead: " + error.message);
-    }
+    if (!error) fetchData();
   };
 
   const deleteTransaction = async (id) => {
-    if (currentUser?.name) {
-      await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
-    }
-
     const { error } = await supabase.from('transactions').delete().eq('ma_gd', id);
-    if (!error) {
-      setTransactions(prev => prev.filter(t => t['Mã GD'] !== id));
-    } else {
-      console.error("Error deleting transaction:", error);
-      alert("Lỗi khi xóa giao dịch: " + error.message);
-    }
+    if (!error) fetchData();
   };
 
   const deleteStaff = async (id) => {
-    if (currentUser?.name) {
-      await supabase.rpc('set_current_user_name', { user_name: currentUser.name });
-    }
-
     const { error } = await supabase.from('employees').delete().eq('ma_nv', id);
-    if (!error) {
-      setStaff(prev => prev.filter(s => s['Mã NV'] !== id));
-    } else {
-      console.error("Error deleting staff:", error);
-      alert("Lỗi khi xóa nhân viên: " + error.message);
-    }
+    if (!error) fetchData();
   };
 
   const deleteMarketing = async (id) => {
     const { error } = await supabase.from('marketing_campaigns').delete().eq('ma_chien_dich', id);
-    if (!error) {
-      setMarketing(prev => prev.filter(m => m['_id'] !== id));
-    } else {
-      console.error("Error deleting marketing:", error);
-    }
+    if (!error) fetchData();
   };
 
   const deleteFinancial = async (id) => {
     const { error } = await supabase.from('financial_records').delete().eq('ma_tc', id);
-    if (!error) {
-      setFinancials(prev => prev.filter(f => f['_id'] !== id));
-    } else {
-      console.error("Error deleting financial:", error);
-    }
+    if (!error) fetchData();
   };
-
-  // --- FILTERING LOGIC ---
-  const parseDate = (item, type) => {
-    let dateStr = null;
-    if (type === 'lead') {
-      dateStr = item['Ngày nhận'];
-      if (!dateStr) return null;
-      return new Date(dateStr);
-    } else if (type === 'transaction') {
-      dateStr = item['Ngày GD'];
-      if (!dateStr) return null;
-      if (dateStr.includes('/')) {
-         const parts = dateStr.split('/');
-         if (parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]);
-      }
-      return new Date(dateStr);
-    } else if (type === 'marketing' || type === 'financial') {
-      dateStr = item['Tháng'];
-      if (!dateStr) return null;
-      if (dateStr.includes('/')) {
-         const parts = dateStr.split('/');
-         if (parts.length === 2) return new Date(parts[1], parts[0] - 1, 1);
-      }
-      return new Date(dateStr);
-    }
-    return null;
-  };
-
-  const checkFilter = (item, type) => {
-    if (globalFilter === 'all') return true;
-    
-    const d = parseDate(item, type);
-    if (!d || isNaN(d)) return true; // Include items without valid dates
-
-    const day = d.getDate();
-    const m = d.getMonth() + 1; // 1-12
-    const y = d.getFullYear();
-    const q = Math.ceil(m / 3); // 1-4
-
-    const [fType, fValue] = globalFilter.split(':');
-    
-    if (fType === 'day') {
-       const [fd, fm, fy] = fValue.split('/');
-       if (type === 'marketing' || type === 'financial') {
-         // Marketing & Financials only have month data, so match the month
-         return m === Number(fm) && y === Number(fy);
-       }
-       return day === Number(fd) && m === Number(fm) && y === Number(fy);
-    } else if (fType === 'month') {
-       const [fm, fy] = fValue.split('/');
-       return m === Number(fm) && y === Number(fy);
-    } else if (fType === 'quarter') {
-       const fq = Number(fValue.charAt(1));
-       const fy = Number(fValue.split('/')[1]);
-       return q === fq && y === fy;
-    } else if (fType === 'year') {
-       return y === Number(fValue);
-    }
-    return true;
-  };
-
-  const leads = allLeads.filter(l => {
-    if (!checkFilter(l, 'lead')) return false;
-    if (currentUser?.role === 'Sales' && currentUser?.id) {
-      return l['_employee_id'] === currentUser.id;
-    }
-    return true;
-  });
-  
-  const transactions = allTransactions.filter(t => {
-    if (!checkFilter(t, 'transaction')) return false;
-    if (currentUser?.role === 'Sales' && currentUser?.id) {
-      return t['Mã nhân viên'] === currentUser.id;
-    }
-    return true;
-  });
-  const marketing = allMarketing.filter(m => checkFilter(m, 'marketing'));
-  const financials = allFinancials.filter(f => checkFilter(f, 'financial'));
 
   return (
     <DataContext.Provider value={{
       globalFilter, setGlobalFilter,
-      leads, addLead, editLead, deleteLead, addMultipleLeads, updateLeads,
-      transactions, addTransaction, editTransaction, deleteTransaction,
-      marketing, addMarketing, editMarketing, deleteMarketing,
-      financials, addFinancial, editFinancial, deleteFinancial,
+      leads: allLeads,
+      transactions: allTransactions,
+      marketing: allMarketing,
+      financials: allFinancials,
       sales,
-      staff, addStaff, editStaff, deleteStaff,
+      staff,
       loadingData,
-      currentUser
+      currentUser,
+      leadsPage, setLeadsPage, leadsTotal, leadsSearch, setLeadsSearch, leadsSort, setLeadsSort,
+      transactionsPage, setTransactionsPage, transactionsTotal, transSearch, setTransSearch, transSort, setTransSort,
+      dashboardStats, itemsPerPage,
+      addLead, editLead, deleteLead, addMultipleLeads, updateLeads,
+      addTransaction, editTransaction, deleteTransaction,
+      addMarketing, editMarketing, deleteMarketing,
+      addFinancial, editFinancial, deleteFinancial,
+      addStaff, editStaff, deleteStaff,
+      refreshData: () => fetchData()
     }}>
       {children}
     </DataContext.Provider>

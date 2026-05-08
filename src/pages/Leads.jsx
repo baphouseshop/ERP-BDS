@@ -3,79 +3,62 @@ import * as XLSX from 'xlsx';
 import { useData } from '../context/DataContext';
 
 function Leads() {
-  const { leads, marketing, addLead, editLead, deleteLead, addMultipleLeads, updateLeads, sales, staff } = useData();
+  const { 
+    leads, 
+    leadsTotal, 
+    leadsPage, 
+    setLeadsPage, 
+    leadsSearch,
+    setLeadsSearch,
+    leadsSort,
+    setLeadsSort,
+    itemsPerPage,
+    marketing, 
+    addLead, 
+    editLead, 
+    deleteLead, 
+    addMultipleLeads, 
+    updateLeads, 
+    sales, 
+    staff 
+  } = useData();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [duplicateWarning, setDuplicateWarning] = useState(null);
   const fileInputRef = useRef(null);
 
   // --- FILTER STATE ---
-  const [searchText, setSearchText] = useState('');
+  // --- FILTER STATE ---
   const [filterStatus, setFilterStatus] = useState('');
   const [filterSource, setFilterSource] = useState('');
   const [filterAgency, setFilterAgency] = useState('');
   const [filterSales, setFilterSales] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 15;
-  const [sortConfig, setSortConfig] = useState({ key: '_created_at', direction: 'desc' });
+  const [currentPage, setCurrentPage] = useState(leadsPage);
 
-  // Unique values for dropdowns
+  // Unique values - ideally these should come from server, but using local slice as fallback
   const uniqueStatuses = [...new Set(leads.map(l => l['Trạng thái']).filter(Boolean))];
   const uniqueSources = [...new Set(leads.map(l => l['Nguồn']).filter(Boolean))];
   const uniqueAgencies = [...new Set(leads.map(l => l['Tên sàn']).filter(Boolean))];
   const uniqueSalesNames = [...new Set(leads.map(l => l['Sales phụ trách']).filter(Boolean))];
 
-  // Apply filters
-  const filteredLeads = leads.filter(l => {
-    const text = searchText.toLowerCase().trim();
-    if (text && !(
-      String(l['Mã lead'] || '').toLowerCase().includes(text) ||
-      String(l['Họ tên'] || '').toLowerCase().includes(text) ||
-      String(l['SĐT (đầy đủ)'] || '').includes(text) ||
-      String(l['SĐT (ẩn)'] || '').includes(text) ||
-      String(l['Sales phụ trách'] || '').toLowerCase().includes(text) ||
-      String(l['_employee_id'] || '').toLowerCase().includes(text)
-    )) return false;
-    if (filterStatus && l['Trạng thái'] !== filterStatus) return false;
-    if (filterSource && l['Nguồn'] !== filterSource) return false;
-    if (filterAgency && l['Tên sàn'] !== filterAgency) return false;
-    if (filterSales && l['Sales phụ trách'] !== filterSales) return false;
-    return true;
-  }).sort((a, b) => {
-    if (!sortConfig.key) return 0;
-    
-    let aValue = a[sortConfig.key];
-    let bValue = b[sortConfig.key];
-
-    // Handle date sorting
-    if (['_created_at', 'Ngày nhận', 'Ngày FU', 'Ngày hẹn', 'Lần cập nhật cuối'].includes(sortConfig.key)) {
-      aValue = aValue ? new Date(aValue).getTime() : 0;
-      bValue = bValue ? new Date(bValue).getTime() : 0;
-    } else {
-      aValue = String(aValue || '').toLowerCase();
-      bValue = String(bValue || '').toLowerCase();
-    }
-
-    if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-    if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
-    return 0;
-  });
-
   const handleSort = (key) => {
-    let direction = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
-    setSortConfig({ key, direction });
+    // Map UI keys to DB columns
+    const keyMap = { 
+      'Mã lead': 'ma_lead', 'Họ tên': 'ho_ten', 'SĐT (đầy đủ)': 'sdt', 
+      'Ngày nhận': 'ngay_nhan', 'Trạng thái': 'trang_thai' 
+    };
+    const dbKey = keyMap[key] || 'ngay_nhan';
+    setLeadsSort({ column: dbKey, ascending: leadsSort.column === dbKey ? !leadsSort.ascending : false });
   };
 
   // Pagination Logic
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentLeads = filteredLeads.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredLeads.length / itemsPerPage);
+  const currentLeads = leads; // Already paginated from server
+  const totalPages = Math.ceil(leadsTotal / itemsPerPage);
 
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const paginate = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    setLeadsPage(pageNumber);
+  };
 
   const hasActiveFilters = searchText || filterStatus || filterSource || filterAgency || filterSales;
   const clearFilters = () => { setSearchText(''); setFilterStatus(''); setFilterSource(''); setFilterAgency(''); setFilterSales(''); };
@@ -356,7 +339,7 @@ function Leads() {
 
       {/* FILTER BAR */}
       <div className="filter-bar">
-        <input className="filter-input" placeholder="🔍 Tìm tên, SĐT, mã lead, mã NV..." value={searchText} onChange={e => setSearchText(e.target.value)} />
+        <input className="filter-input" placeholder="🔍 Tìm tên, SĐT, mã lead, mã NV..." value={leadsSearch} onChange={e => { setLeadsSearch(e.target.value); setLeadsPage(1); }} />
         <select className="filter-select" value={filterSales} onChange={e => setFilterSales(e.target.value)}>
           <option value="">-- Sales --</option>
           {uniqueSalesNames.map(s => <option key={s} value={s}>{s}</option>)}
@@ -374,7 +357,7 @@ function Leads() {
           {uniqueAgencies.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
         {hasActiveFilters && <button className="btn-clear-filter" onClick={clearFilters}>✕ Xóa lọc</button>}
-        <span className="filter-count">Hiển thị <strong>{filteredLeads.length}</strong>/{leads.length}</span>
+        <span className="filter-count">Tổng cộng: <strong>{leadsTotal}</strong> lead</span>
       </div>
 
       <div className="table-container">
@@ -383,7 +366,7 @@ function Leads() {
             <tr>
               <th>Thao tác</th>
               <th onClick={() => handleSort('Mã lead')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                Mã Lead {sortConfig.key === 'Mã lead' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
+                 Mã Lead {leadsSort.column === 'ma_lead' ? (leadsSort.ascending ? '🔼' : '🔽') : '↕️'}
               </th>
               <th onClick={() => handleSort('Họ tên')} style={{ cursor: 'pointer', userSelect: 'none' }}>
                 Họ Tên {sortConfig.key === 'Họ tên' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
