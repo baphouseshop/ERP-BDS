@@ -422,12 +422,16 @@ export const DataProvider = ({ children }) => {
       ngay_fu: l["Ngày FU"] || null,
       ghi_chu: l["Ghi chú"]
     }));
+    // Optimistic Update
+    setLeads(prev => [...newLeadsArray, ...prev]);
+    setLeadsTotal(prev => prev + newLeadsArray.length);
+
     const { error } = await supabase.from('leads').upsert(dbLeads);
+    
     if (error) { 
       alert("Lỗi: " + error.message); 
-    } else { 
-      setLeads(prev => [...newLeadsArray, ...prev]);
-      setLeadsTotal(prev => prev + newLeadsArray.length);
+      // Rollback
+      fetchData(); // Simplest way to sync back to DB state on error
     }
   }, []);
 
@@ -438,14 +442,18 @@ export const DataProvider = ({ children }) => {
       trang_thai: l["Trạng thái"],
       ghi_chu: l["Ghi chú"]
     }));
+    // Optimistic Update
+    setLeads(prev => prev.map(l => {
+      const up = updatedLeadsArray.find(u => u["Mã lead"] === l["Mã lead"]);
+      return up ? { ...l, ...up } : l;
+    }));
+
     const { error } = await supabase.from('leads').upsert(dbLeads);
+    
     if (error) { 
       alert("Lỗi: " + error.message); 
-    } else { 
-      setLeads(prev => prev.map(l => {
-        const up = updatedLeadsArray.find(u => u["Mã lead"] === l["Mã lead"]);
-        return up ? { ...l, ...up } : l;
-      }));
+      // Rollback
+      fetchData();
     }
   }, []);
 
