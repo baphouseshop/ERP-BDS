@@ -12,7 +12,7 @@ function Staff() {
   const [filterStatusF, setFilterStatusF] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
-  const [sortConfig, setSortConfig] = useState({ key: '_created_at', direction: 'desc' });
+  const [sortConfig, setSortConfig] = useState({ key: 'Mã NV', direction: 'asc' });
 
   const uniqueDepts = [...new Set(staff.map(s => s['Sàn']).filter(Boolean))];
   const uniqueStatuses = [...new Set(staff.map(s => s['Trạng thái']).filter(Boolean))];
@@ -36,7 +36,7 @@ function Staff() {
     let bValue = b[sortConfig.key];
 
     // Handle date sorting
-    if (['_created_at', 'Ngày vào làm'].includes(sortConfig.key)) {
+    if (['Mã NV', 'Ngày vào làm'].includes(sortConfig.key)) {
       aValue = aValue ? new Date(aValue).getTime() : 0;
       bValue = bValue ? new Date(bValue).getTime() : 0;
     } else if (['Lương (VNĐ)'].includes(sortConfig.key)) {
@@ -158,8 +158,8 @@ function Staff() {
               setSortConfig({ key, direction: dir });
             }}
           >
-            <option value="_created_at-desc">Mới nhất lên đầu</option>
-            <option value="_created_at-asc">Cũ nhất lên đầu</option>
+            <option value="Mã NV-asc">Mã NV (Tăng dần)</option>
+            <option value="Mã NV-desc">Mã NV (Giảm dần)</option>
             <option value="Tên NV-asc">Họ tên (A-Z)</option>
             <option value="Tên NV-desc">Họ tên (Z-A)</option>
             <option value="Mã NV-asc">Mã NV (Tăng dần)</option>

@@ -71,7 +71,7 @@ function Financials() {
   const [searchText, setSearchText] = useState('');
   const [filterType, setFilterType] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
-  const [sortConfig, setSortConfig] = useState({ key: '_created_at', direction: 'desc' });
+  const [sortConfig, setSortConfig] = useState({ key: 'Tháng', direction: 'desc' });
   const [formData, setFormData] = useState({
     'Tháng': new Date().toISOString().slice(0, 7),
     'Hạng mục': '',
@@ -238,7 +238,7 @@ function Financials() {
     let aValue = a[sortConfig.key];
     let bValue = b[sortConfig.key];
 
-    if (sortConfig.key === '_created_at') {
+    if (sortConfig.key === 'Tháng') {
       aValue = aValue ? new Date(aValue).getTime() : 0;
       bValue = bValue ? new Date(bValue).getTime() : 0;
     } else {
@@ -275,8 +275,8 @@ function Financials() {
               setSortConfig({ key, direction: dir });
             }}
           >
-            <option value="_created_at-desc">Mới nhất lên đầu</option>
-            <option value="_created_at-asc">Cũ nhất lên đầu</option>
+            <option value="Tháng-desc">Mới nhất lên đầu</option>
+            <option value="Tháng-asc">Cũ nhất lên đầu</option>
             <option value="Hạng mục-asc">Hạng mục (A-Z)</option>
             <option value="Hạng mục-desc">Hạng mục (Z-A)</option>
           </select>

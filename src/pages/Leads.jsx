@@ -322,8 +322,8 @@ function Leads() {
               setSortConfig({ key, direction: dir });
             }}
           >
-            <option value="_created_at-desc">Mới nhất lên đầu</option>
-            <option value="_created_at-asc">Cũ nhất lên đầu</option>
+            <option value="Ngày nhận-desc">Mới nhất lên đầu</option>
+            <option value="Ngày nhận-asc">Cũ nhất lên đầu</option>
             <option value="Họ tên-asc">Họ tên (A-Z)</option>
             <option value="Họ tên-desc">Họ tên (Z-A)</option>
             <option value="Ngày nhận-desc">Ngày nhận (Mới nhất)</option>

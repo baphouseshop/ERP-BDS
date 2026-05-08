@@ -24,7 +24,7 @@ function Marketing() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [filterChannel, setFilterChannel] = useState('');
-  const [sortConfig, setSortConfig] = useState({ key: '_created_at', direction: 'desc' });
+  const [sortConfig, setSortConfig] = useState({ key: 'Tháng', direction: 'desc' });
 
   const [formData, setFormData] = useState({
     'Tháng': new Date().toISOString().slice(0, 7), // YYYY-MM
@@ -184,7 +184,7 @@ function Marketing() {
     let aValue = a[sortConfig.key];
     let bValue = b[sortConfig.key];
 
-    if (sortConfig.key === '_created_at') {
+    if (sortConfig.key === 'Tháng') {
       aValue = aValue ? new Date(aValue).getTime() : 0;
       bValue = bValue ? new Date(bValue).getTime() : 0;
     } else {
@@ -213,8 +213,8 @@ function Marketing() {
               setSortConfig({ key, direction: dir });
             }}
           >
-            <option value="_created_at-desc">Mới nhất lên đầu</option>
-            <option value="_created_at-asc">Cũ nhất lên đầu</option>
+            <option value="Tháng-desc">Mới nhất lên đầu</option>
+            <option value="Tháng-asc">Cũ nhất lên đầu</option>
             <option value="Tên chiến dịch-asc">Tên chiến dịch (A-Z)</option>
             <option value="Tên chiến dịch-desc">Tên chiến dịch (Z-A)</option>
           </select>

@@ -169,8 +169,8 @@ function Transactions() {
               setSortConfig({ key, direction: dir });
             }}
           >
-            <option value="_created_at-desc">Mới nhất lên đầu</option>
-            <option value="_created_at-asc">Cũ nhất lên đầu</option>
+            <option value="Ngày GD-desc">Mới nhất lên đầu</option>
+            <option value="Ngày GD-asc">Cũ nhất lên đầu</option>
             <option value="Khách hàng-asc">Khách hàng (A-Z)</option>
             <option value="Khách hàng-desc">Khách hàng (Z-A)</option>
             <option value="Ngày GD-desc">Ngày GD (Mới nhất)</option>
