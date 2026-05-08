@@ -338,11 +338,11 @@ function Transactions() {
       {totalPages > 1 && (
         <div className="pagination-container" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '20px', marginBottom: '40px' }}>
           <button 
-            onClick={() => paginate(currentPage - 1)} 
-            disabled={currentPage === 1}
-            style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', opacity: currentPage === 1 ? 0.5 : 1 }}
+            onClick={() => setTransactionsPage(prev => Math.max(prev - 1, 1))} 
+            disabled={transactionsPage === 1}
+            style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: transactionsPage === 1 ? 'not-allowed' : 'pointer', opacity: transactionsPage === 1 ? 0.5 : 1 }}
           >
-            Trải
+            Trái
           </button>
           
           {[...Array(totalPages)].map((_, idx) => {
