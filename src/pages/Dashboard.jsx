@@ -22,7 +22,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 function Dashboard() {
-  const { sales, transactions, marketing, leads, financials, dashboardStats } = useData();
+  const { allSales, transactions, marketing, leads, financials, dashboardStats, staff } = useData();
 
   // Fallback for when stats are loading
   const stats = dashboardStats || {
@@ -144,12 +144,47 @@ function Dashboard() {
     { name: 'Đã ký HĐMB', value: countHDMB, fill: '#ff4d94' }
   ].reverse();
 
-  // 5. Sales vs KPI
-  const salesData = sales.map(s => ({
-    name: s['Tên NV'].split(' ').pop(), 
-    'Thực tế (tỷ)': Number(s['DS thực (tỷ)'] || 0),
-    'KPI (tỷ)': Number(s['KH DS (tỷ)'] || 0)
-  }));
+  // 5. Sales Performance - TOP 5 by KPI %
+  const top5KpiData = [...allSales]
+    .filter(s => Number(s['DS thực (tỷ)']) > 0 || Number(s['KH DS (tỷ)']) > 0)
+    .sort((a, b) => Number(b['% KPI']) - Number(a['% KPI']))
+    .slice(0, 5)
+    .map(s => ({
+      name: s['Tên NV'].split(' ').pop(), 
+      'Thực tế (tỷ)': Number(s['DS thực (tỷ)'] || 0),
+      'KPI (tỷ)': Number(s['KH DS (tỷ)'] || 0)
+    }));
+
+  // 6. Revenue by Department
+  const deptRevenueData = (() => {
+    const revenueByDept = {};
+    transactions.forEach(t => {
+      const empId = t['Mã nhân viên'];
+      const emp = staff.find(e => e['Mã NV'] === empId);
+      let dept = emp ? emp['Sàn'] : 'Khác';
+      if (!dept) dept = 'Khác';
+      
+      // Normalize department names
+      let normalizedDept = dept;
+      const lowerDept = dept.toLowerCase();
+      if (lowerDept.includes('sàn 1')) normalizedDept = 'Sàn 1';
+      else if (lowerDept.includes('sàn 2')) normalizedDept = 'Sàn 2';
+      else if (lowerDept.includes('sàn 3')) normalizedDept = 'Sàn 3';
+      else if (lowerDept.includes('marketing') || lowerDept.includes('mkt')) normalizedDept = 'MKT';
+      else if (lowerDept.includes('kế toán')) normalizedDept = 'Kế toán';
+      else if (lowerDept.includes('sales')) normalizedDept = 'Sales';
+      
+      const amount = Number(t['Giá (VNĐ)'] || 0);
+      revenueByDept[normalizedDept] = (revenueByDept[normalizedDept] || 0) + amount;
+    });
+    
+    return Object.keys(revenueByDept).map(dept => ({
+      name: dept,
+      value: Number((revenueByDept[dept] / 1000000000).toFixed(2))
+    })).sort((a, b) => b.value - a.value);
+  })();
+
+  const DEPT_COLORS = ['#00e5ff', '#ccff00', '#ff4d94', '#b366ff', '#00cc66', '#ffcc00'];
 
   return (
     <div>
@@ -253,6 +288,19 @@ function Dashboard() {
             </PieChart>
           </ResponsiveContainer>
         </div>
+        <div className="dash-chart-card">
+          <div className="dash-chart-title">Doanh thu theo bộ phận</div>
+          <div className="dash-chart-subtitle">Đơn vị: Tỷ VNĐ</div>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={deptRevenueData} cx="40%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={5} dataKey="value">
+                {deptRevenueData.map((entry, index) => <Cell key={`cell-${index}`} fill={DEPT_COLORS[index % DEPT_COLORS.length]} />)}
+              </Pie>
+              <Tooltip content={<CustomTooltip />} />
+              <Legend layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{ fontSize: '11px', color: 'var(--text-muted)' }} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
       {/* CHARTS ROW 2 */}
@@ -275,10 +323,10 @@ function Dashboard() {
         </div>
 
         <div className="dash-chart-card">
-          <div className="dash-chart-title">Doanh số Sales vs KPI</div>
+          <div className="dash-chart-title">Top 5 KPI Doanh số</div>
           <div className="dash-chart-subtitle">Đơn vị: Tỷ VNĐ</div>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={salesData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <BarChart data={top5KpiData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#2a2e39" vertical={false} />
               <XAxis dataKey="name" stroke="#8b92a5" fontSize={11} tickLine={false} axisLine={false} />
               <YAxis stroke="#8b92a5" fontSize={11} tickLine={false} axisLine={false} />

@@ -12,6 +12,7 @@ export const DataProvider = ({ children }) => {
   const [allMarketing, setMarketing] = useState([]);
   const [allFinancials, setFinancials] = useState([]);
   const [sales, setSales] = useState([]);
+  const [allSales, setAllSales] = useState([]);
   const [staff, setStaff] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
@@ -299,27 +300,35 @@ export const DataProvider = ({ children }) => {
 
       // 6. Sales Performance (Uses Aggregated Data from RPC)
       const salesAgg = statsData?.sales_performance || {};
-      const salesData = employees.map(emp => {
+      const allSalesData = employees.map(emp => {
         const kpiTarget = kpiTargets.find(k => k.employee_code === emp.ma_nv) || {};
-        const kpi = kpiTarget.kpi_revenue_billion || 10;
+        const kpi = kpiTarget.kpi_revenue_billion || 0; // Default to 0 if no KPI
         const totalSales = (Number(salesAgg[emp.ma_nv] || 0)) / 1000000000;
         const pctKPI = kpi > 0 ? (totalSales / kpi) : 0;
         return {
           "Mã NV": emp.ma_nv, "Tên NV": emp.ho_ten, "Sàn": emp.phong_ban, "KH DS (tỷ)": kpi,
           "Doanh số (tỷ)": totalSales.toFixed(2), "DS thực (tỷ)": totalSales.toFixed(2), "% KPI": pctKPI,
           "XẾP LOẠI KPI": pctKPI >= 1 ? 'Xuất sắc' : pctKPI >= 0.8 ? 'Tốt' : 'Kém',
-          "Lương cứng (tr)": kpiTarget.salary_million || 5, "Gọi điện": 0,
-          "Site Visit": 0, "KH Site Visit": kpiTarget.target_site_visits || 5,
-          "HĐMB THỰC TẾ": 0, "KH HĐMB": kpiTarget.target_contracts || 1,
-          "CỌC": 0, "KH CỌC": kpiTarget.target_deposits || 2
+          "Lương cứng (tr)": kpiTarget.salary_million || 0, "Gọi điện": 0,
+          "Site Visit": 0, "KH Site Visit": kpiTarget.target_site_visits || 0,
+          "HĐMB THỰC TẾ": 0, "KH HĐMB": kpiTarget.target_contracts || 0,
+          "CỌC": 0, "KH CỌC": kpiTarget.target_deposits || 0,
+          "Chức vụ": emp.chuc_vu || ""
         };
-      }).filter(s => {
-        // Hiển thị nhân viên thuộc bộ phận Sales/Operations hoặc các Sàn
+      });
+
+      setAllSales(allSalesData);
+
+      const filteredSales = allSalesData.filter(s => {
+        // Chỉ tính các chỉ số cho ai gắn mã của sale (Sàn hoặc Sales)
         const dept = (s["Sàn"] || "").toLowerCase();
         const role = (s["Chức vụ"] || "").toLowerCase();
+        
+        // Loại bỏ Operations, IT, HR, Kế toán khỏi Leaderboard
         const isSalesStaff = 
-          ['sales','operations','kinh doanh','sàn','đại lý'].some(keyword => dept.includes(keyword)) ||
-          ['sale','leader','giám đốc','trưởng phòng'].some(keyword => role.includes(keyword));
+          (['sales','kinh doanh','sàn','đại lý'].some(keyword => dept.includes(keyword)) ||
+           ['sale','kinh doanh'].some(keyword => role.includes(keyword))) &&
+          !['it','hr','kế toán','operations','vận hành','hành chính'].some(keyword => dept.includes(keyword) || role.includes(keyword));
         
         if (!isSalesStaff) return false;
         // Admin và BOD thấy tất cả những người thuộc bộ phận sales
@@ -327,7 +336,7 @@ export const DataProvider = ({ children }) => {
         // Sales chỉ thấy chính mình
         return s["Mã NV"] === currentUser.ma_nv;
       });
-      setSales(salesData);
+      setSales(filteredSales);
 
     } catch (error) {
       console.error("Critical error in fetchData:", error);
@@ -753,6 +762,7 @@ export const DataProvider = ({ children }) => {
     marketing: allMarketing,
     financials: allFinancials,
     sales,
+    allSales,
     staff,
     loadingData,
     currentUser,
@@ -773,7 +783,7 @@ export const DataProvider = ({ children }) => {
     addStaff, editStaff, deleteStaff,
     refreshData: () => fetchData()
   }), [
-    globalFilter, allLeads, allTransactions, allMarketing, allFinancials, sales, staff,
+    globalFilter, allLeads, allTransactions, allMarketing, allFinancials, sales, allSales, staff,
     loadingData, currentUser, session, authLoading, 
     leadsPage, leadsTotal, leadsSearch, leadsSort,
     transactionsPage, transactionsTotal, transSearch, transSort,
