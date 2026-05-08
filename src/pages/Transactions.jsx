@@ -34,8 +34,6 @@ function Transactions() {
     setTransSort({ column: dbKey, ascending: transSort.column === dbKey ? !transSort.ascending : false });
   };
 
-  const currentTransactions = transactions; 
-
   // Pagination Logic
   const currentTransactions = transactions; // Already paginated from server
   const totalPages = Math.ceil(transactionsTotal / itemsPerPage);
