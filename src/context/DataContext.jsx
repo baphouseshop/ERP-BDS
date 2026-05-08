@@ -349,7 +349,12 @@ export const DataProvider = ({ children }) => {
       ghi_chu: newLead["Ghi chú"]
     };
     const { error } = await supabase.from('leads').insert([dbLead]);
-    if (error) { alert("Lỗi: " + error.message); } else { fetchData(); }
+    if (error) { 
+      alert("Lỗi: " + error.message); 
+    } else { 
+      setLeads(prev => [newLead, ...prev]);
+      setLeadsTotal(prev => prev + 1);
+    }
   };
 
   const editLead = async (updatedLead) => {
@@ -367,7 +372,11 @@ export const DataProvider = ({ children }) => {
       ghi_chu: updatedLead["Ghi chú"]
     };
     const { error } = await supabase.from('leads').update(dbLead).eq('ma_lead', updatedLead["Mã lead"]);
-    if (error) { alert("Lỗi: " + error.message); } else { fetchData(); }
+    if (error) { 
+      alert("Lỗi: " + error.message); 
+    } else { 
+      setLeads(prev => prev.map(l => l["Mã lead"] === updatedLead["Mã lead"] ? updatedLead : l));
+    }
   };
 
   const addMultipleLeads = async (newLeadsArray) => {
@@ -387,7 +396,12 @@ export const DataProvider = ({ children }) => {
       ghi_chu: l["Ghi chú"]
     }));
     const { error } = await supabase.from('leads').upsert(dbLeads);
-    if (error) { alert("Lỗi: " + error.message); } else { fetchData(); }
+    if (error) { 
+      alert("Lỗi: " + error.message); 
+    } else { 
+      setLeads(prev => [...newLeadsArray, ...prev]);
+      setLeadsTotal(prev => prev + newLeadsArray.length);
+    }
   };
 
   const updateLeads = async (updatedLeadsArray) => {
@@ -398,7 +412,14 @@ export const DataProvider = ({ children }) => {
       ghi_chu: l["Ghi chú"]
     }));
     const { error } = await supabase.from('leads').upsert(dbLeads);
-    if (error) { alert("Lỗi: " + error.message); } else { fetchData(); }
+    if (error) { 
+      alert("Lỗi: " + error.message); 
+    } else { 
+      setLeads(prev => prev.map(l => {
+        const up = updatedLeadsArray.find(u => u["Mã lead"] === l["Mã lead"]);
+        return up ? { ...l, ...up } : l;
+      }));
+    }
   };
 
   const addTransaction = async (newTransaction) => {
@@ -416,7 +437,12 @@ export const DataProvider = ({ children }) => {
       ghi_chu: newTransaction["Ghi chú"]
     };
     const { error } = await supabase.from('transactions').insert([dbTrans]);
-    if (error) { alert("Lỗi: " + error.message); } else { fetchData(); }
+    if (error) { 
+      alert("Lỗi: " + error.message); 
+    } else { 
+      setTransactions(prev => [newTransaction, ...prev]);
+      setTransactionsTotal(prev => prev + 1);
+    }
   };
 
   const editTransaction = async (updatedTransaction) => {
@@ -433,7 +459,11 @@ export const DataProvider = ({ children }) => {
       ghi_chu: updatedTransaction["Ghi chú"]
     };
     const { error } = await supabase.from('transactions').update(dbTrans).eq('ma_gd', updatedTransaction["Mã GD"]);
-    if (error) { alert("Lỗi: " + error.message); } else { fetchData(); }
+    if (error) { 
+      alert("Lỗi: " + error.message); 
+    } else { 
+      setTransactions(prev => prev.map(t => t["Mã GD"] === updatedTransaction["Mã GD"] ? updatedTransaction : t));
+    }
   };
 
   const addMarketing = async (newMarketing) => {
@@ -452,7 +482,9 @@ export const DataProvider = ({ children }) => {
       ghi_chu: newMarketing["Ghi chú"]
     };
     const { error } = await supabase.from('marketing_campaigns').insert([dbMkt]);
-    if (!error) fetchData();
+    if (!error) {
+      setMarketing(prev => [newMarketing, ...prev]);
+    }
   };
 
   const editMarketing = async (updatedMarketing) => {
@@ -470,7 +502,9 @@ export const DataProvider = ({ children }) => {
       ghi_chu: updatedMarketing["Ghi chú"]
     };
     const { error } = await supabase.from('marketing_campaigns').update(dbMkt).eq('ma_chien_dich', updatedMarketing["_id"]);
-    if (!error) fetchData();
+    if (!error) {
+      setMarketing(prev => prev.map(m => m["_id"] === updatedMarketing["_id"] ? updatedMarketing : m));
+    }
   };
 
   const addFinancial = async (newFinancial) => {
@@ -486,7 +520,9 @@ export const DataProvider = ({ children }) => {
       nguoi_duyet_id: newFinancial["_approver_id"]
     };
     const { error } = await supabase.from('financial_records').insert([dbFin]);
-    if (!error) fetchData();
+    if (!error) {
+      setFinancials(prev => [newFinancial, ...prev]);
+    }
   };
 
   const editFinancial = async (updatedFinancial) => {
@@ -500,7 +536,9 @@ export const DataProvider = ({ children }) => {
       nguoi_duyet_id: updatedFinancial["_approver_id"]
     };
     const { error } = await supabase.from('financial_records').update(dbFin).eq('ma_tc', updatedFinancial["_id"]);
-    if (!error) fetchData();
+    if (!error) {
+      setFinancials(prev => prev.map(f => f["_id"] === updatedFinancial["_id"] ? updatedFinancial : f));
+    }
   };
 
   const addStaff = async (newStaff) => {
@@ -517,7 +555,11 @@ export const DataProvider = ({ children }) => {
       quan_ly_id: newStaff["Quản lý (Mã NV)"]
     };
     const { error } = await supabase.from('employees').insert([dbStaff]);
-    if (error) { alert("Lỗi: " + error.message); } else { fetchData(); }
+    if (error) { 
+      alert("Lỗi: " + error.message); 
+    } else { 
+      setStaff(prev => [newStaff, ...prev]);
+    }
   };
 
   const editStaff = async (updatedStaff) => {
@@ -533,32 +575,48 @@ export const DataProvider = ({ children }) => {
       quan_ly_id: updatedStaff["Quản lý (Mã NV)"]
     };
     const { error } = await supabase.from('employees').update(dbStaff).eq('ma_nv', updatedStaff["Mã NV"]);
-    if (error) { alert("Lỗi: " + error.message); } else { fetchData(); }
+    if (error) { 
+      alert("Lỗi: " + error.message); 
+    } else { 
+      setStaff(prev => prev.map(s => s["Mã NV"] === updatedStaff["Mã NV"] ? updatedStaff : s));
+    }
   };
 
   const deleteLead = async (id) => {
     const { error } = await supabase.from('leads').delete().eq('ma_lead', id);
-    if (!error) fetchData();
+    if (!error) {
+      setLeads(prev => prev.filter(l => l["Mã lead"] !== id));
+      setLeadsTotal(prev => prev - 1);
+    }
   };
 
   const deleteTransaction = async (id) => {
     const { error } = await supabase.from('transactions').delete().eq('ma_gd', id);
-    if (!error) fetchData();
+    if (!error) {
+      setTransactions(prev => prev.filter(t => t["Mã GD"] !== id));
+      setTransactionsTotal(prev => prev - 1);
+    }
   };
 
   const deleteStaff = async (id) => {
     const { error } = await supabase.from('employees').delete().eq('ma_nv', id);
-    if (!error) fetchData();
+    if (!error) {
+      setStaff(prev => prev.filter(s => s["Mã NV"] !== id));
+    }
   };
 
   const deleteMarketing = async (id) => {
     const { error } = await supabase.from('marketing_campaigns').delete().eq('ma_chien_dich', id);
-    if (!error) fetchData();
+    if (!error) {
+      setMarketing(prev => prev.filter(m => m["_id"] !== id));
+    }
   };
 
   const deleteFinancial = async (id) => {
     const { error } = await supabase.from('financial_records').delete().eq('ma_tc', id);
-    if (!error) fetchData();
+    if (!error) {
+      setFinancials(prev => prev.filter(f => f["_id"] !== id));
+    }
   };
 
   return (
