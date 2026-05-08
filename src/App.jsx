@@ -12,6 +12,7 @@ import Settings from './pages/Settings';
 import Login from './pages/Login';
 import { useData } from './context/DataContext';
 import { supabase } from './supabaseClient';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function DateFilter() {
   const { globalFilter, setGlobalFilter } = useData();
@@ -229,17 +230,19 @@ function App() {
         {loadingData ? (
            <div style={{ padding: '20px', color: 'var(--text-primary)' }}>Đang tải dữ liệu...</div>
         ) : (
-          <Routes>
-            <Route path="/" element={checkAccess(['Admin', 'BOD', 'Sales', 'Marketing', 'Kế toán', 'HR']) ? <Dashboard /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
-            <Route path="/leads" element={checkAccess(['Admin', 'BOD', 'Sales', 'Marketing']) ? <Leads /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
-            <Route path="/transactions" element={checkAccess(['Admin', 'BOD', 'Sales', 'Kế toán']) ? <Transactions /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
-            <Route path="/sales" element={checkAccess(['Admin', 'BOD', 'Sales', 'Marketing']) ? <Sales /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
-            <Route path="/marketing" element={checkAccess(['Admin', 'BOD', 'Marketing']) ? <Marketing /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
-            <Route path="/financials" element={checkAccess(['Admin', 'BOD', 'Kế toán']) ? <Financials /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
-            <Route path="/staff" element={checkAccess(['Admin', 'BOD', 'HR']) ? <Staff /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
-            <Route path="/logs" element={checkAccess(['Admin', 'BOD']) ? <Logs /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
-            <Route path="/settings" element={checkAccess(['Admin', 'BOD']) ? <Settings /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
-          </Routes>
+          <ErrorBoundary>
+            <Routes>
+              <Route path="/" element={checkAccess(['Admin', 'BOD', 'Sales', 'Marketing', 'Kế toán', 'HR']) ? <Dashboard /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
+              <Route path="/leads" element={checkAccess(['Admin', 'BOD', 'Sales', 'Marketing']) ? <Leads /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
+              <Route path="/transactions" element={checkAccess(['Admin', 'BOD', 'Sales', 'Kế toán']) ? <Transactions /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
+              <Route path="/sales" element={checkAccess(['Admin', 'BOD', 'Sales', 'Marketing']) ? <Sales /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
+              <Route path="/marketing" element={checkAccess(['Admin', 'BOD', 'Marketing']) ? <Marketing /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
+              <Route path="/financials" element={checkAccess(['Admin', 'BOD', 'Kế toán']) ? <Financials /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
+              <Route path="/staff" element={checkAccess(['Admin', 'BOD', 'HR']) ? <Staff /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
+              <Route path="/logs" element={checkAccess(['Admin', 'BOD']) ? <Logs /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
+              <Route path="/settings" element={checkAccess(['Admin', 'BOD']) ? <Settings /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
+            </Routes>
+          </ErrorBoundary>
         )}
       </div>
     </div>
