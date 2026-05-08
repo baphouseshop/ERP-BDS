@@ -1,6 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../supabaseClient';
-import initialDb from '../data/db.json';
 
 const DataContext = createContext();
 
@@ -11,8 +10,8 @@ export const DataProvider = ({ children }) => {
   const [allTransactions, setTransactions] = useState([]);
   const [allMarketing, setMarketing] = useState([]);
   const [allFinancials, setFinancials] = useState([]);
-  const [sales, setSales] = useState(initialDb.sales || []);
-  const [staff, setStaff] = useState(initialDb.staff || []);
+  const [sales, setSales] = useState([]);
+  const [staff, setStaff] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
 
