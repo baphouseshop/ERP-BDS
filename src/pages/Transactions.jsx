@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useData } from '../context/DataContext';
 import toast from 'react-hot-toast';
 
@@ -29,6 +29,23 @@ function Transactions() {
   const [filterSales, setFilterSales] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: 'Ngày GD', direction: 'desc' });
   const [currentPage, setCurrentPage] = useState(transactionsPage);
+
+  // Debounced Search Logic
+  const [localSearch, setLocalSearch] = useState(transSearch);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (localSearch !== transSearch) {
+        setTransSearch(localSearch);
+        setTransactionsPage(1);
+      }
+    }, 500); // 500ms delay
+    return () => clearTimeout(timer);
+  }, [localSearch]);
+
+  // Sync local search when global search is cleared
+  useEffect(() => {
+    setLocalSearch(transSearch);
+  }, [transSearch]);
 
   // Derived values for filters
   const uniqueSalesNames = [...new Set(transactions.map(t => t['Sales']).filter(Boolean))];
@@ -188,7 +205,7 @@ function Transactions() {
 
       {/* FILTER BAR */}
       <div className="filter-bar">
-        <input className="filter-input" placeholder="🔍 Tìm khách hàng, mã GD, mã NV, mã Lead..." value={transSearch} onChange={e => { setTransSearch(e.target.value); setTransactionsPage(1); }} />
+        <input className="filter-input" placeholder="🔍 Tìm khách hàng, mã GD, mã NV, mã Lead..." value={localSearch} onChange={e => setLocalSearch(e.target.value)} />
         <select className="filter-select" value={filterSales} onChange={e => setFilterSales(e.target.value)}>
           <option value="">-- Sales --</option>
           {uniqueSalesNames.map(s => <option key={s} value={s}>{s}</option>)}

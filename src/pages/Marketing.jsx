@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 import { useData } from '../context/DataContext';
 
@@ -27,6 +27,23 @@ function Marketing() {
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+
+  // Debounced Search Logic
+  const [localSearch, setLocalSearch] = useState(marketingSearch);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (localSearch !== marketingSearch) {
+        setMarketingSearch(localSearch);
+        setMarketingPage(1);
+      }
+    }, 500); // 500ms delay
+    return () => clearTimeout(timer);
+  }, [localSearch]);
+
+  // Sync local search when global search is cleared
+  useEffect(() => {
+    setLocalSearch(marketingSearch);
+  }, [marketingSearch]);
   const [filterChannel, setFilterChannel] = useState('');
 
   const [formData, setFormData] = useState({
@@ -202,8 +219,8 @@ function Marketing() {
         <input 
           className="filter-input" 
           placeholder="🔍 Tìm tên chiến dịch, kênh, ghi chú..." 
-          value={marketingSearch} 
-          onChange={e => setMarketingSearch(e.target.value)} 
+          value={localSearch} 
+          onChange={e => setLocalSearch(e.target.value)} 
         />
         {/* Optional: Filter by channel could be implemented server-side as well, but for now we focus on text search */}
         {marketingSearch && <button className="btn-clear-filter" onClick={clearFilters}>✕ Xóa lọc</button>}

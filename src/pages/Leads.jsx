@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { useData } from '../context/DataContext';
 import toast from 'react-hot-toast';
@@ -36,6 +36,23 @@ function Leads() {
   const [filterSales, setFilterSales] = useState('');
   const [currentPage, setCurrentPage] = useState(leadsPage);
   const [sortConfig, setSortConfig] = useState({ key: 'Ngày nhận', direction: 'desc' });
+
+  // Debounced Search Logic
+  const [localSearch, setLocalSearch] = useState(leadsSearch);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (localSearch !== leadsSearch) {
+        setLeadsSearch(localSearch);
+        setLeadsPage(1);
+      }
+    }, 500); // 500ms delay
+    return () => clearTimeout(timer);
+  }, [localSearch]);
+
+  // Sync local search when global search is cleared (e.g. via Xóa lọc)
+  useEffect(() => {
+    setLocalSearch(leadsSearch);
+  }, [leadsSearch]);
 
   // Unique values - ideally these should come from server, but using local slice as fallback
   const uniqueStatuses = [...new Set(leads.map(l => l['Trạng thái']).filter(Boolean))];
@@ -341,7 +358,7 @@ function Leads() {
 
       {/* FILTER BAR */}
       <div className="filter-bar">
-        <input className="filter-input" placeholder="🔍 Tìm tên, SĐT, mã lead, mã NV..." value={leadsSearch} onChange={e => { setLeadsSearch(e.target.value); setLeadsPage(1); }} />
+        <input className="filter-input" placeholder="🔍 Tìm tên, SĐT, mã lead, mã NV..." value={localSearch} onChange={e => setLocalSearch(e.target.value)} />
         <select className="filter-select" value={filterSales} onChange={e => setFilterSales(e.target.value)}>
           <option value="">-- Sales --</option>
           {uniqueSalesNames.map(s => <option key={s} value={s}>{s}</option>)}
