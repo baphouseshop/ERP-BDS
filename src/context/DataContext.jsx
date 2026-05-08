@@ -182,9 +182,15 @@ export const DataProvider = ({ children }) => {
       }
 
       // 5. Marketing & Financials
+      let mktQuery = supabase.from('marketing_campaigns').select('*').order('ma_chien_dich', { ascending: false });
+      mktQuery = applyDateFilter(mktQuery, globalFilter, 'created_at');
+      
+      let finQuery = supabase.from('financial_records').select('*').order('thang', { ascending: false });
+      finQuery = applyDateFilter(finQuery, globalFilter, 'created_at');
+
       const [mktRes, finRes] = await Promise.all([
-        supabase.from('marketing_campaigns').select('*').order('ma_chien_dich', { ascending: false }),
-        supabase.from('financial_records').select('*').order('thang', { ascending: false })
+        mktQuery,
+        finQuery
       ]);
 
       if (mktRes.data) {
