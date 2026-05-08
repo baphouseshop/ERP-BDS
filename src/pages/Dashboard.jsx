@@ -27,24 +27,19 @@ function Dashboard() {
   // Fallback for when stats are loading
   const stats = dashboardStats || {
     leads: { total: 0, unassigned: 0, status_counts: {} },
-    transactions: { total: 0, completed: 0, deposited: 0, booking: 0, zone_counts: {} }
+    transactions: { total: 0, completed: 0, deposited: 0, booking: 0, zone_counts: {} },
+    financial_stats: { revenue: 0, revenue_kh: 0, expense: 0 }
   };
 
   // --- KPI CALCULATIONS ---
   
   // 1. Doanh thu
-  const revenueItems = financials.filter(f => 
-    f['Hạng mục'] === 'Revenue' || f['Hạng mục'] === 'Doanh thu thực thu' || f['Hạng mục'] === 'Doanh thu HĐMB'
-  );
-  const doanhThu = Number(revenueItems.reduce((sum, f) => sum + Number(f['Thực tế (tỷ)'] || 0), 0)).toFixed(2);
-  const doanhThuKH = Number(revenueItems.reduce((sum, f) => sum + Number(f['KH (tỷ)'] || 0), 0)).toFixed(2);
+  const doanhThu = Number(stats.financial_stats?.revenue || 0).toFixed(2);
+  const doanhThuKH = Number(stats.financial_stats?.revenue_kh || 0).toFixed(2);
   const doanhThuPercent = doanhThuKH > 0 ? Math.round((doanhThu / doanhThuKH) * 100) : 0;
 
   // 2. Lợi nhuận gộp
-  const expenseItems = financials.filter(f => 
-    f['Loại'] === 'Expense' || f['Loại'] === 'Chi phí'
-  );
-  const chiPhi = expenseItems.reduce((sum, f) => sum + Number(f['Thực tế (tỷ)'] || 0), 0);
+  const chiPhi = Number(stats.financial_stats?.expense || 0);
   const loiNhuan = (doanhThu - chiPhi).toFixed(2);
   const margin = doanhThu > 0 ? ((loiNhuan / doanhThu) * 100).toFixed(1) : 0;
 

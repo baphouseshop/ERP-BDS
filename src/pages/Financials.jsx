@@ -64,13 +64,13 @@ const renderProgressBar = (item, color, icon, calcTotal, calcKH) => {
 
 function Financials() {
   const { 
-    financials, // full list for charts
-    financialsPaginated, // paginated list for table
+    financials, 
     financialsTotal,
     financialsPage, setFinancialsPage,
     financialsSearch, setFinancialsSearch,
     financialsSort, setFinancialsSort,
-    transactions, marketing, staff, addFinancial, editFinancial, deleteFinancial 
+    staff, addFinancial, editFinancial, deleteFinancial,
+    itemsPerPage, dashboardStats
   } = useData();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -152,6 +152,23 @@ function Financials() {
       setFormData({ ...formData, '_approver_id': '', 'Người duyệt': '' });
     }
   };
+
+  const handleSearchChange = (e) => {
+    setFinancialsSearch(e.target.value);
+    setFinancialsPage(1);
+  };
+
+  const clearFilters = () => {
+    setFinancialsSearch('');
+    setFilterType('');
+    setFilterCategory('');
+    setFinancialsPage(1);
+  };
+
+  const totalPages = Math.ceil(financialsTotal / itemsPerPage);
+  
+  // Calculate unique categories for filter
+  const uniqueCategories = Array.from(new Set(financials.map(f => f['Hạng mục']).filter(Boolean)));
 
   // --- DATA EXTRACTION ---
   // Map: accept both English (Supabase) and Vietnamese (local/db.json) category names
@@ -263,16 +280,16 @@ function Financials() {
           <select 
             className="filter-select" 
             style={{ width: '180px' }}
-            value={`${sortConfig.key}-${sortConfig.direction}`} 
+            value={`${financialsSort.column}-${financialsSort.ascending ? 'asc' : 'desc'}`} 
             onChange={e => {
-              const [key, dir] = e.target.value.split('-');
-              setSortConfig({ key, direction: dir });
+              const [column, dir] = e.target.value.split('-');
+              setFinancialsSort({ column, ascending: dir === 'asc' });
             }}
           >
-            <option value="Tháng-desc">Mới nhất lên đầu</option>
-            <option value="Tháng-asc">Cũ nhất lên đầu</option>
-            <option value="Hạng mục-asc">Hạng mục (A-Z)</option>
-            <option value="Hạng mục-desc">Hạng mục (Z-A)</option>
+            <option value="thang-desc">Mới nhất lên đầu</option>
+            <option value="thang-asc">Cũ nhất lên đầu</option>
+            <option value="hang_muc-asc">Hạng mục (A-Z)</option>
+            <option value="hang_muc-desc">Hạng mục (Z-A)</option>
           </select>
           <button onClick={handleOpenAddModal} className="btn-submit">Thêm Bản ghi</button>
         </div>
@@ -363,8 +380,8 @@ function Financials() {
           <input 
             className="filter-input" 
             placeholder="🔍 Tìm hạng mục, ghi chú, người duyệt..." 
-            value={searchText} 
-            onChange={e => setSearchText(e.target.value)} 
+            value={financialsSearch} 
+            onChange={handleSearchChange} 
           />
           <select className="filter-select" value={filterType} onChange={e => setFilterType(e.target.value)}>
             <option value="">-- Tất cả loại --</option>
@@ -375,8 +392,8 @@ function Financials() {
             <option value="">-- Tất cả hạng mục --</option>
             {uniqueCategories.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
-          {(searchText || filterType || filterCategory) && <button className="btn-clear-filter" onClick={clearFilters}>✕ Xóa lọc</button>}
-          <span className="filter-count">Hiển thị <strong>{filteredFinancials.length}</strong>/{financials.length}</span>
+          {(financialsSearch || filterType || filterCategory) && <button className="btn-clear-filter" onClick={clearFilters}>✕ Xóa lọc</button>}
+          <span className="filter-count">Hiển thị <strong>{financials.length}</strong>/{financialsTotal}</span>
         </div>
 
         <div className="table-container" style={{ marginTop: '10px' }}>
@@ -394,7 +411,7 @@ function Financials() {
               </tr>
             </thead>
             <tbody>
-              {currentFinancials.map((f, i) => (
+              {financials.map((f, i) => (
                 <tr key={i}>
                   <td>
                     <div style={{ display: 'flex', gap: '5px' }}>
@@ -424,36 +441,36 @@ function Financials() {
         </div>
 
         {/* Pagination Controls */}
-        {totalPagesCount > 1 && (
+        {totalPages > 1 && (
           <div className="pagination-container" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '20px', marginBottom: '40px' }}>
             <button 
-              onClick={() => paginate(currentPage - 1)} 
-              disabled={currentPage === 1}
-              style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', opacity: currentPage === 1 ? 0.5 : 1 }}
+              onClick={() => setFinancialsPage(financialsPage - 1)} 
+              disabled={financialsPage === 1}
+              style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: financialsPage === 1 ? 'not-allowed' : 'pointer', opacity: financialsPage === 1 ? 0.5 : 1 }}
             >
               Trải
             </button>
             
-            {[...Array(totalPagesCount)].map((_, idx) => {
+            {[...Array(totalPages)].map((_, idx) => {
               const pageNum = idx + 1;
-              if (totalPagesCount > 7) {
-                if (pageNum !== 1 && pageNum !== totalPagesCount && (pageNum < currentPage - 1 || pageNum > currentPage + 1)) {
-                  if (pageNum === 2 && currentPage > 3) return <span key="dots1" style={{ color: 'var(--text-muted)' }}>...</span>;
-                  if (pageNum === totalPagesCount - 1 && currentPage < totalPagesCount - 2) return <span key="dots2" style={{ color: 'var(--text-muted)' }}>...</span>;
+              if (totalPages > 7) {
+                if (pageNum !== 1 && pageNum !== totalPages && (pageNum < financialsPage - 1 || pageNum > financialsPage + 1)) {
+                  if (pageNum === 2 && financialsPage > 3) return <span key="dots1" style={{ color: 'var(--text-muted)' }}>...</span>;
+                  if (pageNum === totalPages - 1 && financialsPage < totalPages - 2) return <span key="dots2" style={{ color: 'var(--text-muted)' }}>...</span>;
                   return null;
                 }
               }
               return (
                 <button
                   key={pageNum}
-                  onClick={() => paginate(pageNum)}
+                  onClick={() => setFinancialsPage(pageNum)}
                   style={{
                     padding: '6px 12px',
                     borderRadius: '4px',
                     border: '1px solid',
-                    borderColor: currentPage === pageNum ? 'var(--accent)' : 'var(--border-color)',
-                    background: currentPage === pageNum ? 'var(--accent)' : 'var(--bg-secondary)',
-                    color: currentPage === pageNum ? '#000' : 'var(--text-main)',
+                    borderColor: financialsPage === pageNum ? 'var(--accent)' : 'var(--border-color)',
+                    background: financialsPage === pageNum ? 'var(--accent)' : 'var(--bg-secondary)',
+                    color: financialsPage === pageNum ? '#000' : 'var(--text-main)',
                     fontWeight: 'bold',
                     cursor: 'pointer'
                   }}
@@ -464,9 +481,9 @@ function Financials() {
             })}
 
             <button 
-              onClick={() => paginate(currentPage + 1)} 
-              disabled={currentPage === totalPagesCount}
-              style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: currentPage === totalPagesCount ? 'not-allowed' : 'pointer', opacity: currentPage === totalPagesCount ? 0.5 : 1 }}
+              onClick={() => setFinancialsPage(financialsPage + 1)} 
+              disabled={financialsPage === totalPages}
+              style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: financialsPage === totalPages ? 'not-allowed' : 'pointer', opacity: financialsPage === totalPages ? 0.5 : 1 }}
             >
               Phải
             </button>
