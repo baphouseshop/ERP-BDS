@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../supabaseClient';
 import initialDb from '../data/db.json';
 
@@ -31,6 +31,7 @@ export const DataProvider = ({ children }) => {
 
   const [dashboardStats, setDashboardStats] = useState(null);
   const itemsPerPage = 15;
+  const fetchDataRef = useRef(null);
 
   // --- SERVER-SIDE FILTER HELPERS ---
   const applyDateRange = (filter) => {
@@ -209,12 +210,12 @@ export const DataProvider = ({ children }) => {
         })));
       }
 
-      // 6. Sales Performance (Now uses Aggregated DS for all employees)
-      const { data: salesAgg } = await supabase.from('transactions').select('nhan_vien_id, gia');
+      // 6. Sales Performance (Uses Aggregated Data from RPC)
+      const salesAgg = statsData?.sales_performance || {};
       const salesData = employees.map(emp => {
         const initialSale = initialDb.sales.find(s => s["Tên NV"] === emp.ho_ten) || {};
         const kpi = initialSale["KH DS (tỷ)"] || 10;
-        const totalSales = (salesAgg?.filter(t => t.nhan_vien_id === emp.ma_nv).reduce((sum, t) => sum + Number(t.gia || 0), 0) || 0) / 1000000000;
+        const totalSales = (Number(salesAgg[emp.ma_nv] || 0)) / 1000000000;
         const pctKPI = kpi > 0 ? (totalSales / kpi) : 0;
         return {
           "Mã NV": emp.ma_nv, "Tên NV": emp.ho_ten, "Sàn": emp.phong_ban, "KH DS (tỷ)": kpi,
@@ -235,6 +236,10 @@ export const DataProvider = ({ children }) => {
     }
   }, [globalFilter, leadsPage, leadsSearch, leadsSort, transactionsPage, transSearch, transSort, currentUser]);
 
+  useEffect(() => {
+    fetchDataRef.current = fetchData;
+  }, [fetchData]);
+
   const subscribeToTable = (tableName) => {
     return supabase
       .channel(`${tableName}-realtime`)
@@ -250,7 +255,7 @@ export const DataProvider = ({ children }) => {
         }
 
         if (isRelevant) {
-          fetchData();
+          if (fetchDataRef.current) fetchDataRef.current();
         }
       })
       .subscribe();
