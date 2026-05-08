@@ -70,7 +70,7 @@ function Financials() {
     financialsSearch, setFinancialsSearch,
     financialsSort, setFinancialsSort,
     staff, addFinancial, editFinancial, deleteFinancial,
-    itemsPerPage, dashboardStats
+    itemsPerPage, dashboardStats, transactions
   } = useData();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
