@@ -257,7 +257,7 @@ function Transactions() {
             </tr>
           </thead>
           <tbody>
-            {currentTransactions.map((t, index) => (
+            {transactions.map((t, index) => (
               <tr key={index}>
                 <td>
                   <div style={{ display: 'flex', gap: '5px' }}>
