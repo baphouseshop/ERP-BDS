@@ -178,26 +178,27 @@ function Financials() {
     'Quỹ lương & Hoa hồng': ['Salaries', 'Quỹ lương & Hoa hồng']
   };
 
-  const sumFin = (name, key) => {
-    const aliases = categoryAliases[name] || [name];
-    return financials
-      .filter(f => aliases.includes(f['Hạng mục']) || aliases.includes(f['Loại']))
-      .reduce((sum, f) => sum + Number(f[key] || 0), 0);
+  const stats = dashboardStats?.financial_stats || {
+    revenue: 0, revenue_kh: 0,
+    ops_cost: 0, ops_cost_kh: 0,
+    mkt_cost: 0, mkt_cost_kh: 0,
+    salary_cost: 0, salary_cost_kh: 0,
+    expense: 0
   };
 
-  const doanhThuT = sumFin('Doanh thu thực thu', 'Thực tế (tỷ)');
-  const doanhThuKH = sumFin('Doanh thu thực thu', 'KH (tỷ)');
+  const doanhThuT = Number(stats.revenue || 0);
+  const doanhThuKH = Number(stats.revenue_kh || 0);
   
-  const chiPhiVHT = sumFin('Chi phí vận hành', 'Thực tế (tỷ)');
-  const chiPhiVHKH = sumFin('Chi phí vận hành', 'KH (tỷ)');
+  const chiPhiVHT = Number(stats.ops_cost || 0);
+  const chiPhiVHKH = Number(stats.ops_cost_kh || 0);
   
-  const chiPhiMktT = sumFin('Chi phí Marketing', 'Thực tế (tỷ)');
-  const chiPhiMktKH = sumFin('Chi phí Marketing', 'KH (tỷ)');
+  const chiPhiMktT = Number(stats.mkt_cost || 0);
+  const chiPhiMktKH = Number(stats.mkt_cost_kh || 0);
   
-  const luongHHT = sumFin('Quỹ lương & Hoa hồng', 'Thực tế (tỷ)');
-  const luongHHKH = sumFin('Quỹ lương & Hoa hồng', 'KH (tỷ)');
+  const luongHHT = Number(stats.salary_cost || 0);
+  const luongHHKH = Number(stats.salary_cost_kh || 0);
 
-  const sumChiPhi = chiPhiVHT + chiPhiMktT + luongHHT;
+  const sumChiPhi = Number(stats.expense || 0);
   const sumChiPhiKH = chiPhiVHKH + chiPhiMktKH + luongHHKH;
 
   const loiNhuanT = doanhThuT - sumChiPhi;
