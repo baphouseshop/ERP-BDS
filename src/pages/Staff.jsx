@@ -202,6 +202,7 @@ function Staff() {
               <th onClick={() => handleSort('Email')} style={{ cursor: 'pointer' }}>Email {sortConfig.key === 'Email' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
               <th onClick={() => handleSort('Ngày vào làm')} style={{ cursor: 'pointer' }}>Ngày vào làm {sortConfig.key === 'Ngày vào làm' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
               <th onClick={() => handleSort('Trạng thái')} style={{ cursor: 'pointer' }}>Trạng thái {sortConfig.key === 'Trạng thái' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+              <th onClick={() => handleSort('Quyền')} style={{ cursor: 'pointer' }}>Quyền {sortConfig.key === 'Quyền' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
               <th onClick={() => handleSort('Lương (VNĐ)')} style={{ cursor: 'pointer' }}>Lương (VNĐ) {sortConfig.key === 'Lương (VNĐ)' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
               <th onClick={() => handleSort('Quản lý (Mã NV)')} style={{ cursor: 'pointer' }}>Quản lý {sortConfig.key === 'Quản lý (Mã NV)' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
             </tr>
@@ -236,6 +237,16 @@ function Staff() {
                     fontWeight: 'bold', 
                     fontSize: '12px' 
                   }}>{member['Trạng thái']}</span>
+                </td>
+                <td>
+                  <span className="badge" style={{ 
+                    backgroundColor: 'rgba(0, 243, 255, 0.1)', 
+                    color: 'var(--accent)',
+                    border: '1px solid rgba(0, 243, 255, 0.2)',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    fontSize: '11px'
+                  }}>{member['Quyền']}</span>
                 </td>
                 <td>{Number(member['Lương (VNĐ)'] || 0).toLocaleString()} đ</td>
                 <td>{member['Quản lý (Mã NV)']}</td>
