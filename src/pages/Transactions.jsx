@@ -26,7 +26,13 @@ function Transactions() {
   const [filterStatus, setFilterStatus] = useState('');
   const [filterZone, setFilterZone] = useState('');
   const [filterSales, setFilterSales] = useState('');
+  const [sortConfig, setSortConfig] = useState({ key: 'Ngày GD', direction: 'desc' });
   const [currentPage, setCurrentPage] = useState(transactionsPage);
+
+  // Derived values for filters
+  const uniqueSalesNames = [...new Set(transactions.map(t => t['Sales']).filter(Boolean))];
+  const uniqueStatuses = [...new Set(transactions.map(t => t['Trạng thái']).filter(Boolean))];
+  const uniqueZones = [...new Set(transactions.map(t => t['Phân khu']).filter(Boolean))];
 
   const handleSort = (key) => {
     const keyMap = { 'Mã GD': 'ma_gd', 'Ngày GD': 'ngay_gd', 'Giá (VNĐ)': 'gia', 'Trạng thái': 'trang_thai' };
@@ -43,8 +49,8 @@ function Transactions() {
     setTransactionsPage(pageNumber);
   };
 
-  const hasActiveFilters = searchText || filterStatus || filterZone || filterSales;
-  const clearFilters = () => { setSearchText(''); setFilterStatus(''); setFilterZone(''); setFilterSales(''); };
+  const hasActiveFilters = transSearch || filterStatus || filterZone || filterSales;
+  const clearFilters = () => { setTransSearch(''); setFilterStatus(''); setFilterZone(''); setFilterSales(''); };
   const [formData, setFormData] = useState({
     'Mã GD': '',
     'Ngày GD': '',
