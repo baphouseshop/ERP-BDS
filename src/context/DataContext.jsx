@@ -104,8 +104,7 @@ export const DataProvider = ({ children }) => {
         "Ngày vào làm": emp.ngay_vao_lam || "",
         "Trạng thái": emp.trang_thai || "Active",
         "Lương (VNĐ)": emp.luong || 0,
-        "Quản lý (Mã NV)": emp.quan_ly_id || "",
-        "_created_at": emp.created_at
+        "Quản lý (Mã NV)": emp.quan_ly_id || ""
       })));
 
       const getEmpName = (id) => employees.find(e => e.ma_nv == id)?.ho_ten || id || "";
@@ -140,8 +139,7 @@ export const DataProvider = ({ children }) => {
           "Tên sàn": l.ten_san || "Nội bộ",
           "Ngày hẹn": l.ngay_hen,
           "Ngày FU": l.ngay_fu,
-          "Ghi chú": l.ghi_chu,
-          "_created_at": l.created_at
+          "Ghi chú": l.ghi_chu
         })));
         setLeadsTotal(leadsCount || 0);
       }
@@ -175,15 +173,14 @@ export const DataProvider = ({ children }) => {
           "Sales": getEmpName(t.nhan_vien_id),
           "Mã nhân viên": t.nhan_vien_id,
           "Khách hàng": getLeadName(t.khach_hang_id),
-          "Mã Lead": t.khach_hang_id,
-          "_created_at": t.created_at
+          "Mã Lead": t.khach_hang_id
         })));
         setTransactionsTotal(transCount || 0);
       }
 
       // 5. Marketing & Financials
       const [mktRes, finRes] = await Promise.all([
-        supabase.from('marketing_campaigns').select('*').order('created_at', { ascending: false }),
+        supabase.from('marketing_campaigns').select('*').order('ma_chien_dich', { ascending: false }),
         supabase.from('financial_records').select('*').order('thang', { ascending: false })
       ]);
 
