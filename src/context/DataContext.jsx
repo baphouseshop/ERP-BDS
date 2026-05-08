@@ -33,6 +33,7 @@ export const DataProvider = ({ children }) => {
   const [dashboardStats, setDashboardStats] = useState(null);
   const itemsPerPage = 15;
   const fetchDataRef = useRef(null);
+  const currentUserRef = useRef(null);
 
   // --- SERVER-SIDE FILTER HELPERS ---
   const applyDateRange = (filter) => {
@@ -249,18 +250,23 @@ export const DataProvider = ({ children }) => {
     fetchDataRef.current = fetchData;
   }, [fetchData]);
 
+  useEffect(() => {
+    currentUserRef.current = currentUser;
+  }, [currentUser]);
+
   const subscribeToTable = (tableName) => {
     return supabase
       .channel(`${tableName}-realtime`)
       .on('postgres_changes', { event: '*', schema: 'public', table: tableName }, (payload) => {
-        const userCode = currentUser?.ma_nv;
-        const isAdmin = ['Admin', 'BOD'].includes(currentUser?.role);
+        const user = currentUserRef.current;
+        const userCode = user?.ma_nv;
+        const isAdmin = ['Admin', 'BOD'].includes(user?.role);
 
         let isRelevant = isAdmin;
         if (!isRelevant && tableName === 'leads') {
           isRelevant = payload.new?.nhan_vien_id === userCode || payload.old?.nhan_vien_id === userCode;
         } else if (!isRelevant && tableName === 'transactions') {
-          isRelevant = payload.new?.nhan_vien_id === userCode || payload.old?.nhan_vien_id === userCode || currentUser?.role === 'Kế toán';
+          isRelevant = payload.new?.nhan_vien_id === userCode || payload.old?.nhan_vien_id === userCode || user?.role === 'Kế toán';
         }
 
         if (isRelevant) {
