@@ -165,9 +165,12 @@ function Transactions() {
     } else {
       addTransaction(formData);
     }
-    
     setIsModalOpen(false);
   };
+
+  const uniqueSalesNames = Array.from(new Set(staff.map(s => s['Tên NV']).filter(Boolean))).sort();
+  const uniqueStatuses = ['Đang giữ chỗ', 'Giữ chỗ', 'Đã đặt cọc', 'Đã ký HĐMB', 'Đã hoàn thành', 'Đã hủy'];
+  const uniqueZones = Array.from(new Set(transactions.map(t => t['Phân khu']).filter(Boolean))).sort();
 
   return (
     <div>
