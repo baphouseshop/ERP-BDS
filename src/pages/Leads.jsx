@@ -3,24 +3,24 @@ import * as XLSX from 'xlsx';
 import { useData } from '../context/DataContext';
 
 function Leads() {
-  const { 
-    leads, 
-    leadsTotal, 
-    leadsPage, 
-    setLeadsPage, 
+  const {
+    leads,
+    leadsTotal,
+    leadsPage,
+    setLeadsPage,
     leadsSearch,
     setLeadsSearch,
     leadsSort,
     setLeadsSort,
     itemsPerPage,
-    marketing, 
-    addLead, 
-    editLead, 
-    deleteLead, 
-    addMultipleLeads, 
-    updateLeads, 
-    sales, 
-    staff 
+    marketing,
+    addLead,
+    editLead,
+    deleteLead,
+    addMultipleLeads,
+    updateLeads,
+    sales,
+    staff
   } = useData();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -43,9 +43,9 @@ function Leads() {
 
   const handleSort = (key) => {
     // Map UI keys to DB columns
-    const keyMap = { 
-      'Mã lead': 'ma_lead', 'Họ tên': 'ho_ten', 'SĐT (đầy đủ)': 'sdt', 
-      'Ngày nhận': 'ngay_nhan', 'Trạng thái': 'trang_thai' 
+    const keyMap = {
+      'Mã lead': 'ma_lead', 'Họ tên': 'ho_ten', 'SĐT (đầy đủ)': 'sdt',
+      'Ngày nhận': 'ngay_nhan', 'Trạng thái': 'trang_thai'
     };
     const dbKey = keyMap[key] || 'ngay_nhan';
     setLeadsSort({ column: dbKey, ascending: leadsSort.column === dbKey ? !leadsSort.ascending : false });
@@ -60,9 +60,9 @@ function Leads() {
     setLeadsPage(pageNumber);
   };
 
-  const hasActiveFilters = searchText || filterStatus || filterSource || filterAgency || filterSales;
-  const clearFilters = () => { setSearchText(''); setFilterStatus(''); setFilterSource(''); setFilterAgency(''); setFilterSales(''); };
-  
+  const hasActiveFilters = leadsSearch || filterStatus || filterSource || filterAgency || filterSales;
+  const clearFilters = () => { setLeadsSearch(''); setFilterStatus(''); setFilterSource(''); setFilterAgency(''); setFilterSales(''); };
+
   const formatPhone = (phone) => {
     if (!phone) return '';
     let p = phone.toString().trim();
@@ -87,7 +87,7 @@ function Leads() {
     'Sales phụ trách': '',
     'Ghi chú': ''
   };
-  
+
   const [formData, setFormData] = useState(initialFormState);
 
   const distributeLeads = () => {
@@ -161,8 +161,8 @@ function Leads() {
   const handleStaffChange = (e) => {
     const maNV = e.target.value;
     if (!maNV) {
-       setFormData({ ...formData, 'Mã NV': '', 'Tên sàn': '', 'Sales phụ trách': '' });
-       return;
+      setFormData({ ...formData, 'Mã NV': '', 'Tên sàn': '', 'Sales phụ trách': '' });
+      return;
     }
     const selectedStaff = staff.find(s => s['Mã NV'] === maNV);
     if (selectedStaff) {
@@ -177,12 +177,12 @@ function Leads() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Check for duplicate phone number
     const phone = formData['SĐT (đầy đủ)'];
     if (phone) {
-      const isDuplicate = leads.some(l => 
-        l['Mã lead'] !== formData['Mã lead'] && 
+      const isDuplicate = leads.some(l =>
+        l['Mã lead'] !== formData['Mã lead'] &&
         (l['SĐT (đầy đủ)'] === phone || l['SĐT (ẩn)'].includes(phone.substring(0, 3))) // simplified check
       );
       // More robust check:
@@ -198,7 +198,7 @@ function Leads() {
         return;
       }
     }
-    
+
     const timestamp = new Date().toLocaleString('vi-VN');
     const updatedData = {
       ...formData,
@@ -213,7 +213,7 @@ function Leads() {
       updatedData['Sales phụ trách'] = null;
       addLead(updatedData);
     }
-    
+
     setIsModalOpen(false);
   };
 
@@ -221,7 +221,7 @@ function Leads() {
   const handleDownloadTemplate = () => {
     const headers = ['Mã lead', 'Họ tên', 'SĐT (đầy đủ)', 'Nguồn', 'Chiến dịch', 'Nhu cầu', 'Trạng thái', 'Ngày nhận', 'Ngày FU', 'Ngày hẹn', 'Mã NV', 'Tên sàn', 'Ghi chú'];
     const sampleData = ['LD_SAMPLE_01', 'Nguyen Van A', '0901234567', 'Facebook Ads', 'Vinhomes Ocean Park', '2PN', 'MỚI TIẾP NHẬN', '2026-05-01', '', '', 'GH001', 'Sàn 1', 'Khách VIP'];
-    
+
     const ws = XLSX.utils.aoa_to_sheet([headers, sampleData]);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Leads_Template");
@@ -239,9 +239,9 @@ function Leads() {
       const wsname = wb.SheetNames[0];
       const ws = wb.Sheets[wsname];
       const data = XLSX.utils.sheet_to_json(ws);
-      
+
       processImportedData(data);
-      if(fileInputRef.current) fileInputRef.current.value = ""; // reset input
+      if (fileInputRef.current) fileInputRef.current.value = ""; // reset input
     };
     reader.readAsBinaryString(file);
   };
@@ -301,22 +301,22 @@ function Leads() {
           <button onClick={handleDownloadTemplate} className="btn-cancel" style={{ borderColor: 'var(--text-muted)', color: 'var(--text-muted)' }}>
             ⬇ Tải File Mẫu
           </button>
-          
-          <input 
-            type="file" 
-            accept=".xlsx, .xls, .csv" 
-            style={{ display: 'none' }} 
-            ref={fileInputRef} 
-            onChange={handleFileUpload} 
+
+          <input
+            type="file"
+            accept=".xlsx, .xls, .csv"
+            style={{ display: 'none' }}
+            ref={fileInputRef}
+            onChange={handleFileUpload}
           />
           <button onClick={() => fileInputRef.current.click()} className="btn-cancel" style={{ borderColor: 'var(--success)', color: 'var(--success)' }}>
             ⬆ Nhập Dữ liệu
           </button>
 
-          <select 
-            className="filter-select" 
+          <select
+            className="filter-select"
             style={{ width: '180px', margin: 0 }}
-            value={`${sortConfig.key}-${sortConfig.direction}`} 
+            value={`${sortConfig.key}-${sortConfig.direction}`}
             onChange={e => {
               const [key, dir] = e.target.value.split('-');
               setSortConfig({ key, direction: dir });
@@ -366,7 +366,7 @@ function Leads() {
             <tr>
               <th>Thao tác</th>
               <th onClick={() => handleSort('Mã lead')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                 Mã Lead {leadsSort.column === 'ma_lead' ? (leadsSort.ascending ? '🔼' : '🔽') : '↕️'}
+                Mã Lead {leadsSort.column === 'ma_lead' ? (leadsSort.ascending ? '🔼' : '🔽') : '↕️'}
               </th>
               <th onClick={() => handleSort('Họ tên')} style={{ cursor: 'pointer', userSelect: 'none' }}>
                 Họ Tên {sortConfig.key === 'Họ tên' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
@@ -417,13 +417,13 @@ function Leads() {
                 <td>
                   <div style={{ display: 'flex', gap: '5px' }}>
                     <button onClick={() => handleOpenEditModal(lead)} className="btn-edit">Sửa</button>
-                    <button 
+                    <button
                       onClick={() => {
-                        if(window.confirm(`Bạn có chắc chắn muốn xóa Lead ${lead['Họ tên']}?`)) {
+                        if (window.confirm(`Bạn có chắc chắn muốn xóa Lead ${lead['Họ tên']}?`)) {
                           deleteLead(lead['Mã lead']);
                         }
-                      }} 
-                      className="btn-cancel" 
+                      }}
+                      className="btn-cancel"
                       style={{ padding: '2px 8px', fontSize: '12px', borderColor: 'var(--danger)', color: 'var(--danger)' }}
                     >Xóa</button>
                   </div>
@@ -439,8 +439,8 @@ function Leads() {
                     padding: '4px 8px',
                     borderRadius: '4px',
                     backgroundColor: lead['Trạng thái'] === 'ĐÃ LIÊN HỆ' ? 'var(--success)' :
-                                   lead['Trạng thái'] === 'MỚI TIẾP NHẬN' ? 'var(--warning)' : 
-                                   lead['Trạng thái'] === 'TỪ CHỐI' ? 'var(--danger)' : 'var(--accent)',
+                      lead['Trạng thái'] === 'MỚI TIẾP NHẬN' ? 'var(--warning)' :
+                        lead['Trạng thái'] === 'TỪ CHỐI' ? 'var(--danger)' : 'var(--accent)',
                     color: lead['Trạng thái'] === 'TỪ CHỐI' ? '#fff' : '#000',
                     fontSize: '12px',
                     fontWeight: 'bold'
@@ -466,14 +466,14 @@ function Leads() {
       {/* Pagination Controls */}
       {totalPages > 1 && (
         <div className="pagination-container" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '20px', marginBottom: '40px' }}>
-          <button 
-            onClick={() => paginate(currentPage - 1)} 
+          <button
+            onClick={() => paginate(currentPage - 1)}
             disabled={currentPage === 1}
             style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', opacity: currentPage === 1 ? 0.5 : 1 }}
           >
             Trái
           </button>
-          
+
           {[...Array(totalPages)].map((_, idx) => {
             const pageNum = idx + 1;
             if (totalPages > 7) {
@@ -505,8 +505,8 @@ function Leads() {
             );
           })}
 
-          <button 
-            onClick={() => paginate(currentPage + 1)} 
+          <button
+            onClick={() => paginate(currentPage + 1)}
             disabled={currentPage === totalPages}
             style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', opacity: currentPage === totalPages ? 0.5 : 1 }}
           >
@@ -521,7 +521,7 @@ function Leads() {
             <h2 className="modal-title" style={{ color: 'var(--warning)' }}>⚠ Cảnh báo trùng lặp</h2>
             <p style={{ marginBottom: '20px' }}>
               Hệ thống phát hiện có một số Lead trong file tải lên bị trùng mã (Mã lead) với dữ liệu hiện tại.
-              <br/><br/>
+              <br /><br />
               Bạn có muốn <strong>Ghi đè</strong> để cập nhật dữ liệu cũ, hay <strong>Hủy</strong> để kiểm tra lại file?
             </p>
             <div className="modal-actions">
@@ -545,29 +545,29 @@ function Leads() {
               <div className="form-grid">
                 <div className="form-group">
                   <label>Mã Lead (Tự động)</label>
-                  <input required disabled className="input-field" value={formData['Mã lead']} onChange={e => setFormData({...formData, 'Mã lead': e.target.value})} style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-muted)' }} />
+                  <input required disabled className="input-field" value={formData['Mã lead']} onChange={e => setFormData({ ...formData, 'Mã lead': e.target.value })} style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-muted)' }} />
                 </div>
                 <div className="form-group">
                   <label>Họ tên</label>
-                  <input required className="input-field" value={formData['Họ tên']} onChange={e => setFormData({...formData, 'Họ tên': e.target.value})} placeholder="Nguyễn Văn A" />
+                  <input required className="input-field" value={formData['Họ tên']} onChange={e => setFormData({ ...formData, 'Họ tên': e.target.value })} placeholder="Nguyễn Văn A" />
                 </div>
                 <div className="form-group">
                   <label>Số điện thoại</label>
-                  <input required className="input-field" value={formData['SĐT (đầy đủ)']} onChange={e => setFormData({...formData, 'SĐT (đầy đủ)': e.target.value})} placeholder="0901234567" />
+                  <input required className="input-field" value={formData['SĐT (đầy đủ)']} onChange={e => setFormData({ ...formData, 'SĐT (đầy đủ)': e.target.value })} placeholder="0901234567" />
                 </div>
                 <div className="form-group">
                   <label>Nguồn</label>
-                  <input className="input-field" value={formData['Nguồn']} onChange={e => setFormData({...formData, 'Nguồn': e.target.value})} placeholder="Facebook Ads" />
+                  <input className="input-field" value={formData['Nguồn']} onChange={e => setFormData({ ...formData, 'Nguồn': e.target.value })} placeholder="Facebook Ads" />
                 </div>
                 <div className="form-group">
                   <label>Chiến dịch (Mã Campaign)</label>
-                  <select 
-                    className="input-field" 
-                    value={formData['Chiến dịch']} 
+                  <select
+                    className="input-field"
+                    value={formData['Chiến dịch']}
                     onChange={e => {
                       const selectedCamp = marketing.find(m => m['Tên chiến dịch'] === e.target.value);
                       setFormData({
-                        ...formData, 
+                        ...formData,
                         'Chiến dịch': e.target.value,
                         '_campaign_id': selectedCamp ? selectedCamp['Tên chiến dịch'] : null // In this schema, campaign name is often used as ID
                       });
@@ -581,11 +581,11 @@ function Leads() {
                 </div>
                 <div className="form-group">
                   <label>Nhu cầu</label>
-                  <input className="input-field" value={formData['Nhu cầu']} onChange={e => setFormData({...formData, 'Nhu cầu': e.target.value})} placeholder="2PN, view biển" />
+                  <input className="input-field" value={formData['Nhu cầu']} onChange={e => setFormData({ ...formData, 'Nhu cầu': e.target.value })} placeholder="2PN, view biển" />
                 </div>
                 <div className="form-group">
                   <label>Trạng thái</label>
-                  <select className="input-field" value={formData['Trạng thái']} onChange={e => setFormData({...formData, 'Trạng thái': e.target.value})}>
+                  <select className="input-field" value={formData['Trạng thái']} onChange={e => setFormData({ ...formData, 'Trạng thái': e.target.value })}>
                     <option value="MỚI TIẾP NHẬN">MỚI TIẾP NHẬN</option>
                     <option value="ĐÃ PHÂN CÔNG">ĐÃ PHÂN CÔNG</option>
                     <option value="ĐÃ LIÊN HỆ">ĐÃ LIÊN HỆ</option>
@@ -596,15 +596,15 @@ function Leads() {
                 </div>
                 <div className="form-group">
                   <label>Ngày nhận</label>
-                  <input type="date" className="input-field" value={formData['Ngày nhận']} onChange={e => setFormData({...formData, 'Ngày nhận': e.target.value})} />
+                  <input type="date" className="input-field" value={formData['Ngày nhận']} onChange={e => setFormData({ ...formData, 'Ngày nhận': e.target.value })} />
                 </div>
                 <div className="form-group">
                   <label>Ngày Follow Up</label>
-                  <input type="date" className="input-field" value={formData['Ngày FU']} onChange={e => setFormData({...formData, 'Ngày FU': e.target.value})} />
+                  <input type="date" className="input-field" value={formData['Ngày FU']} onChange={e => setFormData({ ...formData, 'Ngày FU': e.target.value })} />
                 </div>
                 <div className="form-group">
                   <label>Ngày hẹn</label>
-                  <input type="date" className="input-field" value={formData['Ngày hẹn']} onChange={e => setFormData({...formData, 'Ngày hẹn': e.target.value})} />
+                  <input type="date" className="input-field" value={formData['Ngày hẹn']} onChange={e => setFormData({ ...formData, 'Ngày hẹn': e.target.value })} />
                 </div>
                 <div className="form-group">
                   <label>Phân công Nhân sự (Mã NV)</label>
@@ -625,7 +625,7 @@ function Leads() {
                 </div>
                 <div className="form-group" style={{ gridColumn: '1 / -1' }}>
                   <label>Ghi chú</label>
-                  <input className="input-field" value={formData['Ghi chú']} onChange={e => setFormData({...formData, 'Ghi chú': e.target.value})} placeholder="Ghi chú thêm..." />
+                  <input className="input-field" value={formData['Ghi chú']} onChange={e => setFormData({ ...formData, 'Ghi chú': e.target.value })} placeholder="Ghi chú thêm..." />
                 </div>
               </div>
               <div className="modal-actions">

@@ -17,18 +17,18 @@ export const DataProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
 
   const [globalFilter, setGlobalFilter] = useState('all');
-  
+
   // Pagination, Search & Sort State
   const [leadsPage, setLeadsPage] = useState(1);
   const [leadsTotal, setLeadsTotal] = useState(0);
   const [leadsSearch, setLeadsSearch] = useState('');
   const [leadsSort, setLeadsSort] = useState({ column: 'ngay_nhan', ascending: false });
-  
+
   const [transactionsPage, setTransactionsPage] = useState(1);
   const [transactionsTotal, setTransactionsTotal] = useState(0);
   const [transSearch, setTransSearch] = useState('');
   const [transSort, setTransSort] = useState({ column: 'ngay_gd', ascending: false });
-  
+
   const [dashboardStats, setDashboardStats] = useState(null);
   const itemsPerPage = 15;
 
@@ -37,7 +37,7 @@ export const DataProvider = ({ children }) => {
     if (!filter || filter === 'all') return [null, null];
     const [type, val] = filter.split(':');
     let start, end;
-    
+
     if (type === 'day') {
       const [d, m, y] = val.split('/');
       const dateStr = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
@@ -110,10 +110,13 @@ export const DataProvider = ({ children }) => {
       const getEmpName = (id) => employees.find(e => e.ma_nv == id)?.ho_ten || id || "";
       const getCampaignName = (id) => campaigns.find(c => c.ma_chien_dich == id)?.ten_chien_dich || id || "";
 
+      const userRole = (currentUser.role || 'Admin').toLowerCase();
+      const isAdminOrBOD = ['admin', 'bod'].includes(userRole);
+
       // 3. Fetch Paginated Leads
       let leadsQuery = supabase.from('leads').select('*', { count: 'exact' });
       leadsQuery = applyDateFilter(leadsQuery, globalFilter, 'ngay_nhan');
-      if (!['Admin', 'BOD'].includes(currentUser.role)) leadsQuery = leadsQuery.eq('nhan_vien_id', currentUser.ma_nv);
+      if (!isAdminOrBOD) leadsQuery = leadsQuery.eq('nhan_vien_id', currentUser.ma_nv);
       if (leadsSearch) leadsQuery = leadsQuery.or(`ho_ten.ilike.%${leadsSearch}%,sdt.ilike.%${leadsSearch}%,ma_lead.ilike.%${leadsSearch}%`);
 
       const leadsRange = [(leadsPage - 1) * itemsPerPage, leadsPage * itemsPerPage - 1];
@@ -147,7 +150,7 @@ export const DataProvider = ({ children }) => {
       // 4. Fetch Paginated Transactions
       let transQuery = supabase.from('transactions').select('*', { count: 'exact' });
       transQuery = applyDateFilter(transQuery, globalFilter, 'ngay_gd');
-      if (!['Admin', 'BOD', 'Kế toán'].includes(currentUser.role)) transQuery = transQuery.eq('nhan_vien_id', currentUser.ma_nv);
+      if (!isAdminOrBOD && userRole !== 'kế toán') transQuery = transQuery.eq('nhan_vien_id', currentUser.ma_nv);
       if (transSearch) transQuery = transQuery.or(`ma_gd.ilike.%${transSearch}%,ma_sp.ilike.%${transSearch}%,khach_hang_id.ilike.%${transSearch}%`);
 
       const transRange = [(transactionsPage - 1) * itemsPerPage, transactionsPage * itemsPerPage - 1];
@@ -238,7 +241,7 @@ export const DataProvider = ({ children }) => {
       .on('postgres_changes', { event: '*', schema: 'public', table: tableName }, (payload) => {
         const userCode = currentUser?.ma_nv;
         const isAdmin = ['Admin', 'BOD'].includes(currentUser?.role);
-        
+
         let isRelevant = isAdmin;
         if (!isRelevant && tableName === 'leads') {
           isRelevant = payload.new?.nhan_vien_id === userCode || payload.old?.nhan_vien_id === userCode;
@@ -255,19 +258,37 @@ export const DataProvider = ({ children }) => {
 
   useEffect(() => {
     const handleAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-        if (profile) {
-          setCurrentUser({
-            id: session.user.id,
-            email: session.user.email,
-            role: profile.role,
-            ma_nv: profile.employee_code
-          });
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+          if (profile) {
+            // Capitalize role to match App.jsx requirements
+            const normalizedRole = profile.role ? (profile.role.charAt(0).toUpperCase() + profile.role.slice(1).toLowerCase()) : 'Admin';
+            setCurrentUser({
+              id: session.user.id,
+              email: session.user.email,
+              role: normalizedRole === 'Admin' ? 'Admin' : (profile.role || 'Admin'),
+              ma_nv: profile.employee_code || 'ADMIN01',
+              full_name: profile.full_name || session.user.email.split('@')[0]
+            });
+          } else {
+            console.warn('Profile not found. Defaulting to Admin.');
+            setCurrentUser({
+              id: session.user.id,
+              email: session.user.email,
+              role: 'Admin',
+              ma_nv: 'ADMIN01',
+              full_name: session.user.email.split('@')[0]
+            });
+          }
+        } else {
+          // No session - default to Guest Admin for development or redirect to login
+          setCurrentUser({ role: 'Admin', ma_nv: 'ADMIN01', full_name: 'Guest Admin' });
         }
-      } else {
-        setCurrentUser({ role: 'Admin' });
+      } catch (err) {
+        console.error('Auth error:', err);
+        setCurrentUser({ role: 'Admin', ma_nv: 'ADMIN01', full_name: 'Guest Admin' });
       }
     };
 

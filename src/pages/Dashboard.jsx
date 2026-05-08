@@ -181,7 +181,7 @@ function Dashboard() {
         <div className="dash-kpi-card card-leads">
           <div className="dash-kpi-title">Tổng Lead CRM</div>
           <div className="dash-kpi-value">{totalLeads}</div>
-          <div className="dash-kpi-subtext">{chuaPhanCongLeads.length} chưa phân công · {daPhanCong} đã phân</div>
+          <div className="dash-kpi-subtext">{unassignedLeadsCount} chưa phân công · {daPhanCong} đã phân</div>
         </div>
 
         <div className="dash-kpi-card card-mkt">
@@ -192,7 +192,7 @@ function Dashboard() {
 
         <div className="dash-kpi-card card-unassigned">
           <div className="dash-kpi-title">Chưa phân công</div>
-          <div className="dash-kpi-value">{chuaPhanCongLeads.length}</div>
+          <div className="dash-kpi-value">{unassignedLeadsCount}</div>
           <div className="dash-kpi-subtext">Xử lý ngay</div>
         </div>
       </div>
