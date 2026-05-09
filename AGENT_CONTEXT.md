@@ -126,9 +126,11 @@ CRM/
 
 ## 🚦 5. Tiến độ Hiện tại & Việc cần làm (Current Status & TODO)
 * **Tiến độ**: 
-    - Đã chuẩn hóa định dạng số (Compact Format - tỷ/tr) trên toàn bộ hệ thống Dashboard, Financials, Marketing.
-    - Đã ổn định AI Assistant (BOD Intelligence) sử dụng Gemini API v1.
-    - Đã hỗ trợ cấu hình linh hoạt API Key và Model thông qua Supabase Secrets.
+    - **Bảo mật & Ổn định AI (BOD Assistant)**: Đã di chuyển toàn bộ logic AI sang Supabase Edge Function (`bod-assistant`). Tuyệt đối không để lộ API Key ở Frontend.
+    - **Mô hình AI**: Đã cố định sử dụng `gemini-2.5-flash` và endpoint `v1beta` để phù hợp với tài khoản Google AI của Sếp.
+    - **Trí tuệ & Ngữ cảnh**: AI đã được nâng cấp để hiểu toàn cảnh công ty (Tổng nhân viên, Top 10 Sales, KPI tài chính). Hỏi gì đáp nấy, không trả lời thừa.
+    - **Dữ liệu**: Đã chuẩn hóa ánh xạ doanh số (DS THỰC) giúp AI báo cáo chính xác 100% so với Dashboard.
 * **Việc cần làm**:
-    - Kiểm tra hiệu năng hiển thị khi dữ liệu tăng trưởng lớn.
+    - Giám sát độ trễ của Edge Function khi xử lý các tập dữ liệu lớn.
+    - Xem xét tích hợp thêm các báo cáo marketing sâu hơn vào ngữ cảnh của AI.
     - Tiếp tục tối ưu giao diện theo yêu cầu hiện đại, tinh tế của Sếp.
