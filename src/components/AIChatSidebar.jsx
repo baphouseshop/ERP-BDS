@@ -36,10 +36,14 @@ const AIChatSidebar = () => {
         : (allSales || staff || []);
 
       const salesContext = rawSales
-        .map(s => ({
-          nv: s["Tên NV"] || s.ho_ten || s.name || "N/A",
-          ds: s["DS THỰC"] || s.total_revenue || s.revenue || 0,
-        }))
+        .map(s => {
+          // Lấy doanh số từ mọi trường có thể có (đảm bảo không sót số của Sếp)
+          const revenue = s["DS THỰC"] || s["Doanh số"] || s.total_revenue || s.revenue || s.amount || 0;
+          return {
+            nv: s["Tên NV"] || s.ho_ten || s.name || s.full_name || "N/A",
+            ds: typeof revenue === 'string' ? parseFloat(revenue.replace(/[^\d.]/g, '')) : revenue
+          };
+        })
         .sort((a, b) => b.ds - a.ds)
         .slice(0, 5);
 
