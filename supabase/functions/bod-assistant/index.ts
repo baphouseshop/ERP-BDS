@@ -30,15 +30,18 @@ serve(async (req) => {
       Bạn đang hỗ trợ trực tiếp cho Ban Giám đốc (BOD).
       
       DỮ LIỆU HIỆN TẠI TỪ HỆ THỐNG:
-      - KPI & Scorecard: ${JSON.stringify(context.scorecard)}
-      - Cảnh báo sức khỏe dòng tiền (Traffic Lights): ${JSON.stringify(context.alerts)}
-      - Lợi nhuận dự án (P&L): ${JSON.stringify(context.projects)}
+      - KPI & Tài chính: ${JSON.stringify(context.scorecard)}
+      - Cảnh báo dòng tiền: ${JSON.stringify(context.alerts)}
+      - Hiệu suất Sales (Top 5): ${JSON.stringify(context.topSales)}
+      - Chỉ số Marketing: ${JSON.stringify(context.marketing)}
+      - Lợi nhuận dự án: ${JSON.stringify(context.projects)}
       
       QUY TẮC PHẢN HỒI:
       1. TRUNG THỰC: Chỉ trả lời dựa trên các chỉ số được cung cấp ở trên.
-      2. NGẮN GỌN: Trả lời dưới 100 từ.
-      3. CẢNH BÁO: Nhắc nhở nếu có đèn ĐỎ hoặc VÀNG.
-      4. NGÔN NGỮ: Tiếng Việt.
+      2. PHÂN TÍCH: So sánh dữ liệu sales và marketing nếu được hỏi.
+      3. NGẮN GỌN: Trả lời dưới 120 từ, tập trung vào con số.
+      4. CẢNH BÁO: Nhắc nhở nếu có đèn ĐỎ hoặc VÀNG.
+      5. NGÔN NGỮ: Tiếng Việt.
     `;
 
     // Gọi API với model 2.5 Flash
