@@ -14,11 +14,11 @@ serve(async (req) => {
     const { prompt, context } = await req.json()
     const apiKey = Deno.env.get('GEMINI_API_KEY') || Deno.env.get('Gemini API Key');
     
-    // CHUYỂN SANG 1.5 FLASH ĐỂ ỔN ĐỊNH TUYỆT ĐỐI
-    const modelName = 'gemini-1.5-flash';
+    // SỬ DỤNG LẠI 2.5 FLASH (BẢN DUY NHẤT HỖ TRỢ TÀI KHOẢN CỦA SẾP)
+    const modelName = 'gemini-2.5-flash';
 
     if (!apiKey) {
-      return new Response(JSON.stringify({ reply: 'Lỗi: Thiếu API Key trong hệ thống.' }), { headers: corsHeaders })
+       return new Response(JSON.stringify({ reply: 'Hệ thống đang chờ Sếp cập nhật API Key mới.' }), { headers: corsHeaders })
     }
 
     const systemPrompt = `
@@ -27,32 +27,32 @@ serve(async (req) => {
       KPI: ${JSON.stringify(context.scorecard || {})}
       
       YÊU CẦU:
-      - Nếu thấy dữ liệu sales, hãy chỉ ra ai dẫn đầu doanh số (cột "ds").
-      - Trả lời bằng tiếng Việt, ngắn gọn dưới 50 từ.
+      - Nêu đích danh người bán tốt nhất (cột "nv") từ dữ liệu.
+      - Trả lời tiếng Việt, ngắn gọn.
     `;
 
-    // SỬ DỤNG V1 THAY VÌ V1BETA ĐỂ TĂNG ĐỘ ỔN ĐỊNH
-    const url = `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${apiKey}`;
+    // SỬ DỤNG V1BETA CHO MODEL 2.5
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
     
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: systemPrompt + '\n\nCâu hỏi của Sếp: ' + prompt }] }]
+        contents: [{ parts: [{ text: systemPrompt + '\n\nSếp hỏi: ' + prompt }] }]
       })
     });
 
     const data = await response.json();
     
     if (data.error) {
-      return new Response(JSON.stringify({ reply: `Lỗi API (${data.error.code}): ${data.error.message}` }), { headers: corsHeaders })
+      return new Response(JSON.stringify({ reply: `Lỗi Gemini (${data.error.code}): ${data.error.message}. Sếp vui lòng cập nhật lại API Key mới.` }), { headers: corsHeaders })
     }
 
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'AI đang bận, Sếp vui lòng hỏi lại sau giây lát.';
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'AI không trả về kết quả.';
 
     return new Response(JSON.stringify({ reply }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
 
   } catch (error) {
-    return new Response(JSON.stringify({ reply: 'Lỗi kết nối: ' + error.message }), { headers: corsHeaders })
+    return new Response(JSON.stringify({ reply: 'Lỗi hệ thống: ' + error.message }), { headers: corsHeaders })
   }
 })

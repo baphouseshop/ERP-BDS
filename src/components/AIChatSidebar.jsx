@@ -43,49 +43,32 @@ const AIChatSidebar = () => {
         .sort((a, b) => b.ds - a.ds)
         .slice(0, 5);
 
-      const systemPrompt = `
-        Bạn là Trợ lý Trí tuệ BOD cho Blanca CRM. 
-        DỮ LIỆU HIỆN TẠI:
-        - Sales (Top 5): ${JSON.stringify(salesContext)}
-        - Tài chính: ${JSON.stringify(executiveScorecard)}
-        - Dự án: ${JSON.stringify(projectPL)}
-        
-        NHIỆM VỤ:
-        - Nêu đích danh người bán tốt nhất từ danh sách nếu được hỏi.
-        - Trả lời tiếng Việt, cực ngắn gọn (dưới 80 từ).
-      `;
-
-      // GỌI TRỰC TIẾP GEMINI TỪ FRONTEND ĐỂ TRÁNH LỖI TRUNG GIAN
-      const apiKey = "AIzaSyB3N1n_uE9Fna7DrWelugvYpOHtIVxyE-0";
-      const modelName = 'gemini-2.5-flash';
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
-
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: systemPrompt + "\n\nUser: " + userMessage }] }]
-        })
+      const { data, error } = await supabase.functions.invoke('bod-assistant', {
+        body: { 
+          prompt: userMessage,
+          context: {
+            scorecard: executiveScorecard,
+            alerts: trafficLights,
+            projects: projectPL,
+            topSales: salesContext,
+            marketing: dashboardStats?.marketingStats || [],
+            user: currentUser?.full_name
+          }
+        }
       });
 
-      const data = await response.json();
-      
-      if (data.error) {
-        throw new Error(`Lỗi Gemini (${data.error.code}): ${data.error.message}`);
-      }
-
-      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "AI không phản hồi.";
+      if (error) throw error;
 
       const botMessage = {
         role: 'assistant',
-        content: reply
+        content: data.reply
       };
       setMessages(prev => [...prev, botMessage]);
     } catch (error) {
       console.error('Chat Error:', error);
       const errorMessage = {
         role: 'assistant',
-        content: `Lỗi kết nối AI: ${error.message}. Sếp vui lòng kiểm tra lại mạng hoặc API Key.`
+        content: `Lỗi kết nối AI: ${error.message}. Sếp vui lòng kiểm tra lại mạng hoặc cập nhật API Key mới vào hệ thống.`
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
