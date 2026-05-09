@@ -30,26 +30,44 @@ const AIChatSidebar = () => {
     setIsLoading(true);
 
     try {
-      // 1. Chuẩn bị dữ liệu Top Sales để phân tích sâu
-      const salesContext = (allSales || [])
-        .map(s => {
-          const revenue = s["DS THỰC"] || s["Doanh số"] || s.total_revenue || 0;
-          return {
-            nv: s["Tên NV"] || s.ho_ten || s.name || "N/A",
-            ds: typeof revenue === 'string' ? parseFloat(revenue.replace(/[^\d.]/g, '')) : revenue
-          };
-        })
-        .sort((a, b) => b.ds - a.ds)
-        .slice(0, 10);
+      // 1. Lấy dữ liệu tổng hợp đa chiều từ View v_bod_ai_summary
+      const { data: rawSummary } = await supabase
+        .from('v_bod_ai_summary')
+        .select('*');
 
-      // 2. Gọi Edge Function an toàn (không dùng API Key ở Frontend)
+      // 2. Chế biến dữ liệu để phù hợp với Prompt của AI hiện tại
+      const floorStats = {};
+      const salesPerformance = (rawSummary || []).map(row => {
+        if (!floorStats[row.ten_san]) {
+          floorStats[row.ten_san] = { 
+            nhan_vien: row.tong_nhan_vien_cua_san,
+            doanh_thu: 0,
+            giao_dich: 0
+          };
+        }
+        floorStats[row.ten_san].doanh_thu += parseFloat(row.tong_doanh_thu || 0);
+        floorStats[row.ten_san].giao_dich += parseInt(row.tong_giao_dich || 0);
+
+        return {
+          ten: row.ten_nhan_vien,
+          san: row.ten_san,
+          ds: row.tong_doanh_thu,
+          gd: row.tong_giao_dich,
+          tile: row.ty_le_chuyen_doi_pt + '%'
+        };
+      });
+
+      // 3. Gọi Edge Function
       const { data, error } = await supabase.functions.invoke('bod-assistant', {
         body: { 
           prompt: userMessage,
           context: {
             totalStaff: staff?.length || 0,
-            topSales: salesContext,
-            scorecard: executiveScorecard,
+            topSales: salesPerformance, // Truyền toàn bộ danh sách đã chuẩn hóa
+            scorecard: { 
+              ...executiveScorecard,
+              thong_ke_san: floorStats // Chèn thêm thống kê sàn vào scorecard
+            },
             projects: projectPL
           }
         }

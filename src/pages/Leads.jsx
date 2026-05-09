@@ -27,7 +27,8 @@ function Leads() {
     addMultipleLeads,
     updateLeads,
     sales,
-    staff
+    staff,
+    isFetching
   } = useData();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -375,7 +376,10 @@ function Leads() {
           {AGENCY_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
         {hasActiveFilters && <button className="btn-clear-filter" onClick={clearFilters}>✕ Xóa lọc</button>}
-        <span className="filter-count">Tổng cộng: <strong>{leadsTotal}</strong> lead</span>
+        <span className="filter-count">
+          {isFetching && <span className="loader-inline" style={{ marginRight: '10px' }}>⏳</span>}
+          Tổng cộng: <strong>{leadsTotal}</strong> lead
+        </span>
       </div>
 
       <div className="table-container">

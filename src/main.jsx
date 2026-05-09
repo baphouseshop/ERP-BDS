@@ -4,6 +4,7 @@ import { HashRouter } from 'react-router-dom'
 import App from './App.jsx'
 import './index.css'
 import { DataProvider } from './context/DataContext'
+import { NotificationProvider } from './context/NotificationContext'
 
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 
@@ -12,7 +13,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <ErrorBoundary>
       <DataProvider>
         <HashRouter>
-          <App />
+          <NotificationProvider>
+            <App />
+          </NotificationProvider>
         </HashRouter>
       </DataProvider>
     </ErrorBoundary>

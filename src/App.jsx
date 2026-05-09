@@ -10,11 +10,14 @@ import Staff from './pages/Staff';
 import Logs from './pages/Logs';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
+import Automation from './pages/Automation';
 import { useData } from './context/DataContext';
 import { supabase } from './supabaseClient';
 import ErrorBoundary from './components/ErrorBoundary';
 import toast, { Toaster } from 'react-hot-toast';
 import AIChatSidebar from './components/AIChatSidebar';
+import LoadingScreen from './components/LoadingScreen';
+import NotificationBell from './components/NotificationBell';
 
 function DateFilter() {
   const { globalFilter, setGlobalFilter } = useData();
@@ -173,6 +176,7 @@ function TopBar() {
     { path: '/marketing', label: 'MARKETING', roles: ['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'Marketing', 'IT'] },
     { path: '/leads', label: 'CRM LEADS', roles: ['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'Sales', 'Marketing', 'IT'] },
     { path: '/staff', label: 'NHÂN SỰ', roles: ['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'HR', 'IT'] },
+    { path: '/automation', label: 'AUTOMATION', roles: ['Admin', 'BOD', 'Giám đốc', 'Marketing', 'IT'] },
     { path: '/logs', label: 'LỊCH SỬ', roles: ['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'IT'] },
     { path: '/settings', label: 'CÀI ĐẶT', roles: ['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'IT'] },
   ];
@@ -192,6 +196,7 @@ function TopBar() {
             <span className="live-dot"></span> Live
           </div>
           <div className="time-display">{dateStr}</div>
+          <NotificationBell />
           <button onClick={handleLogout} style={{ marginLeft: '15px', backgroundColor: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '4px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>
             Đăng xuất
           </button>
@@ -212,7 +217,7 @@ function App() {
   const { currentUser, loadingData, session, authLoading } = useData();
 
   if (authLoading) {
-    return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>Loading...</div>;
+    return <LoadingScreen message="Đang xác thực quyền truy cập..." />;
   }
 
   if (!session) {
@@ -240,7 +245,7 @@ function App() {
       <TopBar />
       <div className="main-content">
         {loadingData ? (
-           <div style={{ padding: '20px', color: 'var(--text-primary)' }}>Đang tải dữ liệu...</div>
+           <LoadingScreen message="Đang đồng bộ dữ liệu với hệ thống..." />
         ) : (
           <ErrorBoundary>
             <Routes>
@@ -252,6 +257,7 @@ function App() {
               <Route path="/financials" element={checkAccess(['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'Kế toán', 'IT']) ? <Financials /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
               <Route path="/staff" element={checkAccess(['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'HR', 'IT']) ? <Staff /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
               <Route path="/logs" element={checkAccess(['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'IT']) ? <Logs /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
+              <Route path="/automation" element={checkAccess(['Admin', 'BOD', 'Giám đốc', 'Marketing', 'IT']) ? <Automation /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
               <Route path="/settings" element={checkAccess(['Admin', 'BOD', 'Giám đốc', 'Giám đốc sàn', 'IT']) ? <Settings /> : <div style={{padding: '20px'}}>Bạn không có quyền truy cập trang này.</div>} />
             </Routes>
           </ErrorBoundary>

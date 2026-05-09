@@ -1,6 +1,6 @@
 # Bối cảnh Dự án (Agent Context): CRM
 
-> **Cập nhật lần cuối**: 2026-05-09 09:03
+> **Cập nhật lần cuối**: 2026-05-09 13:05
 > **Tự động tạo**: Được tạo bởi `prepare_context.py` để giúp AI Agent nhanh chóng nắm bắt toàn bộ dự án
 
 ---
@@ -127,10 +127,16 @@ CRM/
 ## 🚦 5. Tiến độ Hiện tại & Việc cần làm (Current Status & TODO)
 * **Tiến độ**: 
     - **Bảo mật & Ổn định AI (BOD Assistant)**: Đã di chuyển toàn bộ logic AI sang Supabase Edge Function (`bod-assistant`). Tuyệt đối không để lộ API Key ở Frontend.
-    - **Mô hình AI**: Đã cố định sử dụng `gemini-2.5-flash` và endpoint `v1beta` để phù hợp với tài khoản Google AI của Sếp.
-    - **Trí tuệ & Ngữ cảnh**: AI đã được nâng cấp để hiểu toàn cảnh công ty (Tổng nhân viên, Top 10 Sales, KPI tài chính). Hỏi gì đáp nấy, không trả lời thừa.
+    - **Mô hình AI**: Đã cố định sử dụng `gemini-2.0-flash` (đã update) phù hợp với tài khoản Google AI.
+    - **Audit Logging**: Triển khai bảng `audit_logs` và logic `logAction` truy vết mọi tác vụ Add/Edit/Delete trên toàn hệ thống.
+    - **Harden Mutations**: Role-based guarding (Chỉ Admin/BOD được xóa), robust validation (SĐT, Email, Required), và cơ chế rollback khi lỗi server.
+    - **UX Refinement**: 
+        - Tối ưu trạng thái Loading: `isFetching` cho các tác vụ nền (search/pagination) giúp UI mượt mà, không bị flash trắng.
+        - Thêm indicator `loader-inline` trực quan khi dữ liệu đang đồng bộ.
+        - Premium `LoadingScreen.jsx` cho khởi động ứng dụng.
     - **Dữ liệu**: Đã chuẩn hóa ánh xạ doanh số (DS THỰC) giúp AI báo cáo chính xác 100% so với Dashboard.
 * **Việc cần làm**:
-    - Giám sát độ trễ của Edge Function khi xử lý các tập dữ liệu lớn.
-    - Xem xét tích hợp thêm các báo cáo marketing sâu hơn vào ngữ cảnh của AI.
-    - Tiếp tục tối ưu giao diện theo yêu cầu hiện đại, tinh tế của Sếp.
+    - **Audit Log Viewer**: Tích hợp giao diện xem Log cho Admin để giám sát hoạt động hệ thống.
+    - **Performance Monitor**: Giám sát độ trễ của Edge Function khi xử lý >5000 leads.
+    - **Auto-Reports**: Nghiên cứu cơ chế AI tự động gửi báo cáo KPI hàng ngày qua Telegram/Zalo.
+    - **Stress Test**: Kiểm tra tính ổn định của cơ chế Rollback trong điều kiện mạng chập chờn.

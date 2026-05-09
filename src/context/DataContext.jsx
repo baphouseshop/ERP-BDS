@@ -1,6 +1,12 @@
 import React, { createContext, useState, useContext, useEffect, useCallback, useRef, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
 import toast from 'react-hot-toast';
+import { 
+  validatePhone, 
+  validateEmail, 
+  sanitizeString, 
+  validateRequired 
+} from '../utils/validation';
 
 const DataContext = createContext();
 
@@ -19,6 +25,7 @@ export const DataProvider = ({ children }) => {
   const [projectPL, setProjectPL] = useState([]);
   const [cashflowForecast, setCashflowForecast] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [session, setSession] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -97,7 +104,8 @@ export const DataProvider = ({ children }) => {
 
   const fetchData = useCallback(async () => {
     if (!currentUser) return;
-    setLoadingData(true);
+    
+    setIsFetching(true);
     try {
       const [start, end] = applyDateRange(globalFilter);
 
@@ -134,6 +142,11 @@ export const DataProvider = ({ children }) => {
       const employees = empRes.data || [];
       const campaigns = mktListRes.data || [];
       const kpiTargets = kpiRes.data || [];
+
+      // Optimize mapping with Maps (O(1) lookup instead of O(N) find)
+      const empMap = new Map(employees.map(e => [String(e.ma_nv), e.ho_ten]));
+      const campMap = new Map(campaigns.map(c => [String(c.ma_chien_dich), c.ten_chien_dich]));
+
       setStaff(employees.map(emp => ({
         "Mã NV": emp.ma_nv,
         "Tên NV": emp.ho_ten,
@@ -148,8 +161,8 @@ export const DataProvider = ({ children }) => {
         "Quyền": emp.quyen || "Sales"
       })));
 
-      const getEmpName = (id) => employees.find(e => e.ma_nv == id)?.ho_ten || id || "";
-      const getCampaignName = (id) => campaigns.find(c => c.ma_chien_dich == id)?.ten_chien_dich || id || "";
+      const getEmpName = (id) => empMap.get(String(id)) || id || "";
+      const getCampaignName = (id) => campMap.get(String(id)) || id || "";
 
       const userRole = (currentUser.role || 'Admin').toLowerCase();
       // Các quyền quản lý/admin được xem toàn bộ dữ liệu
@@ -375,6 +388,7 @@ export const DataProvider = ({ children }) => {
     } catch (error) {
       console.error("Critical error in fetchData:", error);
     } finally {
+      setIsFetching(false);
       setLoadingData(false);
     }
   }, [
@@ -417,6 +431,27 @@ export const DataProvider = ({ children }) => {
       .subscribe();
   };
 
+  const logAction = useCallback(async ({ action, tableName, recordId, oldData = null, newData = null }) => {
+    try {
+      const user = currentUserRef.current;
+      if (!user) return;
+
+      const logEntry = {
+        action,
+        table_name: tableName,
+        record_id: String(recordId),
+        old_data: oldData,
+        new_data: newData,
+        changed_by: user.id,
+        changed_by_name: user.full_name
+      };
+
+      await supabase.from('audit_logs').insert([logEntry]);
+    } catch (err) {
+      console.warn("Audit log failed (silent):", err);
+    }
+  }, []);
+
   useEffect(() => {
     const handleAuth = async (currentSession) => {
       setAuthLoading(true);
@@ -457,12 +492,20 @@ export const DataProvider = ({ children }) => {
     const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange((event, newSession) => {
       if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED') {
         handleAuth(newSession);
+        if (event === 'SIGNED_IN') toast.success("Đăng nhập thành công");
       } else if (event === 'SIGNED_OUT') {
         setSession(null);
         setCurrentUser(null);
         setLeads([]);
         setTransactions([]);
         setAuthLoading(false);
+        toast.success("Đã đăng xuất");
+      } else if (event === 'TOKEN_REFRESHED') {
+        console.log("Auth token refreshed");
+      } else if (event === 'USER_DELETED') {
+        toast.error("Tài khoản đã bị xóa hoặc vô hiệu hóa");
+        setSession(null);
+        setCurrentUser(null);
       }
     });
 
@@ -491,167 +534,262 @@ export const DataProvider = ({ children }) => {
 
   // --- MUTATION FUNCTIONS (Supabase Sync) ---
   const addLead = useCallback(async (newLead) => {
-    const dbLead = {
-      ma_lead: newLead["Mã lead"],
-      ngay_nhan: newLead["Ngày nhận"] || null,
-      ho_ten: newLead["Họ tên"],
-      sdt: newLead["SĐT (đầy đủ)"],
-      nguon: newLead["Nguồn"],
-      chien_dich_id: newLead["_campaign_id"] || null,
-      nhu_cau: newLead["Nhu cầu"],
-      trang_thai: newLead["Trạng thái"],
-      nhan_vien_id: newLead["Mã NV"] || null,
-      ten_san: newLead["Tên sàn"],
-      ngay_hen: newLead["Ngày hẹn"] || null,
-      ngay_fu: newLead["Ngày FU"] || null,
-      ghi_chu: newLead["Ghi chú"]
-    };
-    const { error } = await supabase.from('leads').insert([dbLead]);
-    if (error) { 
-      toast.error("Lỗi: " + error.message); 
-    } else { 
+    try {
+      // 1. Validation
+      if (!validateRequired(newLead["Họ tên"])) throw new Error("Họ tên không được để trống");
+      if (!validateRequired(newLead["SĐT (đầy đủ)"])) throw new Error("SĐT không được để trống");
+      if (!validatePhone(newLead["SĐT (đầy đủ)"])) throw new Error("Định dạng SĐT không hợp lệ (0xxx)");
+      if (!validateRequired(newLead["Mã lead"])) throw new Error("Mã lead không được để trống");
+
+      const dbLead = {
+        ma_lead: sanitizeString(newLead["Mã lead"]),
+        ngay_nhan: newLead["Ngày nhận"] || new Date().toISOString(),
+        ho_ten: sanitizeString(newLead["Họ tên"]),
+        sdt: sanitizeString(newLead["SĐT (đầy đủ)"]),
+        nguon: sanitizeString(newLead["Nguồn"]),
+        chien_dich_id: newLead["_campaign_id"] || null,
+        nhu_cau: sanitizeString(newLead["Nhu cầu"]),
+        trang_thai: newLead["Trạng thái"] || "MỚI TIẾP NHẬN",
+        nhan_vien_id: newLead["Mã NV"] || null,
+        ten_san: sanitizeString(newLead["Tên sàn"]),
+        ngay_hen: newLead["Ngày hẹn"] || null,
+        ngay_fu: newLead["Ngày FU"] || null,
+        ghi_chu: sanitizeString(newLead["Ghi chú"])
+      };
+
+      const { error } = await supabase.from('leads').insert([dbLead]);
+      if (error) throw error;
+
+      await logAction({
+        action: 'ADD_LEAD',
+        tableName: 'leads',
+        recordId: dbLead.ma_lead,
+        newData: dbLead
+      });
+
       setLeads(prev => [newLead, ...prev]);
       setLeadsTotal(prev => prev + 1);
+      toast.success("Thêm lead thành công");
+    } catch (error) {
+      console.error("Add lead error:", error);
+      toast.error(error.message || "Có lỗi khi thêm lead. Vui lòng thử lại.");
     }
   }, []);
 
   const editLead = useCallback(async (updatedLead) => {
-    const dbLead = {
-      ho_ten: updatedLead["Họ tên"],
-      sdt: updatedLead["SĐT (đầy đủ)"],
-      nguon: updatedLead["Nguồn"],
-      chien_dich_id: updatedLead["_campaign_id"] || null,
-      nhu_cau: updatedLead["Nhu cầu"],
-      trang_thai: updatedLead["Trạng thái"],
-      nhan_vien_id: updatedLead["Mã NV"] || null,
-      ten_san: updatedLead["Tên sàn"],
-      ngay_hen: updatedLead["Ngày hẹn"] || null,
-      ngay_fu: updatedLead["Ngày FU"] || null,
-      ghi_chu: updatedLead["Ghi chú"]
-    };
-    const { error } = await supabase.from('leads').update(dbLead).eq('ma_lead', updatedLead["Mã lead"]);
-    if (error) { 
-      toast.error("Lỗi: " + error.message); 
-    } else { 
+    try {
+      if (!validateRequired(updatedLead["Họ tên"])) throw new Error("Họ tên không được để trống");
+      if (!validatePhone(updatedLead["SĐT (đầy đủ)"])) throw new Error("Định dạng SĐT không hợp lệ");
+
+      const dbLead = {
+        ho_ten: sanitizeString(updatedLead["Họ tên"]),
+        sdt: sanitizeString(updatedLead["SĐT (đầy đủ)"]),
+        nguon: sanitizeString(updatedLead["Nguồn"]),
+        chien_dich_id: updatedLead["_campaign_id"] || null,
+        nhu_cau: sanitizeString(updatedLead["Nhu cầu"]),
+        trang_thai: updatedLead["Trạng thái"],
+        nhan_vien_id: updatedLead["Mã NV"] || null,
+        ten_san: sanitizeString(updatedLead["Tên sàn"]),
+        ngay_hen: updatedLead["Ngày hẹn"] || null,
+        ngay_fu: updatedLead["Ngày FU"] || null,
+        ghi_chu: sanitizeString(updatedLead["Ghi chú"])
+      };
+
+      const { error } = await supabase.from('leads').update(dbLead).eq('ma_lead', updatedLead["Mã lead"]);
+      if (error) throw error;
+
+      await logAction({
+        action: 'EDIT_LEAD',
+        tableName: 'leads',
+        recordId: updatedLead["Mã lead"],
+        newData: dbLead
+      });
+
       setLeads(prev => prev.map(l => l["Mã lead"] === updatedLead["Mã lead"] ? updatedLead : l));
+      toast.success("Cập nhật lead thành công");
+    } catch (error) {
+      console.error("Edit lead error:", error);
+      toast.error(error.message || "Không thể cập nhật lead.");
     }
   }, []);
 
   const addMultipleLeads = useCallback(async (newLeadsArray) => {
-    const dbLeads = newLeadsArray.map(l => ({
-      ma_lead: l["Mã lead"],
-      ngay_nhan: l["Ngày nhận"],
-      ho_ten: l["Họ tên"],
-      sdt: l["SĐT (đầy đủ)"],
-      nguon: l["Nguồn"],
-      chien_dich_id: l["_campaign_id"] || null,
-      nhu_cau: l["Nhu cầu"],
-      trang_thai: l["Trạng thái"],
-      nhan_vien_id: l["Mã NV"] || null,
-      ten_san: l["Tên sàn"],
-      ngay_hen: l["Ngày hẹn"] || null,
-      ngay_fu: l["Ngày FU"] || null,
-      ghi_chu: l["Ghi chú"]
-    }));
-    // Optimistic Update
-    setLeads(prev => [...newLeadsArray, ...prev]);
-    setLeadsTotal(prev => prev + newLeadsArray.length);
-
-    const { error } = await supabase.from('leads').upsert(dbLeads);
+    const originalLeads = allLeads;
+    const originalTotal = leadsTotal;
     
-    if (error) { 
-      toast.error("Lỗi: " + error.message); 
-      // Rollback
-      fetchData(); // Simplest way to sync back to DB state on error
+    try {
+      if (newLeadsArray.length > 5000) throw new Error("Chỉ có thể import tối đa 5000 lead mỗi lần.");
+
+      const dbLeads = newLeadsArray.map(l => ({
+        ma_lead: sanitizeString(l["Mã lead"]),
+        ngay_nhan: l["Ngày nhận"] || new Date().toISOString(),
+        ho_ten: sanitizeString(l["Họ tên"]),
+        sdt: sanitizeString(l["SĐT (đầy đủ)"]),
+        nguon: sanitizeString(l["Nguồn"]),
+        chien_dich_id: l["_campaign_id"] || null,
+        nhu_cau: sanitizeString(l["Nhu cầu"]),
+        trang_thai: l["Trạng thái"] || "MỚI TIẾP NHẬN",
+        nhan_vien_id: l["Mã NV"] || null,
+        ten_san: sanitizeString(l["Tên sàn"]),
+        ngay_hen: l["Ngày hẹn"] || null,
+        ngay_fu: l["Ngày FU"] || null,
+        ghi_chu: sanitizeString(l["Ghi chú"])
+      }));
+
+      // Optimistic Update
+      setLeads(prev => [...newLeadsArray, ...prev]);
+      setLeadsTotal(prev => prev + newLeadsArray.length);
+
+      const { error } = await supabase.from('leads').upsert(dbLeads);
+      if (error) throw error;
+      
+      toast.success(`Đã import ${newLeadsArray.length} lead thành công`);
+    } catch (error) {
+      console.error("Add multiple leads error:", error);
+      // Rollback on error
+      setLeads(originalLeads);
+      setLeadsTotal(originalTotal);
+      toast.error(error.message || "Lỗi khi import hàng loạt lead.");
     }
-  }, []);
+  }, [allLeads, leadsTotal]);
 
   const updateLeads = useCallback(async (updatedLeadsArray) => {
-    const dbLeads = updatedLeadsArray.map(l => ({
-      ma_lead: l["Mã lead"],
-      nhan_vien_id: l["_employee_id"] || l["Mã NV"],
-      trang_thai: l["Trạng thái"],
-      ghi_chu: l["Ghi chú"]
-    }));
-    // Optimistic Update
-    setLeads(prev => prev.map(l => {
-      const up = updatedLeadsArray.find(u => u["Mã lead"] === l["Mã lead"]);
-      return up ? { ...l, ...up } : l;
-    }));
-
-    const { error } = await supabase.from('leads').upsert(dbLeads);
+    const originalLeads = allLeads;
     
-    if (error) { 
-      toast.error("Lỗi: " + error.message); 
-      // Rollback
-      fetchData();
+    try {
+      const dbLeads = updatedLeadsArray.map(l => ({
+        ma_lead: l["Mã lead"],
+        nhan_vien_id: l["_employee_id"] || l["Mã NV"],
+        trang_thai: l["Trạng thái"],
+        ghi_chu: sanitizeString(l["Ghi chú"])
+      }));
+
+      // Optimistic Update
+      setLeads(prev => prev.map(l => {
+        const up = updatedLeadsArray.find(u => u["Mã lead"] === l["Mã lead"]);
+        return up ? { ...l, ...up } : l;
+      }));
+
+      const { error } = await supabase.from('leads').upsert(dbLeads);
+      if (error) throw error;
+
+      toast.success("Cập nhật danh sách lead thành công");
+    } catch (error) {
+      console.error("Update leads error:", error);
+      setLeads(originalLeads);
+      toast.error(error.message || "Lỗi khi cập nhật danh sách lead.");
     }
-  }, []);
+  }, [allLeads]);
 
   const addTransaction = useCallback(async (newTransaction) => {
-    const dbTrans = {
-      ma_gd: newTransaction["Mã GD"],
-      ngay_gd: newTransaction["Ngày GD"] || null,
-      khach_hang_id: newTransaction["Mã Lead"],
-      nhan_vien_id: newTransaction["Mã nhân viên"],
-      ma_sp: newTransaction["Mã SP"],
-      phan_khu: newTransaction["Phân khu"],
-      gia: Number(newTransaction["Giá (VNĐ)"]),
-      tien_coc: Number(newTransaction["Tiền cọc"]),
-      hoa_hong: Number(newTransaction["Hoa hồng"]),
-      trang_thai: newTransaction["Trạng thái"],
-      ghi_chu: newTransaction["Ghi chú"]
-    };
-    const { error } = await supabase.from('transactions').insert([dbTrans]);
-    if (error) { 
-      toast.error("Lỗi: " + error.message); 
-    } else { 
+    try {
+      if (!validateRequired(newTransaction["Mã GD"])) throw new Error("Mã giao dịch không được để trống");
+      if (!validateRequired(newTransaction["Mã Lead"])) throw new Error("Khách hàng không được để trống");
+
+      const dbTrans = {
+        ma_gd: sanitizeString(newTransaction["Mã GD"]),
+        ngay_gd: newTransaction["Ngày GD"] || new Date().toISOString(),
+        khach_hang_id: newTransaction["Mã Lead"],
+        nhan_vien_id: newTransaction["Mã nhân viên"],
+        ma_sp: sanitizeString(newTransaction["Mã SP"]),
+        phan_khu: sanitizeString(newTransaction["Phân khu"]),
+        gia: Number(newTransaction["Giá (VNĐ)"] || 0),
+        tien_coc: Number(newTransaction["Tiền cọc"] || 0),
+        hoa_hong: Number(newTransaction["Hoa hồng"] || 0),
+        trang_thai: newTransaction["Trạng thái"],
+        ghi_chu: sanitizeString(newTransaction["Ghi chú"])
+      };
+
+      const { error } = await supabase.from('transactions').insert([dbTrans]);
+      if (error) throw error;
+
+      await logAction({
+        action: 'ADD_TRANSACTION',
+        tableName: 'transactions',
+        recordId: dbTrans.ma_gd,
+        newData: dbTrans
+      });
+
       setTransactions(prev => [newTransaction, ...prev]);
       setTransactionsTotal(prev => prev + 1);
+      toast.success("Thêm giao dịch thành công");
+    } catch (error) {
+      console.error("Add transaction error:", error);
+      toast.error(error.message || "Lỗi khi tạo giao dịch.");
     }
   }, []);
 
   const editTransaction = useCallback(async (updatedTransaction) => {
-    const dbTrans = {
-      ngay_gd: updatedTransaction["Ngày GD"] || null,
-      khach_hang_id: updatedTransaction["Mã Lead"],
-      nhan_vien_id: updatedTransaction["Mã nhân viên"],
-      ma_sp: updatedTransaction["Mã SP"],
-      phan_khu: updatedTransaction["Phân khu"],
-      gia: Number(updatedTransaction["Giá (VNĐ)"]),
-      tien_coc: Number(updatedTransaction["Tiền cọc"]),
-      hoa_hong: Number(updatedTransaction["Hoa hồng"]),
-      trang_thai: updatedTransaction["Trạng thái"],
-      ghi_chu: updatedTransaction["Ghi chú"]
-    };
-    const { error } = await supabase.from('transactions').update(dbTrans).eq('ma_gd', updatedTransaction["Mã GD"]);
-    if (error) { 
-      toast.error("Lỗi: " + error.message); 
-    } else { 
+    try {
+      const dbTrans = {
+        ngay_gd: updatedTransaction["Ngày GD"],
+        khach_hang_id: updatedTransaction["Mã Lead"],
+        nhan_vien_id: updatedTransaction["Mã nhân viên"],
+        ma_sp: sanitizeString(updatedTransaction["Mã SP"]),
+        phan_khu: sanitizeString(updatedTransaction["Phân khu"]),
+        gia: Number(updatedTransaction["Giá (VNĐ)"] || 0),
+        tien_coc: Number(updatedTransaction["Tiền cọc"] || 0),
+        hoa_hong: Number(updatedTransaction["Hoa hồng"] || 0),
+        trang_thai: updatedTransaction["Trạng thái"],
+        ghi_chu: sanitizeString(updatedTransaction["Ghi chú"])
+      };
+
+      const { error } = await supabase.from('transactions').update(dbTrans).eq('ma_gd', updatedTransaction["Mã GD"]);
+      if (error) throw error;
+
+      await logAction({
+        action: 'EDIT_TRANSACTION',
+        tableName: 'transactions',
+        recordId: updatedTransaction["Mã GD"],
+        newData: dbTrans
+      });
+
       setTransactions(prev => prev.map(t => t["Mã GD"] === updatedTransaction["Mã GD"] ? updatedTransaction : t));
+      toast.success("Cập nhật giao dịch thành công");
+    } catch (error) {
+      console.error("Edit transaction error:", error);
+      toast.error(error.message || "Không thể cập nhật giao dịch.");
     }
   }, []);
 
   const addMarketing = useCallback(async (newMarketing) => {
-    const dbMkt = {
-      ma_chien_dich: newMarketing["Tên chiến dịch"],
-      thang: newMarketing["Tháng"],
-      kenh: newMarketing["Kênh"],
-      ten_chien_dich: newMarketing["Tên chiến dịch"],
-      chi_phi: Number(newMarketing["CP (tr)"]) * 1000000,
-      so_lead: Number(newMarketing["Lead"]),
-      so_booking: Number(newMarketing["Booking"]),
-      ty_le_chuyen_doi: Number(newMarketing["Tỷ lệ CĐ"]),
-      chi_phi_moi_lead: Number(newMarketing["CPL (tr)"]) * 1000000,
-      chi_phi_moi_booking: Number(newMarketing["CP/Book (tr)"]) * 1000000,
-      luot_click: Number(newMarketing["Click"]),
-      ghi_chu: newMarketing["Ghi chú"]
-    };
-    const { error } = await supabase.from('marketing_campaigns').insert([dbMkt]);
-    if (!error) {
+    try {
+      if (!['Admin', 'BOD', 'Marketing'].includes(currentUser?.role)) {
+        throw new Error("Bạn không có quyền thêm chiến dịch marketing.");
+      }
+      
+      const dbMkt = {
+        ma_chien_dich: sanitizeString(newMarketing["Tên chiến dịch"]),
+        thang: newMarketing["Tháng"],
+        kenh: sanitizeString(newMarketing["Kênh"]),
+        ten_chien_dich: sanitizeString(newMarketing["Tên chiến dịch"]),
+        chi_phi: Number(newMarketing["CP (tr)"] || 0) * 1000000,
+        so_lead: Number(newMarketing["Lead"] || 0),
+        so_booking: Number(newMarketing["Booking"] || 0),
+        ty_le_chuyen_doi: Number(newMarketing["Tỷ lệ CĐ"] || 0),
+        chi_phi_moi_lead: Number(newMarketing["CPL (tr)"] || 0) * 1000000,
+        chi_phi_moi_booking: Number(newMarketing["CP/Book (tr)"] || 0) * 1000000,
+        luot_click: Number(newMarketing["Click"] || 0),
+        ghi_chu: sanitizeString(newMarketing["Ghi chú"])
+      };
+
+      const { error } = await supabase.from('marketing_campaigns').insert([dbMkt]);
+      if (error) throw error;
+
+      await logAction({
+        action: 'ADD_MARKETING',
+        tableName: 'marketing_campaigns',
+        recordId: dbMkt.ma_chien_dich,
+        newData: dbMkt
+      });
+
       setMarketing(prev => [newMarketing, ...prev]);
+      toast.success("Thêm chiến dịch thành công");
+    } catch (error) {
+      console.error("Add marketing error:", error);
+      toast.error(error.message || "Lỗi khi thêm chiến dịch.");
     }
-  }, []);
+  }, [currentUser]);
 
   const editMarketing = useCallback(async (updatedMarketing) => {
     const dbMkt = {
@@ -753,41 +891,86 @@ export const DataProvider = ({ children }) => {
   }, []);
 
   const deleteLead = useCallback(async (id) => {
-    const { error } = await supabase.from('leads').delete().eq('ma_lead', id);
-    if (!error) {
+    try {
+      if (!['Admin', 'BOD'].includes(currentUser?.role)) {
+        throw new Error("Chỉ Admin/BOD mới có quyền xóa dữ liệu.");
+      }
+      const { error } = await supabase.from('leads').delete().eq('ma_lead', id);
+      if (error) throw error;
+
+      await logAction({ action: 'DELETE_LEAD', tableName: 'leads', recordId: id });
       setLeads(prev => prev.filter(l => l["Mã lead"] !== id));
       setLeadsTotal(prev => prev - 1);
+      toast.success("Đã xóa lead");
+    } catch (error) {
+      toast.error(error.message);
     }
-  }, []);
+  }, [currentUser]);
 
   const deleteTransaction = useCallback(async (id) => {
-    const { error } = await supabase.from('transactions').delete().eq('ma_gd', id);
-    if (!error) {
+    try {
+      if (!['Admin', 'BOD'].includes(currentUser?.role)) {
+        throw new Error("Chỉ Admin/BOD mới có quyền xóa dữ liệu.");
+      }
+      const { error } = await supabase.from('transactions').delete().eq('ma_gd', id);
+      if (error) throw error;
+
+      await logAction({ action: 'DELETE_TRANSACTION', tableName: 'transactions', recordId: id });
       setTransactions(prev => prev.filter(t => t["Mã GD"] !== id));
       setTransactionsTotal(prev => prev - 1);
+      toast.success("Đã xóa giao dịch");
+    } catch (error) {
+      toast.error(error.message);
     }
-  }, []);
+  }, [currentUser]);
 
   const deleteStaff = useCallback(async (id) => {
-    const { error } = await supabase.from('employees').delete().eq('ma_nv', id);
-    if (!error) {
+    try {
+      if (!['Admin', 'BOD'].includes(currentUser?.role)) {
+        throw new Error("Chỉ Admin/BOD mới có quyền xóa dữ liệu.");
+      }
+      const { error } = await supabase.from('employees').delete().eq('ma_nv', id);
+      if (error) throw error;
+
+      await logAction({ action: 'DELETE_STAFF', tableName: 'employees', recordId: id });
       setStaff(prev => prev.filter(s => s["Mã NV"] !== id));
+      toast.success("Đã xóa nhân viên");
+    } catch (error) {
+      toast.error(error.message);
     }
-  }, []);
+  }, [currentUser]);
 
   const deleteMarketing = useCallback(async (id) => {
-    const { error } = await supabase.from('marketing_campaigns').delete().eq('ma_chien_dich', id);
-    if (!error) {
+    try {
+      if (!['Admin', 'BOD'].includes(currentUser?.role)) {
+        throw new Error("Chỉ Admin/BOD mới có quyền xóa dữ liệu.");
+      }
+      const { error } = await supabase.from('marketing_campaigns').delete().eq('ma_chien_dich', id);
+      if (error) throw error;
+
+      await logAction({ action: 'DELETE_MARKETING', tableName: 'marketing_campaigns', recordId: id });
       setMarketing(prev => prev.filter(m => m["_id"] !== id));
+      toast.success("Đã xóa chiến dịch");
+    } catch (error) {
+      toast.error(error.message);
     }
-  }, []);
+  }, [currentUser]);
 
   const deleteFinancial = useCallback(async (id) => {
-    const { error } = await supabase.from('financial_records').delete().eq('ma_tc', id);
-    if (!error) {
+    try {
+      if (!['Admin', 'BOD'].includes(currentUser?.role)) {
+        throw new Error("Chỉ Admin/BOD mới có quyền xóa dữ liệu.");
+      }
+      const { error } = await supabase.from('financial_records').delete().eq('ma_tc', id);
+      if (error) throw error;
+
+      await logAction({ action: 'DELETE_FINANCIAL', tableName: 'financial_records', recordId: id });
       setFinancials(prev => prev.filter(f => f["_id"] !== id));
+      toast.success("Đã xóa bản ghi tài chính");
+    } catch (error) {
+      toast.error(error.message);
     }
-  }, []);
+  }, [currentUser]);
 
   const contextValue = useMemo(() => ({
     globalFilter, setGlobalFilter,
@@ -798,7 +981,9 @@ export const DataProvider = ({ children }) => {
     sales,
     allSales,
     staff,
+    allFinancials,
     loadingData,
+    isFetching,
     currentUser,
     session,
     authLoading,
@@ -819,7 +1004,7 @@ export const DataProvider = ({ children }) => {
     refreshData: () => fetchData()
   }), [
     globalFilter, allLeads, allTransactions, allMarketing, allFinancials, sales, allSales, staff,
-    loadingData, currentUser, session, authLoading, 
+    loadingData, isFetching, currentUser, session, authLoading, 
     leadsPage, leadsTotal, leadsSearch, leadsSort,
     transactionsPage, transactionsTotal, transSearch, transSort,
     marketingPage, marketingTotal, marketingSearch, marketingSort,
