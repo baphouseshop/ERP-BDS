@@ -9,7 +9,7 @@ const AIChatSidebar = () => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { executiveScorecard, trafficLights, projectPL, currentUser } = useData();
+  const { dashboardStats, executiveScorecard, trafficLights, projectPL, currentUser } = useData();
   const chatEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -39,6 +39,8 @@ const AIChatSidebar = () => {
             scorecard: executiveScorecard,
             alerts: trafficLights,
             projects: projectPL,
+            topSales: dashboardStats?.topSalesPerformers,
+            marketing: dashboardStats?.marketingStats,
             user: currentUser?.full_name
           }
         }
