@@ -11,69 +11,39 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, context } = await req.json()
     const apiKey = Deno.env.get('GEMINI_API_KEY') || Deno.env.get('Gemini API Key');
     
-    // Sử dụng v1 (ổn định nhất) và gemini-1.5-flash
-    const apiVersion = 'v1';
-    const modelName = 'gemini-1.5-flash';
-
     if (!apiKey) {
       return new Response(
-        JSON.stringify({ reply: 'Hệ thống AI chưa tìm thấy API Key. Vui lòng kiểm tra lại Supabase Secrets.' }),
+        JSON.stringify({ reply: 'LỖI: Không tìm thấy API Key trong Secrets.' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    const systemPrompt = `
-      Bạn là Trợ lý Trí tuệ BOD (BOD Intelligence Assistant) cho Blanca CRM. 
-      Bạn đang hỗ trợ trực tiếp cho Ban Giám đốc (BOD).
-      
-      DỮ LIỆU HIỆN TẠI TỪ HỆ THỐNG:
-      - KPI & Scorecard: ${JSON.stringify(context.scorecard)}
-      - Cảnh báo sức khỏe dòng tiền (Traffic Lights): ${JSON.stringify(context.alerts)}
-      - Lợi nhuận dự án (P&L): ${JSON.stringify(context.projects)}
-      
-      QUY TẮC PHẢN HỒI:
-      1. TRUNG THỰC: Chỉ trả lời dựa trên các chỉ số được cung cấp ở trên.
-      2. NGẮN GỌN: Trả lời dưới 100 từ.
-      3. CẢNH BÁO: Nhắc nhở nếu có đèn ĐỎ hoặc VÀNG.
-      4. NGÔN NGỮ: Tiếng Việt.
-    `;
-
-    // Gọi API trực tiếp qua fetch để kiểm soát hoàn toàn URL, dùng v1 thay vì v1beta
-    const url = `https://generativelanguage.googleapis.com/${apiVersion}/models/${modelName}:generateContent?key=${apiKey}`;
+    // BƯỚC NỘI SOI: Liệt kê các model khả dụng trực tiếp từ Edge Function
+    const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
+    const listRes = await fetch(listUrl);
+    const listData = await listRes.json();
     
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{ text: systemPrompt + '\n\nUser: ' + prompt }]
-        }]
-      })
-    });
-
-    const data = await response.json();
-    
-    if (data.error) {
+    if (listData.error) {
       return new Response(
-        JSON.stringify({ reply: `Lỗi Gemini (${apiVersion}/${modelName}): ` + (data.error.message || 'Không rõ lỗi') }),
+        JSON.stringify({ reply: `LỖI API KEY: ${listData.error.message}` }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'AI không trả về kết quả.';
-
+    const availableModels = listData.models?.map(m => m.name.replace('models/', '')) || [];
+    
     return new Response(
-      JSON.stringify({ reply }),
+      JSON.stringify({ 
+        reply: `CHẨN ĐOÁN HỆ THỐNG:\n- API Key nhận được: ${apiKey.substring(0, 5)}...${apiKey.substring(apiKey.length - 4)}\n- Danh sách mô hình khả dụng: ${availableModels.slice(0, 10).join(', ')}... \n\nVui lòng chụp ảnh màn hình này gửi tôi.` 
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
   } catch (error) {
-    console.error('Function Error:', error);
     return new Response(
-      JSON.stringify({ reply: 'Lỗi kết nối: ' + error.message }),
+      JSON.stringify({ reply: 'Lỗi chẩn đoán: ' + error.message }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
