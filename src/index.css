@@ -1,22 +1,34 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
-  --bg-primary: #0f1115;
-  --bg-secondary: #1a1d24;
-  --bg-tertiary: #252932;
+  --bg-primary: #0a0c10;
+  --bg-secondary: #14181f;
+  --bg-tertiary: #1c212b;
   --text-main: #ffffff;
-  --text-muted: #8b92a5;
+  --text-muted: #949ba2;
   
-  /* Neon Palette */
-  --accent: #ccff00;       /* Lime Green */
-  --accent-hover: #b3e600;
-  --cyan: #00e5ff;
-  --purple: #b366ff;
-  --pink: #ff4d94;
-  --danger: #ff4d4d;
-  --warning: #ffcc00;
-  --success: #00cc66;
+  /* Premium Palette */
+  --accent: #d4ff00;       /* Vibrant Lime */
+  --accent-hover: #c2eb00;
+  --cyan: #00f2ff;
+  --purple: #bf7aff;
+  --pink: #ff5e9e;
+  --danger: #ff5c5c;
+  --warning: #ffb800;
+  --success: #00e676;
   
-  --border-color: #2a2e39;
-  --font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --border-color: rgba(255, 255, 255, 0.08);
+  --glass-bg: rgba(20, 24, 31, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  
+  --font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  /* Chart Colors (Modern/Soft) */
+  --chart-1: #d4ff00;
+  --chart-2: #00f2ff;
+  --chart-3: #bf7aff;
+  --chart-4: #ff5e9e;
+  --chart-5: #ffb800;
 }
 
 * {
@@ -183,66 +195,71 @@ a:hover {
 }
 
 .dash-kpi-card {
-  background-color: var(--bg-secondary);
-  border-radius: 8px;
-  padding: 15px;
+  background: linear-gradient(145deg, var(--bg-secondary), var(--bg-primary));
+  border-radius: 16px;
+  padding: 24px;
   flex: 1;
   min-width: 200px;
-  border-top: 3px solid var(--border-color);
-  display: flex;
-  flex-direction: column;
+  border: 1px solid var(--border-color);
+  position: relative;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.dash-kpi-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .dash-kpi-title {
   color: var(--text-muted);
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 10px;
-  display: flex;
-  justify-content: space-between;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
 }
 
 .dash-kpi-value {
-  font-size: 28px;
-  font-weight: 800;
-  margin-bottom: 5px;
-  display: flex;
-  align-items: baseline;
-  gap: 5px;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: -1px;
 }
 
 .dash-kpi-unit {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 500;
+  margin-left: 4px;
+  opacity: 0.8;
 }
 
 .dash-kpi-subtext {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
+  font-weight: 400;
 }
 
 /* Specific Card Colors */
-.card-revenue { border-top-color: var(--accent); }
+.card-revenue { border-bottom: 3px solid var(--accent); }
 .card-revenue .dash-kpi-value { color: var(--accent); }
 
-.card-profit { border-top-color: var(--cyan); }
+.card-profit { border-bottom: 3px solid var(--cyan); }
 .card-profit .dash-kpi-value { color: var(--cyan); }
 
-.card-deals { border-top-color: var(--warning); }
+.card-deals { border-bottom: 3px solid var(--warning); }
 .card-deals .dash-kpi-value { color: var(--warning); }
 
-.card-leads { border-top-color: #4da6ff; }
+.card-leads { border-bottom: 3px solid #4da6ff; }
 .card-leads .dash-kpi-value { color: #4da6ff; }
 
-.card-mkt { border-top-color: var(--purple); }
+.card-mkt { border-bottom: 3px solid var(--purple); }
 .card-mkt .dash-kpi-value { color: var(--purple); }
 
-.card-unassigned { border-top-color: var(--danger); }
+.card-unassigned { border-bottom: 3px solid var(--danger); }
 .card-unassigned .dash-kpi-value { color: var(--danger); }
 
-.card-burn { border-top-color: var(--pink); }
+.card-burn { border-bottom: 3px solid var(--pink); }
 .card-burn .dash-kpi-value { color: var(--pink); }
 
 

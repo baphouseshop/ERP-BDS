@@ -1,18 +1,19 @@
 import React from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, 
-  PieChart, Pie, Cell 
+  PieChart, Pie, Cell, AreaChart, Area, FunnelChart, Funnel, LabelList
 } from 'recharts';
 import { useData } from '../context/DataContext';
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div style={{ backgroundColor: 'var(--bg-tertiary)', padding: '10px', border: '1px solid var(--border-color)', borderRadius: '4px' }}>
-        <p style={{ margin: 0, fontWeight: 'bold' }}>{label || payload[0].name}</p>
+      <div style={{ backgroundColor: 'var(--bg-tertiary)', padding: '12px', border: '1px solid var(--border-color)', borderRadius: '12px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)' }}>
+        <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', fontSize: '13px' }}>{label || payload[0].name}</p>
         {payload.map((p, idx) => (
-          <p key={idx} style={{ margin: 0, color: p.color || p.fill }}>
-            {p.name}: {p.value}
+          <p key={idx} style={{ margin: 0, color: p.color || p.fill, fontSize: '12px', display: 'flex', justifyContent: 'space-between', gap: '15px' }}>
+            <span>{p.name}:</span>
+            <span style={{ fontWeight: 'bold' }}>{p.value.toLocaleString()}</span>
           </p>
         ))}
       </div>
@@ -36,22 +37,31 @@ function Dashboard() {
   };
 
   // --- KPI CALCULATIONS ---
+  const formatCompact = (num, defaultUnit = '') => {
+    if (!num || num === 0) return `0${defaultUnit}`;
+    if (num >= 1000000000) return (num / 1000000000).toFixed(2) + ' tỷ';
+    if (num >= 1000000) return (num / 1000000).toFixed(0) + ' tr';
+    return num.toLocaleString() + defaultUnit;
+  };
   
   // 1. Chỉ số từ Dashboard Stats (Hỗ trợ Filter)
-  const doanhThu = Number(stats.financial_stats?.revenue || 0).toFixed(2);
-  const doanhThuKH = Number(stats.financial_stats?.revenue_kh || 0).toFixed(2);
-  const doanhThuPercent = stats.financial_stats?.revenue_kh > 0 
-    ? Math.round((stats.financial_stats?.revenue / stats.financial_stats?.revenue_kh) * 100) 
+  const rawRevenue = stats.financial_stats?.revenue || 0;
+  const rawRevenueKH = stats.financial_stats?.revenue_kh || 0;
+  const doanhThu = rawRevenue.toFixed(2);
+  const doanhThuKH = rawRevenueKH.toFixed(2);
+  const doanhThuPercent = rawRevenueKH > 0 
+    ? Math.round((rawRevenue / rawRevenueKH) * 100) 
     : 0;
 
   // 2. Lợi nhuận & Chi phí (Hỗ trợ Filter)
-  const burnRate = Number((stats.financial_stats?.expense || 0) * 1000000000).toLocaleString();
-  const loiNhuan = (Number(stats.financial_stats?.revenue || 0) - Number(stats.financial_stats?.expense || 0)).toFixed(2);
-  const margin = Number(stats.financial_stats?.revenue || 0) > 0 
-    ? (((Number(stats.financial_stats?.revenue || 0) - Number(stats.financial_stats?.expense || 0)) / Number(stats.financial_stats?.revenue || 1)) * 100).toFixed(1)
+  const rawExpense = stats.financial_stats?.expense || 0;
+  const burnRate = formatCompact(rawExpense * 1000000000);
+  const loiNhuan = (rawRevenue - rawExpense).toFixed(2);
+  const margin = rawRevenue > 0 
+    ? (((rawRevenue - rawExpense) / rawRevenue) * 100).toFixed(1)
     : 0;
 
-  // 3. Giao dịch & Marketing (Giữ logic cũ cho các chỉ số vận hành)
+  // 3. Giao dịch & Marketing
   const totalGD = stats.transactions.total;
   const countHDMB = stats.transactions.completed;
   const countCoc = stats.transactions.deposited;
@@ -59,7 +69,6 @@ function Dashboard() {
 
   const totalLeads = stats.leads.total;
   const unassignedLeadsCount = stats.leads.unassigned;
-  const daPhanCong = totalLeads - unassignedLeadsCount;
 
   const totalBooking = marketing.reduce((sum, m) => sum + Number(m['Booking'] || 0), 0);
   const totalLeadMkt = marketing.reduce((sum, m) => sum + Number(m['Lead'] || 0), 0);
@@ -69,7 +78,6 @@ function Dashboard() {
   // --- INSIGHTS GENERATION ---
   const insights = [];
 
-  // Traffic Light Insights từ SQL
   trafficLights.forEach(t => {
     insights.push({
       type: t.status.includes('Nguy cấp') ? 'danger' : t.status.includes('Cảnh báo') ? 'warning' : 'success',
@@ -78,7 +86,6 @@ function Dashboard() {
     });
   });
 
-  // Unassigned leads insight
   if (unassignedLeadsCount > 0) {
     insights.push({
       type: 'danger',
@@ -87,93 +94,25 @@ function Dashboard() {
     });
   }
 
-  // Sales KPI insights
-  sales.forEach(s => {
-    const thucTe = Number(s['Doanh số (tỷ)'] || 0);
-    const kpi = Number(s['KH DS (tỷ)'] || 1);
-    const percent = Math.round((thucTe / kpi) * 100);
-    if (percent < 70) {
-      insights.push({
-        type: 'danger',
-        title: `${s['Tên NV']} (${s['Mã NV']}) chỉ đạt ${percent}% KPI`,
-        desc: `DS ${thucTe} tỷ / KH ${kpi} tỷ · ⚠ Dưới KPI - cần coaching`
-      });
-    }
-  });
-
-  // Marketing insights
-  let bestMkt = null;
-  let bestMktRate = 0;
-  marketing.forEach(m => {
-    const cp = Number(m['CP (tr)']);
-    const bk = Number(m['Booking']);
-    if (cp > 0 && bk > 0) {
-      const rate = bk / cp;
-      if (rate > bestMktRate) {
-        bestMktRate = rate;
-        bestMkt = m;
-      }
-    }
-  });
-
-  if (bestMkt) {
-    const leadCount = bestMkt['Lead'];
-    const bookCount = bestMkt['Booking'];
-    const cp = Number(bestMkt['CP (tr)']);
-    const conversion = ((bookCount / leadCount) * 100).toFixed(1);
-    insights.push({
-      type: 'success',
-      title: `${bestMkt['Kênh']} hiệu quả nhất: CĐ ${conversion}%`,
-      desc: `Chi ${cp}tr · ${leadCount} lead · ${bookCount} booking`
-    });
-  }
-
   // --- CHARTS DATA ---
-  
-  // 1. Lead Status (from RPC stats)
   const leadStatusData = Object.keys(stats.leads.status_counts).map(k => ({ 
     name: k, 
     value: stats.leads.status_counts[k] 
   }));
-  const PIE_COLORS = ['#b366ff', '#ccff00', '#00cc66', '#00e5ff', '#ff4d94', '#ffcc00'];
+  const PIE_COLORS = ['#bf7aff', '#d4ff00', '#00e676', '#00f2ff', '#ff5e9e', '#ffb800'];
 
-  // 2. Booking by Channel
   const mktChannelData = marketing.map(m => ({
     name: m['Kênh'],
     Booking: Number(m['Booking'] || 0)
   }));
 
-  // 3. Transactions by Zone (from RPC stats)
   const zoneData = Object.keys(stats.transactions.zone_counts).map(k => ({ 
     name: k, 
     value: stats.transactions.zone_counts[k] 
   }));
-  const ZONE_COLORS = ['#ff4d94', '#4da6ff', '#00e5ff'];
+  const ZONE_COLORS = ['#ff5e9e', '#4da6ff', '#00f2ff'];
 
-  // 4. Funnel
-  const funnelData = [
-    { name: 'Lead Marketing', value: totalLeadMkt, fill: '#ccff00' },
-    { name: 'Lead CRM', value: totalLeads, fill: '#b366ff' },
-    { name: 'Booking MKT', value: totalBooking, fill: '#4da6ff' },
-    { name: 'Giao dịch', value: totalGD, fill: '#ffcc00' },
-    { name: 'Đã ký HĐMB', value: countHDMB, fill: '#ff4d94' }
-  ].reverse();
-
-  // 5. Sales Performance - TOP 5 by KPI %
-  const top5KpiData = [...allSales]
-    .filter(s => Number(s['DS thực (tỷ)']) > 0 || Number(s['KH DS (tỷ)']) > 0)
-    .sort((a, b) => Number(b['% KPI']) - Number(a['% KPI']))
-    .slice(0, 5)
-    .map(s => ({
-      name: s['Tên NV'].split(' ').pop(), 
-      'Thực tế (tỷ)': Number(s['DS thực (tỷ)'] || 0),
-      'KPI (tỷ)': Number(s['KH DS (tỷ)'] || 0)
-    }));
-
-  // 6. Revenue by Department (Hỗ trợ Filter từ RPC)
   const deptRevenueData = stats.dept_revenue || [];
-
-  const DEPT_COLORS = ['#00e5ff', '#ccff00', '#ff4d94', '#b366ff', '#00cc66', '#ffcc00'];
 
   return (
     <div>
@@ -193,7 +132,7 @@ function Dashboard() {
 
         <div className="dash-kpi-card card-burn">
           <div className="dash-kpi-title">Burn Rate (Tháng)</div>
-          <div className="dash-kpi-value">{burnRate}<span className="dash-kpi-unit">VNĐ</span></div>
+          <div className="dash-kpi-value">{burnRate}</div>
           <div className="dash-kpi-subtext">Định phí & Biến phí vận hành</div>
         </div>
 
@@ -235,94 +174,77 @@ function Dashboard() {
         <div className="dash-chart-card">
           <div className="dash-chart-title">Trạng thái Lead CRM</div>
           <div className="dash-chart-subtitle">Tổng {totalLeads} leads</div>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie data={leadStatusData} cx="40%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={5} dataKey="value">
-                {leadStatusData.map((entry, index) => <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />)}
-              </Pie>
-              <Tooltip content={<CustomTooltip />} />
-              <Legend layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{ fontSize: '11px', color: 'var(--text-muted)' }} />
-            </PieChart>
-          </ResponsiveContainer>
+          <div style={{ width: '100%', height: '100%' }}>
+            <ResponsiveContainer>
+              <PieChart>
+                <Pie data={leadStatusData} cx="50%" cy="50%" innerRadius={50} outerRadius={85} paddingAngle={5} dataKey="value">
+                  {leadStatusData.map((entry, index) => <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />)}
+                </Pie>
+                <Tooltip content={<CustomTooltip />} />
+                <Legend layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{ fontSize: '10px', paddingTop: '10px' }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         <div className="dash-chart-card">
-          <div className="dash-chart-title">Booking theo kênh</div>
-          <div className="dash-chart-subtitle">Tổng {totalBooking} booking</div>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={mktChannelData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a2e39" vertical={false} />
-              <XAxis dataKey="name" stroke="#8b92a5" fontSize={11} tickLine={false} axisLine={false} />
-              <YAxis stroke="#8b92a5" fontSize={11} tickLine={false} axisLine={false} />
-              <Tooltip cursor={{ fill: '#252932' }} content={<CustomTooltip />} />
-              <Bar dataKey="Booking" radius={[4, 4, 0, 0]}>
-                {mktChannelData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={['#4da6ff', '#00e5ff', '#ff4d94', '#00cc66'][index % 4]} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="dash-chart-card">
-          <div className="dash-chart-title">Giao dịch theo phân khu</div>
-          <div className="dash-chart-subtitle">Tổng {totalGD} giao dịch</div>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie data={zoneData} cx="40%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={5} dataKey="value">
-                {zoneData.map((entry, index) => <Cell key={`cell-${index}`} fill={ZONE_COLORS[index % ZONE_COLORS.length]} />)}
-              </Pie>
-              <Tooltip content={<CustomTooltip />} />
-              <Legend layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{ fontSize: '11px', color: 'var(--text-muted)' }} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="dash-chart-card">
-          <div className="dash-chart-title">Doanh thu theo bộ phận</div>
-          <div className="dash-chart-subtitle">Đơn vị: Tỷ VNĐ</div>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie data={deptRevenueData} cx="40%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={5} dataKey="value">
-                {deptRevenueData.map((entry, index) => <Cell key={`cell-${index}`} fill={DEPT_COLORS[index % DEPT_COLORS.length]} />)}
-              </Pie>
-              <Tooltip content={<CustomTooltip />} />
-              <Legend layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{ fontSize: '11px', color: 'var(--text-muted)' }} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* CHARTS ROW 2: BOD ANALYSIS */}
-      <div className="section-title">▶ Phân tích chuyên sâu cho BOD</div>
-      <div className="dash-charts-wide-grid">
-        <div className="dash-chart-card">
-          <div className="dash-chart-title">Lãi lỗ (P&L) theo dự án</div>
-          <div className="dash-chart-subtitle">Đơn vị: VNĐ</div>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={projectPL} margin={{ top: 10, right: 30, left: 30, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a2e39" vertical={false} />
-              <XAxis dataKey="ten_du_an" stroke="#8b92a5" fontSize={11} axisLine={false} tickLine={false} />
-              <YAxis stroke="#8b92a5" fontSize={11} axisLine={false} tickLine={false} />
-              <Tooltip cursor={{ fill: '#252932' }} content={<CustomTooltip />} />
-              <Legend wrapperStyle={{ fontSize: '11px' }} />
-              <Bar dataKey="total_revenue" name="Doanh thu" fill="#00e5ff" radius={[2, 2, 0, 0]} />
-              <Bar dataKey="net_profit" name="Lợi nhuận ròng" fill="#ccff00" radius={[2, 2, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="dash-chart-title">Phân bổ Doanh thu theo bộ phận</div>
+          <div className="dash-chart-subtitle">Số liệu thực thu (Tỷ VNĐ)</div>
+          <div style={{ width: '100%', height: '100%' }}>
+            <ResponsiveContainer>
+              <AreaChart data={deptRevenueData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorDept" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="var(--accent)" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={10} tickLine={false} axisLine={false} />
+                <YAxis stroke="var(--text-muted)" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}T`} />
+                <Tooltip content={<CustomTooltip />} />
+                <Area type="monotone" dataKey="value" name="Doanh thu" stroke="var(--accent)" strokeWidth={3} fillOpacity={1} fill="url(#colorDept)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         <div className="dash-chart-card">
           <div className="dash-chart-title">Dự báo dòng tiền (90 ngày)</div>
           <div className="dash-chart-subtitle">Kế hoạch thu tiền từ khách hàng</div>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={cashflowForecast} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a2e39" vertical={false} />
-              <XAxis dataKey="period" stroke="#8b92a5" fontSize={11} tickLine={false} axisLine={false} />
-              <YAxis stroke="#8b92a5" fontSize={11} tickLine={false} axisLine={false} />
-              <Tooltip cursor={{ fill: '#252932' }} content={<CustomTooltip />} />
-              <Bar dataKey="expected_amount" name="Tiền dự kiến về" fill="#ff4d94" radius={[2, 2, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          <div style={{ width: '100%', height: '100%' }}>
+            <ResponsiveContainer>
+              <AreaChart data={cashflowForecast} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorCash" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--cyan)" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="var(--cyan)" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                <XAxis dataKey="period" stroke="var(--text-muted)" fontSize={10} tickLine={false} axisLine={false} />
+                <YAxis stroke="var(--text-muted)" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `${(v/1000000).toFixed(0)}tr`} />
+                <Tooltip content={<CustomTooltip />} />
+                <Area type="monotone" dataKey="expected_amount" name="Tiền dự kiến" stroke="var(--cyan)" strokeWidth={3} fillOpacity={1} fill="url(#colorCash)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="dash-chart-card">
+          <div className="dash-chart-title">Giao dịch theo phân khu</div>
+          <div className="dash-chart-subtitle">Tổng {totalGD} giao dịch</div>
+          <div style={{ width: '100%', height: '100%' }}>
+            <ResponsiveContainer>
+              <PieChart>
+                <Pie data={zoneData} cx="50%" cy="50%" innerRadius={50} outerRadius={85} paddingAngle={5} dataKey="value">
+                  {zoneData.map((entry, index) => <Cell key={`cell-${index}`} fill={ZONE_COLORS[index % ZONE_COLORS.length]} />)}
+                </Pie>
+                <Tooltip content={<CustomTooltip />} />
+                <Legend layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{ fontSize: '10px', paddingTop: '10px' }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
     </div>
