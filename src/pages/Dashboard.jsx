@@ -21,6 +21,17 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
+const formatCompact = (val) => {
+  if (val === undefined || val === null || val === '') return '-';
+  const num = Math.abs(Number(val));
+  const sign = Number(val) < 0 ? '-' : '';
+  
+  if (num >= 1000000000) return sign + (num / 1000000000).toFixed(2) + ' tỷ';
+  if (num >= 1000000) return sign + (num / 1000000).toFixed(1) + ' tr';
+  if (num >= 1000) return sign + num.toLocaleString('vi-VN');
+  return sign + num.toString();
+};
+
 function Dashboard() {
   const { 
     sales, allSales, transactions, marketing, leads, financials, 
@@ -38,15 +49,15 @@ function Dashboard() {
   // --- KPI CALCULATIONS ---
   
   // 1. Chỉ số từ Dashboard Stats (Hỗ trợ Filter)
-  const doanhThu = Number(stats.financial_stats?.revenue || 0).toFixed(2);
+  const doanhThu = Number(stats.financial_stats?.revenue || 0);
   const doanhThuKH = Number(stats.financial_stats?.revenue_kh || 0).toFixed(2);
   const doanhThuPercent = stats.financial_stats?.revenue_kh > 0 
     ? Math.round((stats.financial_stats?.revenue / stats.financial_stats?.revenue_kh) * 100) 
     : 0;
 
   // 2. Lợi nhuận & Chi phí (Hỗ trợ Filter)
-  const burnRate = Number((stats.financial_stats?.expense || 0) * 1000000000).toLocaleString();
-  const loiNhuan = (Number(stats.financial_stats?.revenue || 0) - Number(stats.financial_stats?.expense || 0)).toFixed(2);
+  const burnRate = Number(stats.financial_stats?.expense || 0) * 1000000000;
+  const loiNhuan = Number(stats.financial_stats?.revenue || 0) - Number(stats.financial_stats?.expense || 0);
   const margin = Number(stats.financial_stats?.revenue || 0) > 0 
     ? (((Number(stats.financial_stats?.revenue || 0) - Number(stats.financial_stats?.expense || 0)) / Number(stats.financial_stats?.revenue || 1)) * 100).toFixed(1)
     : 0;
@@ -181,19 +192,19 @@ function Dashboard() {
       <div className="dash-kpi-grid">
         <div className="dash-kpi-card card-revenue">
           <div className="dash-kpi-title">Doanh thu thực thu</div>
-          <div className="dash-kpi-value">{doanhThu}<span className="dash-kpi-unit">tỷ</span></div>
+          <div className="dash-kpi-value">{formatCompact(doanhThu * 1000000000)}</div>
           <div className="dash-kpi-subtext">{doanhThuPercent}% KH · KH: {doanhThuKH} tỷ</div>
         </div>
         
         <div className="dash-kpi-card card-profit">
           <div className="dash-kpi-title">Lợi nhuận gộp</div>
-          <div className="dash-kpi-value">{loiNhuan}<span className="dash-kpi-unit">tỷ</span></div>
+          <div className="dash-kpi-value">{formatCompact(loiNhuan * 1000000000)}</div>
           <div className="dash-kpi-subtext">{margin}% biên LN</div>
         </div>
 
         <div className="dash-kpi-card card-burn">
           <div className="dash-kpi-title">Burn Rate (Tháng)</div>
-          <div className="dash-kpi-value">{burnRate}<span className="dash-kpi-unit">VNĐ</span></div>
+          <div className="dash-kpi-value">{formatCompact(burnRate)}</div>
           <div className="dash-kpi-subtext">Định phí & Biến phí vận hành</div>
         </div>
 
@@ -212,7 +223,7 @@ function Dashboard() {
         <div className="dash-kpi-card card-mkt">
           <div className="dash-kpi-title">MKT Booking</div>
           <div className="dash-kpi-value">{totalBooking}</div>
-          <div className="dash-kpi-subtext">{totalChiPhiMkt}tr chi phí</div>
+          <div className="dash-kpi-subtext">Chi phí: {formatCompact(totalChiPhiMkt * 1000000)}</div>
         </div>
       </div>
 

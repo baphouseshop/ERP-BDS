@@ -21,6 +21,18 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
+const formatCompact = (val, isBillion = false) => {
+  if (val === undefined || val === null || val === '') return '-';
+  let num = Number(val);
+  if (isBillion) num = num * 1000000000;
+  const absNum = Math.abs(num);
+  const sign = num < 0 ? '-' : '';
+  
+  if (absNum >= 1000000000) return sign + (absNum / 1000000000).toFixed(2) + ' tỷ';
+  if (absNum >= 1000000) return sign + (absNum / 1000000).toFixed(1) + ' tr';
+  return sign + absNum.toLocaleString('vi-VN');
+};
+
 const renderProgressBar = (item, color, icon, calcTotal, calcKH) => {
   const actual = calcTotal(item);
   const target = calcKH(item);
@@ -292,37 +304,37 @@ function Financials() {
       <div className="dash-kpi-grid">
         <div className="dash-kpi-card card-revenue">
           <div className="dash-kpi-title">DOANH THU THỰC THU</div>
-          <div className="dash-kpi-value">{doanhThuT.toFixed(2)}<span className="dash-kpi-unit">tỷ</span></div>
+          <div className="dash-kpi-value">{formatCompact(doanhThuT, true)}</div>
           <div className="dash-kpi-subtext">KH: {doanhThuKH.toFixed(2)} tỷ · {doanhThuKH ? ((doanhThuT/doanhThuKH)*100).toFixed(0) : 0}%</div>
         </div>
         
         <div className="dash-kpi-card" style={{ borderTopColor: '#ff4d94' }}>
           <div className="dash-kpi-title">CHI PHÍ VẬN HÀNH</div>
-          <div className="dash-kpi-value" style={{ color: '#ff4d94' }}>{chiPhiVHT.toFixed(2)}<span className="dash-kpi-unit">tỷ</span></div>
+          <div className="dash-kpi-value" style={{ color: '#ff4d94' }}>{formatCompact(chiPhiVHT, true)}</div>
           <div className="dash-kpi-subtext">KH: {chiPhiVHKH.toFixed(2)} tỷ · {chiPhiVHKH ? ((chiPhiVHT/chiPhiVHKH)*100).toFixed(0) : 0}%</div>
         </div>
 
         <div className="dash-kpi-card" style={{ borderTopColor: '#4da6ff' }}>
           <div className="dash-kpi-title">CHI PHÍ MARKETING</div>
-          <div className="dash-kpi-value" style={{ color: '#4da6ff' }}>{chiPhiMktT.toFixed(2)}<span className="dash-kpi-unit">tỷ</span></div>
+          <div className="dash-kpi-value" style={{ color: '#4da6ff' }}>{formatCompact(chiPhiMktT, true)}</div>
           <div className="dash-kpi-subtext">KH: {chiPhiMktKH.toFixed(2)} tỷ · {chiPhiMktKH ? ((chiPhiMktT/chiPhiMktKH)*100).toFixed(0) : 0}%</div>
         </div>
 
         <div className="dash-kpi-card" style={{ borderTopColor: '#ffcc00' }}>
           <div className="dash-kpi-title">QUỸ LƯƠNG & HOA HỒNG</div>
-          <div className="dash-kpi-value" style={{ color: '#ffcc00' }}>{luongHHT.toFixed(2)}<span className="dash-kpi-unit">tỷ</span></div>
+          <div className="dash-kpi-value" style={{ color: '#ffcc00' }}>{formatCompact(luongHHT, true)}</div>
           <div className="dash-kpi-subtext">KH: {luongHHKH.toFixed(2)} tỷ · {luongHHKH ? ((luongHHT/luongHHKH)*100).toFixed(0) : 0}%</div>
         </div>
 
         <div className="dash-kpi-card card-profit">
           <div className="dash-kpi-title">LỢI NHUẬN GỘP</div>
-          <div className="dash-kpi-value">{loiNhuanT.toFixed(2)}<span className="dash-kpi-unit">tỷ</span></div>
+          <div className="dash-kpi-value">{formatCompact(loiNhuanT, true)}</div>
           <div className="dash-kpi-subtext">KH: {loiNhuanKH.toFixed(2)} tỷ · {loiNhuanKH ? ((loiNhuanT/loiNhuanKH)*100).toFixed(0) : 0}%</div>
         </div>
 
         <div className="dash-kpi-card" style={{ borderTopColor: '#b366ff' }}>
           <div className="dash-kpi-title">TỔNG CHI PHÍ</div>
-          <div className="dash-kpi-value" style={{ color: '#b366ff' }}>{sumChiPhi.toFixed(2)}<span className="dash-kpi-unit">tỷ</span></div>
+          <div className="dash-kpi-value" style={{ color: '#b366ff' }}>{formatCompact(sumChiPhi, true)}</div>
           <div className="dash-kpi-subtext">VH + MKT + Lương & HH</div>
         </div>
       </div>

@@ -18,6 +18,17 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
+const formatCompact = (val) => {
+  if (val === undefined || val === null || val === '') return '-';
+  const num = Math.abs(Number(val));
+  const sign = Number(val) < 0 ? '-' : '';
+  
+  if (num >= 1000000000) return sign + (num / 1000000000).toFixed(2) + ' tỷ';
+  if (num >= 1000000) return sign + (num / 1000000).toFixed(1) + ' tr';
+  if (num >= 1000) return sign + num.toLocaleString('vi-VN');
+  return sign + num.toString();
+};
+
 function Marketing() {
   const { 
     marketing, marketingTotal, marketingPage, setMarketingPage, 
@@ -221,7 +232,7 @@ function Marketing() {
       <div className="dash-kpi-grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)' }}>
         <div className="dash-kpi-card" style={{ borderTopColor: 'var(--text-muted)' }}>
           <div className="dash-kpi-title">TỔNG CP MARKETING</div>
-          <div className="dash-kpi-value" style={{ color: 'var(--warning)' }}>{totalCP}<span className="dash-kpi-unit">tr</span></div>
+          <div className="dash-kpi-value" style={{ color: 'var(--warning)' }}>{formatCompact(totalCP * 1000000)}</div>
           <div className="dash-kpi-subtext">KH 500tr - Đạt {Math.round((totalCP/500)*100)}%</div>
         </div>
         
@@ -344,8 +355,8 @@ function Marketing() {
 
               <div className="mkt-card-body">
                 <div className="mkt-stat-item">
-                  <div className="mkt-stat-value" style={{ color: 'var(--warning)' }}>{cp}</div>
-                  <div className="mkt-stat-label">CHI PHÍ (TR)</div>
+                  <div className="mkt-stat-value" style={{ color: 'var(--warning)' }}>{formatCompact(cp * 1000000)}</div>
+                  <div className="mkt-stat-label">CHI PHÍ</div>
                   <div className="mkt-progress-bg">
                     <div className="mkt-progress-fill" style={{ width: `${barWidth}%`, backgroundColor: barColor }}></div>
                   </div>
