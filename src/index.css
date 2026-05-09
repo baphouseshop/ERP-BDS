@@ -1654,7 +1654,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   100% { background-position: -200% 0; }
 }
 
+
 @keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* Automation UI V2 - Refined from Reference */
 .automation-modal-v2 {
   max-width: 600px;
@@ -1921,9 +1926,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   opacity: 0.5;
   cursor: not-allowed;
 }
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+
 
 @keyframes spin {
   to { transform: rotate(360deg); }
