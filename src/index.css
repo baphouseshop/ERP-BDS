@@ -1611,6 +1611,53 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
   color: #f1f5f9;
 }
+.automation-dashboard {
+  margin-bottom: 32px;
+  animation: slideDown 0.4s ease-out;
+}
+
+.dash-kpi-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  color: #60a5fa;
+}
+
+.card-revenue .dash-kpi-icon { color: #60a5fa; background: rgba(59, 130, 246, 0.1); }
+.card-profit .dash-kpi-icon { color: #fbbf24; background: rgba(245, 158, 11, 0.1); }
+.card-leads .dash-kpi-icon { color: #f87171; background: rgba(239, 68, 68, 0.1); }
+
+.section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.loading-shimmer {
+  background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 16px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
 @keyframes spin {
   to { transform: rotate(360deg); }

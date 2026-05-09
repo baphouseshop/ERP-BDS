@@ -3,6 +3,7 @@ import { supabase } from '../supabaseClient';
 import { Plus, Play, Pause, Trash2, Edit2, MessageSquare, Mail, Smartphone, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import AutomationScenarioForm from '../components/AutomationScenarioForm';
+import AutomationDashboard from '../components/AutomationDashboard';
 
 const Automation = () => {
   const [scenarios, setScenarios] = useState([]);
@@ -78,6 +79,12 @@ const Automation = () => {
         <button className="btn-primary" onClick={() => { setEditingScenario(null); setIsFormOpen(true); }}>
           <Plus size={18} /> Tạo kịch bản mới
         </button>
+      </div>
+
+      <AutomationDashboard />
+
+      <div className="section-title" style={{ marginTop: '32px', marginBottom: '16px' }}>
+        ▶ Danh sách kịch bản vận hành
       </div>
 
       <div className="automation-grid">
