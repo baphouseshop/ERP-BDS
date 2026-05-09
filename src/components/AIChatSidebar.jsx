@@ -9,7 +9,7 @@ const AIChatSidebar = () => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { dashboardStats, executiveScorecard, trafficLights, projectPL, currentUser } = useData();
+  const { dashboardStats, executiveScorecard, trafficLights, projectPL, currentUser, staff } = useData();
   const chatEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -31,11 +31,13 @@ const AIChatSidebar = () => {
 
     try {
       // Chuẩn bị dữ liệu Sales từ danh sách nhân viên nếu dashboardStats bị NULL
-      const salesContext = dashboardStats?.topSalesPerformers || staff?.slice(0, 5).map(s => ({
-        name: s["Tên NV"],
-        revenue: 0, // Fallback đơn giản
-        status: s["Trạng thái"]
-      }));
+      const salesContext = (dashboardStats?.topSalesPerformers && dashboardStats.topSalesPerformers.length > 0) 
+        ? dashboardStats.topSalesPerformers 
+        : (staff || []).slice(0, 10).map(s => ({
+            name: s["Tên NV"] || s.ho_ten,
+            revenue: s.total_revenue || 0,
+            status: s["Trạng thái"] || s.trang_thai
+          }));
 
       const { data, error } = await supabase.functions.invoke('bod-assistant', {
         body: { 
