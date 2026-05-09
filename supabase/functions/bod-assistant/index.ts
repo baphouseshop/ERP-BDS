@@ -13,71 +13,51 @@ serve(async (req) => {
   try {
     const { prompt, context } = await req.json()
     const apiKey = Deno.env.get('GEMINI_API_KEY') || Deno.env.get('Gemini API Key');
-    
-    // Sử dụng gemini-2.5-flash (mô hình thế hệ mới nhất có sẵn trong tài khoản của Sếp)
-    const apiVersion = 'v1beta';
     const modelName = 'gemini-2.5-flash';
 
     if (!apiKey) {
+      return new Response(JSON.stringify({ reply: 'Lỗi: Thiếu API Key.' }), { headers: corsHeaders })
+    }
+
+    // NẾU HỎI VỀ DỮ LIỆU CÔNG VIỆC, HÃY HIỆN DIAGNOSTIC NẾU DỮ LIỆU TRỐNG
+    const hasSalesData = context.topSales && Array.isArray(context.topSales) && context.topSales.length > 0;
+    
+    if (prompt.toLowerCase().includes('nhân viên') && !hasSalesData) {
       return new Response(
-        JSON.stringify({ reply: 'Hệ thống AI chưa tìm thấy API Key. Vui lòng kiểm tra lại Supabase Secrets.' }),
+        JSON.stringify({ 
+          reply: `CHẨN ĐOÁN DỮ LIỆU:\n- Dashboard Stats có nhận được: ${context.topSales ? 'Có biến nhưng rỗng' : 'Biến NULL'}\n- Context Scorecard: ${context.scorecard ? 'Đã nhận' : 'Trống'}\n\nSếp vui lòng đợi Dashboard tải xong hoàn toàn dữ liệu rồi hãy hỏi AI nhé!` 
+        }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
     const systemPrompt = `
-      Bạn là Trợ lý Trí tuệ BOD (BOD Intelligence Assistant) cho Blanca CRM. 
-      Bạn đang hỗ trợ trực tiếp cho Ban Giám đốc (BOD).
+      Bạn là Trợ lý Trí tuệ BOD (BOD Intelligence Assistant).
+      DỮ LIỆU:
+      - KPI: ${JSON.stringify(context.scorecard)}
+      - Sales: ${JSON.stringify(context.topSales)}
+      - Marketing: ${JSON.stringify(context.marketing)}
+      - Dự án: ${JSON.stringify(context.projects)}
       
-      DỮ LIỆU HIỆN TẠI TỪ HỆ THỐNG:
-      - KPI & Tài chính: ${JSON.stringify(context.scorecard)}
-      - Cảnh báo dòng tiền: ${JSON.stringify(context.alerts)}
-      - Hiệu suất Sales (Top 5): ${JSON.stringify(context.topSales)}
-      - Chỉ số Marketing: ${JSON.stringify(context.marketing)}
-      - Lợi nhuận dự án: ${JSON.stringify(context.projects)}
-      
-      QUY TẮC PHẢN HỒI:
-      1. TRUNG THỰC: Chỉ trả lời dựa trên các chỉ số được cung cấp ở trên.
-      2. PHÂN TÍCH: So sánh dữ liệu sales và marketing nếu được hỏi.
-      3. NGẮN GỌN: Trả lời dưới 120 từ, tập trung vào con số.
-      4. CẢNH BÁO: Nhắc nhở nếu có đèn ĐỎ hoặc VÀNG.
-      5. NGÔN NGỮ: Tiếng Việt.
+      Nếu không thấy dữ liệu Sales, hãy báo là "Hệ thống chưa đồng bộ xong dữ liệu Sales".
+      Trả lời ngắn gọn, tiếng Việt.
     `;
 
-    // Gọi API với model 2.5 Flash
-    const url = `https://generativelanguage.googleapis.com/${apiVersion}/models/${modelName}:generateContent?key=${apiKey}`;
-    
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{
-          parts: [{ text: systemPrompt + '\n\nUser: ' + prompt }]
-        }]
+        contents: [{ parts: [{ text: systemPrompt + '\n\nUser: ' + prompt }] }]
       })
     });
 
     const data = await response.json();
-    
-    if (data.error) {
-      return new Response(
-        JSON.stringify({ reply: `Lỗi Gemini (${modelName}): ` + (data.error.message || 'Không rõ lỗi') }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
     const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'AI không trả về kết quả.';
 
-    return new Response(
-      JSON.stringify({ reply }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    return new Response(JSON.stringify({ reply }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
 
   } catch (error) {
-    console.error('Function Error:', error);
-    return new Response(
-      JSON.stringify({ reply: 'Lỗi hệ thống: ' + error.message }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    return new Response(JSON.stringify({ reply: 'Lỗi: ' + error.message }), { headers: corsHeaders })
   }
 })
