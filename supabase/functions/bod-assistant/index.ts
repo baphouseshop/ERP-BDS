@@ -14,8 +14,8 @@ serve(async (req) => {
     const { prompt, context } = await req.json()
     const apiKey = Deno.env.get('GEMINI_API_KEY') || Deno.env.get('Gemini API Key');
     
-    // Đã nâng cấp mặc định lên mô hình gemini-3.1-flash mới nhất của năm 2026
-    const modelName = Deno.env.get('GEMINI_MODEL') || 'gemini-3.1-flash';
+    // Chuyển về gemini-1.5-flash để đảm bảo tính ổn định cao nhất
+    const modelName = Deno.env.get('GEMINI_MODEL') || 'gemini-1.5-flash';
 
     if (!apiKey) {
       return new Response(
@@ -40,7 +40,8 @@ serve(async (req) => {
       4. NGÔN NGỮ: Tiếng Việt.
     `;
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${apiKey}`, {
+    // Sử dụng v1beta để hỗ trợ dải model rộng hơn (bao gồm cả các bản preview)
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
