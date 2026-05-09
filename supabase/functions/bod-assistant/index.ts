@@ -14,7 +14,9 @@ serve(async (req) => {
   try {
     const { prompt, context } = await req.json()
     const apiKey = Deno.env.get('GEMINI_API_KEY') || Deno.env.get('Gemini API Key');
-    const modelName = Deno.env.get('GEMINI_MODEL') || 'gemini-1.5-flash';
+    
+    // Ép buộc sử dụng gemini-1.5-flash để dứt điểm lỗi 404 Not Found của các model preview
+    const modelName = 'gemini-1.5-flash';
 
     if (!apiKey) {
       return new Response(
@@ -23,7 +25,6 @@ serve(async (req) => {
       )
     }
 
-    // Sử dụng SDK chính thức qua esm.sh
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: modelName });
 
@@ -54,9 +55,8 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Function Error:', error);
-    const currentModel = Deno.env.get('GEMINI_MODEL') || 'gemini-1.5-flash';
     return new Response(
-      JSON.stringify({ reply: `Lỗi hệ thống (${currentModel}): ` + error.message }),
+      JSON.stringify({ reply: `Lỗi hệ thống (gemini-1.5-flash): ` + error.message }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
