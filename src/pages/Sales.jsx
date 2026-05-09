@@ -24,28 +24,8 @@ function Sales() {
   const { sales, transactions, leads } = useData();
 
   // --- DATA CONNECTIONS & PROCESSING ---
-  
-  // Calculate live metrics for each sales agent
-  const enrichedSales = sales.map(s => {
-    const maNV = s['Mã NV'];
-    
-    // Live from Transactions: HĐMB + Cọc
-    const liveTransactions = transactions.filter(t => t['Mã nhân viên'] === maNV && (t['Trạng thái'] === 'Đã ký HĐMB' || t['Trạng thái'] === 'Đã đặt cọc'));
-    const liveHDMB_Coc = liveTransactions.length;
-    
-    // Live from Transactions: Hoa hồng
-    const liveHoaHong = liveTransactions.reduce((sum, t) => sum + Number(t['Hoa hồng'] || 0), 0) / 1000000; // in triệu
-
-    // Live from Leads: Count of leads assigned
-    const liveLeads = leads.filter(l => l['Mã NV'] === maNV || l['Sales phụ trách'] === s['Tên NV']).length;
-
-    return {
-      ...s,
-      'Live HĐMB+CỌC': liveHDMB_Coc,
-      'Live Hoa Hồng': liveHoaHong || Number(s['Hoa hồng (tr)'] || 0), // fallback to static if 0
-      'Live Lead': liveLeads
-    };
-  });
+  // Data is now pre-aggregated in DataContext using the dashboard_stats RPC (Server-Side)
+  const enrichedSales = sales;
 
   // Sort by KPI descending for Leaderboard
   const rankedSales = [...enrichedSales].sort((a, b) => Number(b['% KPI']) - Number(a['% KPI']));
@@ -64,7 +44,7 @@ function Sales() {
   const underKpiNames = underKpiAgents.map(s => s['Tên NV'].split(' ').pop()).join(' · ');
 
   const totalLuong = enrichedSales.reduce((sum, s) => sum + Number(s['Lương cứng (tr)'] || 0), 0);
-  const totalHH = enrichedSales.reduce((sum, s) => sum + Number(s['Live Hoa Hồng'] || 0), 0);
+  const totalHH = enrichedSales.reduce((sum, s) => sum + Number(s['Hoa hồng (tr)'] || 0), 0);
   const totalPayout = totalLuong + totalHH;
 
   // --- CHART DATA ---
@@ -97,7 +77,7 @@ function Sales() {
         <div className="dash-kpi-card" style={{ borderTopColor: '#ff8c00' }}>
           <div className="dash-kpi-title">#1 — {topAgent['Tên NV']?.split(' ').pop()}</div>
           <div className="dash-kpi-value" style={{ color: '#ff8c00' }}>{Math.round((topAgent['% KPI']||0)*100)}<span className="dash-kpi-unit">%</span></div>
-          <div className="dash-kpi-subtext">DS {topAgent['DS thực (tỷ)']} tỷ · HH {topAgent['Live Hoa Hồng']}tr</div>
+          <div className="dash-kpi-subtext">DS {topAgent['DS thực (tỷ)']} tỷ · HH {topAgent['Hoa hồng (tr)']}tr</div>
         </div>
 
         <div className="dash-kpi-card" style={{ borderTopColor: '#4da6ff' }}>
@@ -283,7 +263,7 @@ function Sales() {
                   <td style={{ color: s['Live HĐMB+CỌC'] > 0 ? 'var(--accent)' : ''}}>{s['HĐMB THỰC TẾ']}/{s['KH HĐMB']}</td>
                   <td>{s['CỌC']}/{s['KH CỌC']}</td>
                   <td>{s['Lương cứng (tr)']}</td>
-                  <td style={{ color: '#ff8c00', fontWeight: 'bold' }}>{s['Live Hoa Hồng']}</td>
+                  <td style={{ color: '#ff8c00', fontWeight: 'bold' }}>{s['Hoa hồng (tr)']}</td>
                   <td>
                     <span className="badge-eval" style={{ color: color }}>
                       {s['XẾP LOẠI KPI']}

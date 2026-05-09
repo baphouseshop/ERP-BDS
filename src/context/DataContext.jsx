@@ -319,17 +319,34 @@ export const DataProvider = ({ children }) => {
       const salesAgg = statsData?.sales_performance || {};
       const allSalesData = employees.map(emp => {
         const kpiTarget = kpiTargets.find(k => k.employee_code === emp.ma_nv) || {};
-        const kpi = kpiTarget.kpi_revenue_billion || 0; // Default to 0 if no KPI
-        const totalSales = (Number(salesAgg[emp.ma_nv] || 0)) / 1000000000;
-        const pctKPI = kpi > 0 ? (totalSales / kpi) : 0;
+        const empStats = salesAgg[emp.ma_nv] || {};
+        const totalSalesValue = (Number(empStats.total_revenue || 0)) / 1000000000;
+        const totalComm = (Number(empStats.total_commission || 0)) / 1000000; // in triệu
+        const dealCount = empStats.deal_count || 0;
+        const leadCount = empStats.lead_count || 0;
+        const kpi = kpiTarget.kpi_revenue_billion || 0;
+        const pctKPI = kpi > 0 ? (totalSalesValue / kpi) : 0;
+        
         return {
-          "Mã NV": emp.ma_nv, "Tên NV": emp.ho_ten, "Sàn": emp.phong_ban, "KH DS (tỷ)": kpi,
-          "Doanh số (tỷ)": totalSales.toFixed(2), "DS thực (tỷ)": totalSales.toFixed(2), "% KPI": pctKPI,
+          "Mã NV": emp.ma_nv, 
+          "Tên NV": emp.ho_ten, 
+          "Sàn": emp.phong_ban, 
+          "KH DS (tỷ)": kpi,
+          "Doanh số (tỷ)": totalSalesValue.toFixed(2), 
+          "DS thực (tỷ)": totalSalesValue.toFixed(2), 
+          "% KPI": pctKPI,
           "XẾP LOẠI KPI": pctKPI >= 1 ? 'Xuất sắc' : pctKPI >= 0.8 ? 'Tốt' : 'Kém',
-          "Lương cứng (tr)": kpiTarget.salary_million || 0, "Gọi điện": 0,
-          "Site Visit": 0, "KH Site Visit": kpiTarget.target_site_visits || 0,
-          "HĐMB THỰC TẾ": 0, "KH HĐMB": kpiTarget.target_contracts || 0,
-          "CỌC": 0, "KH CỌC": kpiTarget.target_deposits || 0,
+          "Live HĐMB+CỌC": dealCount,
+          "Live Lead": leadCount,
+          "Hoa hồng (tr)": totalComm.toFixed(1),
+          "Lương cứng (tr)": kpiTarget.salary_million || 0, 
+          "Gọi điện": 0,
+          "Site Visit": 0, 
+          "KH Site Visit": kpiTarget.target_site_visits || 0,
+          "HĐMB THỰC TẾ": 0, 
+          "KH HĐMB": kpiTarget.target_contracts || 0,
+          "CỌC": 0, 
+          "KH CỌC": kpiTarget.target_deposits || 0,
           "Chức vụ": emp.chuc_vu || ""
         };
       });

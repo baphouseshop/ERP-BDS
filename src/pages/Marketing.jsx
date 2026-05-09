@@ -22,7 +22,8 @@ function Marketing() {
   const { 
     marketing, marketingTotal, marketingPage, setMarketingPage, 
     marketingSearch, setMarketingSearch, marketingSort, setMarketingSort,
-    itemsPerPage, addMarketing, editMarketing, deleteMarketing 
+    itemsPerPage, addMarketing, editMarketing, deleteMarketing,
+    dashboardStats
   } = useData();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -123,37 +124,26 @@ function Marketing() {
     setIsModalOpen(false);
   };
 
-  // --- KPI CALCULATIONS ---
-  const totalCPRaw = marketing.reduce((sum, m) => sum + Number(m['CP (tr)'] || 0), 0);
-  const totalCP = Number(totalCPRaw.toFixed(1)); // Fix precision issues
-  const totalLead = marketing.reduce((sum, m) => sum + Number(m['Lead'] || 0), 0);
-  const totalBooking = marketing.reduce((sum, m) => sum + Number(m['Booking'] || 0), 0);
-  const avgCPL = totalLead > 0 ? (totalCP * 1000) / totalLead : 0; // in K
+  // --- KPI CALCULATIONS (Using Server-Side Aggregation) ---
+  const mktStats = dashboardStats?.mkt_performance || { total_cost: 0, total_leads: 0, total_bookings: 0, channels: {} };
+  const totalCP = Number((mktStats.total_cost || 0).toFixed(1));
+  const totalLead = mktStats.total_leads || 0;
+  const totalBooking = mktStats.total_bookings || 0;
+  const avgCPL = totalLead > 0 ? (totalCP * 1000) / totalLead : 0;
   const avgConv = totalLead > 0 ? (totalBooking / totalLead) * 100 : 0;
 
-  // Aggregate by channel
-  const channelData = {};
-  marketing.forEach(m => {
-    const k = m['Kênh'] || 'Khác';
-    if (!channelData[k]) channelData[k] = { Lead: 0, Booking: 0, CP: 0, name: k };
-    channelData[k].Lead += Number(m['Lead'] || 0);
-    channelData[k].Booking += Number(m['Booking'] || 0);
-    channelData[k].CP += Number(m['CP (tr)'] || 0);
-  });
-
-  const channels = Object.values(channelData);
+  const channels = Object.values(mktStats.channels || {});
   let bestChannel = null;
   let worstChannel = null;
   
   if (channels.length > 0) {
-    // Sort by conversion rate
-    channels.sort((a, b) => {
+    const sortedChannels = [...channels].sort((a, b) => {
       const rateA = a.Lead > 0 ? a.Booking / a.Lead : 0;
       const rateB = b.Lead > 0 ? b.Booking / b.Lead : 0;
       return rateB - rateA;
     });
-    bestChannel = channels[0];
-    worstChannel = channels[channels.length - 1];
+    bestChannel = sortedChannels[0];
+    worstChannel = sortedChannels[sortedChannels.length - 1];
   }
 
   // --- CHART DATA ---

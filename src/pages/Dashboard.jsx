@@ -37,17 +37,19 @@ function Dashboard() {
 
   // --- KPI CALCULATIONS ---
   
-  // 1. Chỉ số từ SQL Views (Gốc 100%)
-  const doanhThu = Number(executiveScorecard?.actual_revenue || 0).toFixed(2);
-  const doanhThuKH = Number(executiveScorecard?.revenue_target || 0).toFixed(2);
-  const doanhThuPercent = executiveScorecard?.revenue_target > 0 
-    ? Math.round((executiveScorecard?.actual_revenue / executiveScorecard?.revenue_target) * 100) 
+  // 1. Chỉ số từ Dashboard Stats (Hỗ trợ Filter)
+  const doanhThu = Number(stats.financial_stats?.revenue || 0).toFixed(2);
+  const doanhThuKH = Number(stats.financial_stats?.revenue_kh || 0).toFixed(2);
+  const doanhThuPercent = stats.financial_stats?.revenue_kh > 0 
+    ? Math.round((stats.financial_stats?.revenue / stats.financial_stats?.revenue_kh) * 100) 
     : 0;
 
-  // 2. Lợi nhuận & Chi phí từ SQL
-  const burnRate = Number(executiveScorecard?.burn_rate_current_month || 0).toLocaleString();
-  const loiNhuan = Number(executiveScorecard?.gross_profit || 0).toFixed(2);
-  const margin = Number(executiveScorecard?.gross_margin_pct || 0).toFixed(1);
+  // 2. Lợi nhuận & Chi phí (Hỗ trợ Filter)
+  const burnRate = Number((stats.financial_stats?.expense || 0) * 1000000000).toLocaleString();
+  const loiNhuan = (Number(stats.financial_stats?.revenue || 0) - Number(stats.financial_stats?.expense || 0)).toFixed(2);
+  const margin = Number(stats.financial_stats?.revenue || 0) > 0 
+    ? (((Number(stats.financial_stats?.revenue || 0) - Number(stats.financial_stats?.expense || 0)) / Number(stats.financial_stats?.revenue || 1)) * 100).toFixed(1)
+    : 0;
 
   // 3. Giao dịch & Marketing (Giữ logic cũ cho các chỉ số vận hành)
   const totalGD = stats.transactions.total;
@@ -168,34 +170,8 @@ function Dashboard() {
       'KPI (tỷ)': Number(s['KH DS (tỷ)'] || 0)
     }));
 
-  // 6. Revenue by Department
-  const deptRevenueData = (() => {
-    const revenueByDept = {};
-    transactions.forEach(t => {
-      const empId = t['Mã nhân viên'];
-      const emp = staff.find(e => e['Mã NV'] === empId);
-      let dept = emp ? emp['Sàn'] : 'Khác';
-      if (!dept) dept = 'Khác';
-      
-      // Normalize department names
-      let normalizedDept = dept;
-      const lowerDept = dept.toLowerCase();
-      if (lowerDept.includes('sàn 1')) normalizedDept = 'Sàn 1';
-      else if (lowerDept.includes('sàn 2')) normalizedDept = 'Sàn 2';
-      else if (lowerDept.includes('sàn 3')) normalizedDept = 'Sàn 3';
-      else if (lowerDept.includes('marketing') || lowerDept.includes('mkt')) normalizedDept = 'MKT';
-      else if (lowerDept.includes('kế toán')) normalizedDept = 'Kế toán';
-      else if (lowerDept.includes('sales')) normalizedDept = 'Sales';
-      
-      const amount = Number(t['Giá (VNĐ)'] || 0);
-      revenueByDept[normalizedDept] = (revenueByDept[normalizedDept] || 0) + amount;
-    });
-    
-    return Object.keys(revenueByDept).map(dept => ({
-      name: dept,
-      value: Number((revenueByDept[dept] / 1000000000).toFixed(2))
-    })).sort((a, b) => b.value - a.value);
-  })();
+  // 6. Revenue by Department (Hỗ trợ Filter từ RPC)
+  const deptRevenueData = stats.dept_revenue || [];
 
   const DEPT_COLORS = ['#00e5ff', '#ccff00', '#ff4d94', '#b366ff', '#00cc66', '#ffcc00'];
 
