@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useData } from '../context/DataContext';
 import { KpiCard, SectionHead, DonutChart, BarChart, ChartCard, fmt } from '../components/VisualLanguage';
 
-export default function Financials() {
+function Financials() {
   const { 
     financials, financialsTotal, financialsPage, setFinancialsPage,
     financialsSearch, setFinancialsSearch, financialsSort, setFinancialsSort,

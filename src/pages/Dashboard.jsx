@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useData } from '../context/DataContext';
 import { KpiCard, AlertCard, SectionHead, DonutChart, BarChart, ChartCard, fmt } from '../components/VisualLanguage';
 
-export default function Dashboard() {
+function Dashboard() {
   const { 
     leads, transactions, marketing, financials, sales, allSales,
     dashboardStats, trafficLights, projectPL, cashflowForecast 
