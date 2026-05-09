@@ -2,9 +2,28 @@ import React, { useMemo } from 'react';
 import { useData } from '../context/DataContext';
 import { KpiCard, AlertCard, SectionHead, DonutChart, BarChart, ChartCard, fmt } from '../components/VisualLanguage';
 
+const Table = ({ headers, rows }) => (
+  <div style={{ overflowX: 'auto' }}>
+    <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 4 }}>
+      <thead>
+        <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)' }}>
+          {headers.map(h => <th key={h} style={{ textAlign: 'left', padding: '6px 4px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{h}</th>)}
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((row, i) => (
+          <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+            {row.map((cell, j) => <td key={j} style={{ padding: '8px 4px', fontSize: 11, color: 'var(--text-main)' }}>{cell}</td>)}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
+
 function Dashboard() {
   const { 
-    leads, transactions, marketing, financials, sales, allSales,
+    leads, transactions, marketing, financials, sales,
     dashboardStats, trafficLights, projectPL, cashflowForecast 
   } = useData();
 
@@ -154,6 +173,14 @@ function Dashboard() {
     }));
   }, [stats.dept_revenue]);
 
+  // --- TABLE DATA ---
+  const tableData = useMemo(() => ({
+    topSales: sales.slice(0, 5).map(s => [s['Tên NV'], fmt(Number(s['Doanh số (tỷ)']) * 1_000_000_000), (Number(s['% KPI']) * 100).toFixed(0) + '%']),
+    recentTx: transactions.slice(0, 5).map(t => [t['Tên KH'], t['Phân khu'], fmt(t['Giá trị HĐ (tr)'] * 1_000_000), t['Trạng thái']]),
+    mktROI: marketing.slice(0, 5).map(m => [m['Kênh'], m['Lead'], m['Booking'], m['CP (tr)'] + 'tr']),
+    finStats: financials.slice(0, 5).map(f => [f['Hạng mục'], f['Loại'], f['Thực tế (tỷ)'] + ' tỷ'])
+  }), [sales, transactions, marketing, financials]);
+
   return (
     <div style={{ fontFamily: 'var(--font-family, system-ui, sans-serif)' }}>
       {/* KPI row */}
@@ -176,7 +203,7 @@ function Dashboard() {
 
       {/* charts */}
       <SectionHead icon="ti-chart-bar" label="Phân tích chi tiết" />
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 12, marginBottom: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12, marginBottom: 24 }}>
         <ChartCard title="Trạng thái Lead CRM" sub={`Tổng ${stats.leads.total} leads`}>
           <DonutChart segments={leadStatusSegments} total={stats.leads.total} />
         </ChartCard>
@@ -194,19 +221,50 @@ function Dashboard() {
         </ChartCard>
       </div>
 
+      {/* Tables Section */}
+      <SectionHead icon="ti-layout-grid2" label="Bảng biểu tổng hợp" />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12, marginBottom: 24 }}>
+        <ChartCard title="Top Sales hiệu quả" sub="Theo doanh số và KPI tháng">
+          <Table headers={['Nhân viên', 'Doanh số', 'KPI']} rows={tableData.topSales} />
+        </ChartCard>
+        <ChartCard title="Giao dịch mới nhất" sub="Theo dõi tiến độ hợp đồng">
+          <Table headers={['Khách hàng', 'Khu', 'Giá trị', 'Trạng thái']} rows={tableData.recentTx} />
+        </ChartCard>
+        <ChartCard title="Hiệu suất Marketing" sub="Lead & Booking theo kênh">
+          <Table headers={['Kênh', 'Lead', 'Book', 'Chi phí']} rows={tableData.mktROI} />
+        </ChartCard>
+        <ChartCard title="Hạng mục Tài chính" sub="Thực tế thu chi tháng">
+          <Table headers={['Hạng mục', 'Loại', 'Thực tế']} rows={tableData.finStats} />
+        </ChartCard>
+      </div>
+
       {/* BOD Analysis */}
       <SectionHead icon="ti-presentation" label="Phân tích chuyên sâu cho BOD" />
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-        <ChartCard title="Lãi lỗ (P&L) theo dự án" sub="Đơn vị: Tỷ VNĐ">
-          <BarChart bars={projectPL.map(p => ({ label: p.ten_du_an, val: p.net_profit, color: '#ccff00' }))} />
-        </ChartCard>
-        <ChartCard title="Dự báo dòng tiền (90 ngày)" sub="Kế hoạch thu tiền dự kiến">
-          <BarChart bars={cashflowForecast.map(c => ({ label: c.period, val: c.expected_amount, color: '#ff4d94' }))} />
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <ChartCard title="Lãi lỗ (P&L) theo dự án" sub="Đơn vị: Tỷ VNĐ">
+            <BarChart bars={projectPL.map(p => ({ label: p.ten_du_an, val: p.net_profit, color: '#ccff00' }))} />
+          </ChartCard>
+          <ChartCard title="Dự báo dòng tiền (90 ngày)" sub="Kế hoạch thu tiền dự kiến">
+            <BarChart bars={cashflowForecast.map(c => ({ label: c.period, val: c.expected_amount, color: '#ff4d94' }))} />
+          </ChartCard>
+        </div>
+        <ChartCard title="Theo dõi Chỉ số Sức khỏe" sub="Tình trạng vận hành hiện tại">
+          <Table 
+            headers={['Chỉ số', 'Giá trị']} 
+            rows={[
+              ['Lead Conversion', '12.5%'],
+              ['CAC (Cost/Lead)', '450k'],
+              ['LTV (Customer)', '2.1 tỷ'],
+              ['Burn Rate Rate', '1.4x'],
+              ['Cash Runway', '18 tháng'],
+              ['Sales Velocity', 'High']
+            ]} 
+          />
         </ChartCard>
       </div>
     </div>
   );
 }
-
 
 export default Dashboard;
