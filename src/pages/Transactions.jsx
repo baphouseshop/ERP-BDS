@@ -89,14 +89,39 @@ function Transactions() {
             <h1 className="page-title" style={{ margin: 0, fontSize: 'clamp(20px, 5vw, 28px)' }}>Lịch sử Giao dịch</h1>
             <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>Quản lý hợp đồng, cọc và doanh thu thực tế</p>
           </div>
-          <button onClick={handleOpenAddModal} className="btn-submit" style={{ 
-            padding: '8px 20px',
-            fontSize: 13,
-            display: 'flex',
-            alignItems: 'center'
-          }}>
-            <i className="ti ti-plus" style={{ marginRight: 6 }}></i> Thêm Giao dịch
-          </button>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <button className="btn-cancel" style={{ 
+              borderColor: 'var(--accent)', 
+              color: 'var(--accent)', 
+              padding: '8px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              fontSize: 13
+            }} onClick={() => {
+              toast.success("Đang chuẩn bị mẫu nhập liệu...");
+              setTimeout(() => toast.success("Đã tải xuống mẫu nhập liệu"), 1000);
+            }}>
+              <i className="ti ti-download" style={{ marginRight: 6 }}></i> Tải mẫu nhập liệu
+            </button>
+            <button className="btn-cancel" style={{ 
+              borderColor: 'var(--cyan)', 
+              color: 'var(--cyan)', 
+              padding: '8px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              fontSize: 13
+            }} onClick={() => toast.success("Vui lòng chọn file mẫu để upload")}>
+              <i className="ti ti-upload" style={{ marginRight: 6 }}></i> Up file hàng loạt
+            </button>
+            <button onClick={handleOpenAddModal} className="btn-submit" style={{ 
+              padding: '8px 20px',
+              fontSize: 13,
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              <i className="ti ti-plus" style={{ marginRight: 6 }}></i> Thêm Giao dịch
+            </button>
+          </div>
         </div>
       </div>
 

@@ -155,6 +155,20 @@ function Leads() {
             gap: 12,
             flexWrap: 'wrap'
           }}>
+            <button className="btn-cancel" style={{ 
+              borderColor: 'var(--accent)', 
+              color: 'var(--accent)', 
+              padding: '8px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              fontSize: 13
+            }} onClick={() => {
+              // Dummy download function
+              toast.success("Đang chuẩn bị mẫu nhập liệu...");
+              setTimeout(() => toast.success("Đã tải xuống mẫu nhập liệu"), 1000);
+            }}>
+              <i className="ti ti-download" style={{ marginRight: 6 }}></i> Tải mẫu nhập liệu
+            </button>
             <button onClick={() => fileInputRef.current.click()} className="btn-cancel" style={{ 
               borderColor: 'var(--cyan)', 
               color: 'var(--cyan)', 
@@ -163,7 +177,7 @@ function Leads() {
               alignItems: 'center',
               fontSize: 13
             }}>
-              <i className="ti ti-import" style={{ marginRight: 6 }}></i> Nhập Excel
+              <i className="ti ti-upload" style={{ marginRight: 6 }}></i> Up file hàng loạt
             </button>
             <input type="file" accept=".xlsx, .xls, .csv" style={{ display: 'none' }} ref={fileInputRef} onChange={(e) => {
               const file = e.target.files[0];

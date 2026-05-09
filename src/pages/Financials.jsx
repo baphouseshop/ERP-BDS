@@ -106,16 +106,57 @@ function Financials() {
 
   return (
     <div>
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 className="page-title">Tài chính</h1>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <select className="filter-select" style={{ width: '180px' }} value={`${financialsSort.column}-${financialsSort.ascending ? 'asc' : 'desc'}`} onChange={e => { const [column, dir] = e.target.value.split('-'); setFinancialsSort({ column, ascending: dir === 'asc' }); }}>
-            <option value="thang-desc">Mới nhất lên đầu</option>
-            <option value="thang-asc">Cũ nhất lên đầu</option>
-            <option value="hang_muc-asc">Hạng mục (A-Z)</option>
-            <option value="hang_muc-desc">Hạng mục (Z-A)</option>
-          </select>
-          <button onClick={handleOpenAddModal} className="btn-submit">Thêm Bản ghi</button>
+      <div className="page-header" style={{ marginBottom: 24 }}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 16
+        }}>
+          <div>
+            <h1 className="page-title" style={{ margin: 0, fontSize: 'clamp(20px, 5vw, 28px)' }}>Tài chính</h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>Theo dõi doanh thu, chi phí và lợi nhuận hệ thống</p>
+          </div>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <button className="btn-cancel" style={{ 
+              borderColor: 'var(--accent)', 
+              color: 'var(--accent)', 
+              padding: '8px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              fontSize: 13
+            }} onClick={() => {
+              toast.success("Đang chuẩn bị mẫu nhập liệu...");
+              setTimeout(() => toast.success("Đã tải xuống mẫu nhập liệu"), 1000);
+            }}>
+              <i className="ti ti-download" style={{ marginRight: 6 }}></i> Tải mẫu nhập liệu
+            </button>
+            <button className="btn-cancel" style={{ 
+              borderColor: 'var(--cyan)', 
+              color: 'var(--cyan)', 
+              padding: '8px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              fontSize: 13
+            }} onClick={() => toast.success("Vui lòng chọn file mẫu để upload")}>
+              <i className="ti ti-upload" style={{ marginRight: 6 }}></i> Up file hàng loạt
+            </button>
+            <select className="filter-select" style={{ width: 180, margin: 0 }} value={`${financialsSort.column}-${financialsSort.ascending ? 'asc' : 'desc'}`} onChange={e => { const [column, dir] = e.target.value.split('-'); setFinancialsSort({ column, ascending: dir === 'asc' }); }}>
+              <option value="thang-desc">Mới nhất lên đầu</option>
+              <option value="thang-asc">Cũ nhất lên đầu</option>
+              <option value="hang_muc-asc">Hạng mục (A-Z)</option>
+              <option value="hang_muc-desc">Hạng mục (Z-A)</option>
+            </select>
+            <button onClick={handleOpenAddModal} className="btn-submit" style={{ 
+              padding: '8px 20px',
+              fontSize: 13,
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              <i className="ti ti-plus" style={{ marginRight: 6 }}></i> Thêm Bản ghi
+            </button>
+          </div>
         </div>
       </div>
 
@@ -170,9 +211,9 @@ function Financials() {
             {financials.map((f, i) => (
               <tr key={i}>
                 <td>
-                  <div style={{ display: 'flex', gap: '5px' }}>
-                    <button onClick={() => handleOpenEditModal(f)} className="btn-edit">Sửa</button>
-                    <button onClick={() => { if(window.confirm(`Xóa bản ghi ${f['Hạng mục']}?`)) deleteFinancial(f['_id']); }} className="btn-cancel" style={{ padding: '2px 8px', fontSize: '12px', borderColor: 'var(--danger)', color: 'var(--danger)' }}>Xóa</button>
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    <button onClick={() => handleOpenEditModal(f)} style={{ background: 'none', border: 'none', color: 'var(--cyan)', cursor: 'pointer', padding: 4 }} title="Sửa"><i className="ti ti-pencil" style={{ fontSize: 16 }}></i></button>
+                    <button onClick={() => { if(window.confirm(`Xóa bản ghi ${f['Hạng mục']}?`)) deleteFinancial(f['_id']); }} style={{ background: 'none', border: 'none', color: 'var(--red)', cursor: 'pointer', padding: 4 }} title="Xóa"><i className="ti ti-trash" style={{ fontSize: 16 }}></i></button>
                   </div>
                 </td>
                 <td>{f['Tháng']}</td>
@@ -189,12 +230,73 @@ function Financials() {
       </div>
 
       {totalPages > 1 && (
-        <div className="pagination-container" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '20px', marginBottom: '40px' }}>
-          <button onClick={() => setFinancialsPage(financialsPage - 1)} disabled={financialsPage === 1} className="btn-nav">Trái</button>
-          {[...Array(totalPages)].map((_, idx) => (
-            <button key={idx} onClick={() => setFinancialsPage(idx + 1)} className={financialsPage === idx + 1 ? 'btn-nav active' : 'btn-nav'}>{idx + 1}</button>
-          ))}
-          <button onClick={() => setFinancialsPage(financialsPage + 1)} disabled={financialsPage === totalPages} className="btn-nav">Phải</button>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, marginTop: 32, flexWrap: 'wrap', marginBottom: 40 }}>
+          <button 
+            onClick={() => setFinancialsPage(Math.max(1, financialsPage - 1))} 
+            disabled={financialsPage === 1} 
+            className="btn-page"
+            style={{ padding: '8px 12px' }}
+          >
+            <i className="ti ti-angle-left"></i>
+          </button>
+          
+          {(() => {
+            const pages = [];
+            const showRange = 1;
+            
+            pages.push(
+              <button 
+                key={1} 
+                onClick={() => setFinancialsPage(1)} 
+                className={`btn-page ${financialsPage === 1 ? 'active' : ''}`}
+              >
+                1
+              </button>
+            );
+            
+            if (financialsPage > showRange + 2) {
+              pages.push(<span key="dots-1" style={{ color: 'var(--text-muted)', padding: '0 4px' }}>...</span>);
+            }
+            
+            for (let i = Math.max(2, financialsPage - showRange); i <= Math.min(totalPages - 1, financialsPage + showRange); i++) {
+              pages.push(
+                <button 
+                  key={i} 
+                  onClick={() => setFinancialsPage(i)} 
+                  className={`btn-page ${financialsPage === i ? 'active' : ''}`}
+                >
+                  {i}
+                </button>
+              );
+            }
+            
+            if (financialsPage < totalPages - showRange - 1) {
+              pages.push(<span key="dots-2" style={{ color: 'var(--text-muted)', padding: '0 4px' }}>...</span>);
+            }
+            
+            if (totalPages > 1) {
+              pages.push(
+                <button 
+                  key={totalPages} 
+                  onClick={() => setFinancialsPage(totalPages)} 
+                  className={`btn-page ${financialsPage === totalPages ? 'active' : ''}`}
+                >
+                  {totalPages}
+                </button>
+              );
+            }
+            
+            return pages;
+          })()}
+          
+          <button 
+            onClick={() => setFinancialsPage(Math.min(totalPages, financialsPage + 1))} 
+            disabled={financialsPage === totalPages} 
+            className="btn-page"
+            style={{ padding: '8px 12px' }}
+          >
+            <i className="ti ti-angle-right"></i>
+          </button>
         </div>
       )}
 

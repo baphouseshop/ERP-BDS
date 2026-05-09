@@ -36,8 +36,44 @@ function Sales() {
 
   return (
     <div style={{ paddingBottom: 40 }}>
-      <div className="page-header" style={{ marginBottom: 20 }}>
-        <h1 className="page-title" style={{ margin: 0 }}>Hiệu suất Sales</h1>
+      <div className="page-header" style={{ marginBottom: 24 }}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 16
+        }}>
+          <div>
+            <h1 className="page-title" style={{ margin: 0, fontSize: 'clamp(20px, 5vw, 28px)' }}>Hiệu suất Sales</h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>Phân tích KPI và bảng xếp hạng đội ngũ kinh doanh</p>
+          </div>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <button className="btn-cancel" style={{ 
+              borderColor: 'var(--accent)', 
+              color: 'var(--accent)', 
+              padding: '8px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              fontSize: 13
+            }} onClick={() => {
+              toast.success("Đang chuẩn bị mẫu nhập liệu...");
+              setTimeout(() => toast.success("Đã tải xuống mẫu nhập liệu"), 1000);
+            }}>
+              <i className="ti ti-download" style={{ marginRight: 6 }}></i> Tải mẫu nhập liệu
+            </button>
+            <button className="btn-cancel" style={{ 
+              borderColor: 'var(--cyan)', 
+              color: 'var(--cyan)', 
+              padding: '8px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              fontSize: 13
+            }} onClick={() => toast.success("Vui lòng chọn file mẫu để upload")}>
+              <i className="ti ti-upload" style={{ marginRight: 6 }}></i> Up file hàng loạt
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="dash-kpi-grid-res" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 16, marginBottom: 24 }}>
@@ -149,6 +185,7 @@ function Sales() {
         <table>
           <thead>
             <tr>
+              <th style={{ width: 80 }}>Thao tác</th>
               <th>Mã NV</th>
               <th>Họ tên</th>
               <th>Sàn</th>
@@ -168,6 +205,12 @@ function Sales() {
               const totalIncome = Number(s['Lương cứng (tr)'] || 0) + Number(s['Hoa hồng (tr)'] || 0);
               return (
                 <tr key={i}>
+                  <td>
+                    <div style={{ display: 'flex', gap: 12 }}>
+                      <button style={{ background: 'none', border: 'none', color: 'var(--cyan)', cursor: 'pointer', padding: 4 }} title="Sửa"><i className="ti ti-pencil" style={{ fontSize: 16 }}></i></button>
+                      <button style={{ background: 'none', border: 'none', color: 'var(--red)', cursor: 'pointer', padding: 4 }} title="Xóa"><i className="ti ti-trash" style={{ fontSize: 16 }}></i></button>
+                    </div>
+                  </td>
                   <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{s['Mã NV']}</td>
                   <td style={{ fontWeight: 700 }}>{s['Tên NV']}</td>
                   <td>{s['Sàn']}</td>

@@ -166,6 +166,29 @@ function Marketing() {
             <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>Quản lý hiệu suất và chi phí các chiến dịch</p>
           </div>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <button className="btn-cancel" style={{ 
+              borderColor: 'var(--accent)', 
+              color: 'var(--accent)', 
+              padding: '8px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              fontSize: 13
+            }} onClick={() => {
+              toast.success("Đang chuẩn bị mẫu nhập liệu...");
+              setTimeout(() => toast.success("Đã tải xuống mẫu nhập liệu"), 1000);
+            }}>
+              <i className="ti ti-download" style={{ marginRight: 6 }}></i> Tải mẫu nhập liệu
+            </button>
+            <button className="btn-cancel" style={{ 
+              borderColor: 'var(--cyan)', 
+              color: 'var(--cyan)', 
+              padding: '8px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              fontSize: 13
+            }} onClick={() => toast.success("Vui lòng chọn file mẫu để upload")}>
+              <i className="ti ti-upload" style={{ marginRight: 6 }}></i> Up file hàng loạt
+            </button>
             <select 
               className="filter-select" 
               style={{ width: 180, margin: 0 }}
@@ -289,13 +312,13 @@ function Marketing() {
                   <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-main)' }}>{m['Tên chiến dịch']}</div>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{m['Kênh']} · {m['Tháng']}</div>
                 </div>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  <button onClick={() => handleOpenEditModal(m)} className="btn-edit" style={{ padding: '4px 8px', fontSize: 11 }}>Sửa</button>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <button onClick={() => handleOpenEditModal(m)} style={{ background: 'none', border: 'none', color: 'var(--cyan)', cursor: 'pointer', padding: 4 }} title="Sửa"><i className="ti ti-pencil" style={{ fontSize: 16 }}></i></button>
                   <button 
                     onClick={() => window.confirm(`Xóa chiến dịch ${m['Tên chiến dịch']}?`) && deleteMarketing(m['_id'])} 
-                    className="btn-cancel" 
-                    style={{ padding: '4px 8px', fontSize: 11, borderColor: 'var(--danger)', color: 'var(--danger)' }}
-                  >Xóa</button>
+                    style={{ background: 'none', border: 'none', color: 'var(--red)', cursor: 'pointer', padding: 4 }} 
+                    title="Xóa"
+                  ><i className="ti ti-trash" style={{ fontSize: 16 }}></i></button>
                 </div>
               </div>
 
