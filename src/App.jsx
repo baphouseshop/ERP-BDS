@@ -14,6 +14,7 @@ import { useData } from './context/DataContext';
 import { supabase } from './supabaseClient';
 import ErrorBoundary from './components/ErrorBoundary';
 import toast, { Toaster } from 'react-hot-toast';
+import AIChatSidebar from './components/AIChatSidebar';
 
 function DateFilter() {
   const { globalFilter, setGlobalFilter } = useData();
@@ -256,6 +257,7 @@ function App() {
           </ErrorBoundary>
         )}
       </div>
+      {checkAccess(['Admin', 'BOD', 'Giám đốc']) && <AIChatSidebar />}
     </div>
   );
 }

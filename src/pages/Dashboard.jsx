@@ -22,7 +22,11 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 function Dashboard() {
-  const { sales, allSales, transactions, marketing, leads, financials, dashboardStats, staff } = useData();
+  const { 
+    sales, allSales, transactions, marketing, leads, financials, 
+    dashboardStats, staff, executiveScorecard, trafficLights, 
+    projectPL, cashflowForecast 
+  } = useData();
 
   // Fallback for when stats are loading
   const stats = dashboardStats || {
@@ -33,31 +37,28 @@ function Dashboard() {
 
   // --- KPI CALCULATIONS ---
   
-  // 1. Doanh thu - Tính toán từ allSales để đảm bảo khớp với tổng doanh số từng cá nhân
-  const calculatedTotalRevenue = allSales.reduce((sum, s) => sum + Number(s['Doanh số (tỷ)'] || 0), 0);
-  const calculatedTotalTarget = allSales.reduce((sum, s) => sum + Number(s['KH DS (tỷ)'] || 0), 0);
-  
-  const doanhThu = calculatedTotalRevenue.toFixed(2);
-  const doanhThuKH = calculatedTotalTarget.toFixed(2);
-  const doanhThuPercent = calculatedTotalTarget > 0 ? Math.round((calculatedTotalRevenue / calculatedTotalTarget) * 100) : 0;
+  // 1. Chỉ số từ SQL Views (Gốc 100%)
+  const doanhThu = Number(executiveScorecard?.actual_revenue || 0).toFixed(2);
+  const doanhThuKH = Number(executiveScorecard?.revenue_target || 0).toFixed(2);
+  const doanhThuPercent = executiveScorecard?.revenue_target > 0 
+    ? Math.round((executiveScorecard?.actual_revenue / executiveScorecard?.revenue_target) * 100) 
+    : 0;
 
-  // 2. Lợi nhuận gộp
-  const chiPhi = Number(stats.financial_stats?.expense || 0);
-  const loiNhuan = (doanhThu - chiPhi).toFixed(2);
-  const margin = doanhThu > 0 ? ((loiNhuan / doanhThu) * 100).toFixed(1) : 0;
+  // 2. Lợi nhuận & Chi phí từ SQL
+  const burnRate = Number(executiveScorecard?.burn_rate_current_month || 0).toLocaleString();
+  const loiNhuan = Number(executiveScorecard?.gross_profit || 0).toFixed(2);
+  const margin = Number(executiveScorecard?.gross_margin_pct || 0).toFixed(1);
 
-  // 3. Giao dịch — using pre-aggregated stats
+  // 3. Giao dịch & Marketing (Giữ logic cũ cho các chỉ số vận hành)
   const totalGD = stats.transactions.total;
   const countHDMB = stats.transactions.completed;
   const countCoc = stats.transactions.deposited;
   const countGiuCho = stats.transactions.booking;
 
-  // 4. Tổng Lead — using pre-aggregated stats
   const totalLeads = stats.leads.total;
   const unassignedLeadsCount = stats.leads.unassigned;
   const daPhanCong = totalLeads - unassignedLeadsCount;
 
-  // 5. Booking MKT
   const totalBooking = marketing.reduce((sum, m) => sum + Number(m['Booking'] || 0), 0);
   const totalLeadMkt = marketing.reduce((sum, m) => sum + Number(m['Lead'] || 0), 0);
   const totalChiPhiMktRaw = marketing.reduce((sum, m) => sum + Number(m['CP (tr)'] || 0), 0);
@@ -65,6 +66,15 @@ function Dashboard() {
 
   // --- INSIGHTS GENERATION ---
   const insights = [];
+
+  // Traffic Light Insights từ SQL
+  trafficLights.forEach(t => {
+    insights.push({
+      type: t.status.includes('Nguy cấp') ? 'danger' : t.status.includes('Cảnh báo') ? 'warning' : 'success',
+      title: `${t.indicator}: ${t.status}`,
+      desc: t.note
+    });
+  });
 
   // Unassigned leads insight
   if (unassignedLeadsCount > 0) {
@@ -194,7 +204,7 @@ function Dashboard() {
       {/* KPI GRID */}
       <div className="dash-kpi-grid">
         <div className="dash-kpi-card card-revenue">
-          <div className="dash-kpi-title">Doanh thu</div>
+          <div className="dash-kpi-title">Doanh thu thực thu</div>
           <div className="dash-kpi-value">{doanhThu}<span className="dash-kpi-unit">tỷ</span></div>
           <div className="dash-kpi-subtext">{doanhThuPercent}% KH · KH: {doanhThuKH} tỷ</div>
         </div>
@@ -205,28 +215,28 @@ function Dashboard() {
           <div className="dash-kpi-subtext">{margin}% biên LN</div>
         </div>
 
+        <div className="dash-kpi-card card-burn">
+          <div className="dash-kpi-title">Burn Rate (Tháng)</div>
+          <div className="dash-kpi-value">{burnRate}<span className="dash-kpi-unit">VNĐ</span></div>
+          <div className="dash-kpi-subtext">Định phí & Biến phí vận hành</div>
+        </div>
+
         <div className="dash-kpi-card card-deals">
           <div className="dash-kpi-title">Giao dịch</div>
           <div className="dash-kpi-value">{totalGD}</div>
-          <div className="dash-kpi-subtext">{countHDMB} HĐMB · {countCoc} Cọc · {countGiuCho} Giữ chỗ</div>
+          <div className="dash-kpi-subtext">{countHDMB} HĐMB · {countCoc} Cọc</div>
         </div>
 
         <div className="dash-kpi-card card-leads">
-          <div className="dash-kpi-title">Tổng Lead CRM</div>
+          <div className="dash-kpi-title">Lead CRM</div>
           <div className="dash-kpi-value">{totalLeads}</div>
-          <div className="dash-kpi-subtext">{unassignedLeadsCount} chưa phân công · {daPhanCong} đã phân</div>
+          <div className="dash-kpi-subtext">{unassignedLeadsCount} chưa phân công</div>
         </div>
 
         <div className="dash-kpi-card card-mkt">
-          <div className="dash-kpi-title">Booking MKT</div>
+          <div className="dash-kpi-title">MKT Booking</div>
           <div className="dash-kpi-value">{totalBooking}</div>
-          <div className="dash-kpi-subtext">{totalLeadMkt} leads · {totalChiPhiMkt}tr chi phí</div>
-        </div>
-
-        <div className="dash-kpi-card card-unassigned">
-          <div className="dash-kpi-title">Chưa phân công</div>
-          <div className="dash-kpi-value">{unassignedLeadsCount}</div>
-          <div className="dash-kpi-subtext">Xử lý ngay</div>
+          <div className="dash-kpi-subtext">{totalChiPhiMkt}tr chi phí</div>
         </div>
       </div>
 
@@ -306,37 +316,35 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* CHARTS ROW 2 */}
+      {/* CHARTS ROW 2: BOD ANALYSIS */}
+      <div className="section-title">▶ Phân tích chuyên sâu cho BOD</div>
       <div className="dash-charts-wide-grid">
         <div className="dash-chart-card">
-          <div className="dash-chart-title">Funnel chuyển đổi</div>
-          <div className="dash-chart-subtitle">MKT Lead → CRM → Booking → GD</div>
+          <div className="dash-chart-title">Lãi lỗ (P&L) theo dự án</div>
+          <div className="dash-chart-subtitle">Đơn vị: VNĐ</div>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={funnelData} layout="vertical" margin={{ top: 10, right: 30, left: 30, bottom: 0 }}>
-              <XAxis type="number" hide />
-              <YAxis dataKey="name" type="category" stroke="#8b92a5" fontSize={11} axisLine={false} tickLine={false} />
+            <BarChart data={projectPL} margin={{ top: 10, right: 30, left: 30, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#2a2e39" vertical={false} />
+              <XAxis dataKey="ten_du_an" stroke="#8b92a5" fontSize={11} axisLine={false} tickLine={false} />
+              <YAxis stroke="#8b92a5" fontSize={11} axisLine={false} tickLine={false} />
               <Tooltip cursor={{ fill: '#252932' }} content={<CustomTooltip />} />
-              <Bar dataKey="value" barSize={15} radius={[0, 4, 4, 0]}>
-                {funnelData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.fill} />
-                ))}
-              </Bar>
+              <Legend wrapperStyle={{ fontSize: '11px' }} />
+              <Bar dataKey="total_revenue" name="Doanh thu" fill="#00e5ff" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="net_profit" name="Lợi nhuận ròng" fill="#ccff00" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
         <div className="dash-chart-card">
-          <div className="dash-chart-title">Top 5 KPI Doanh số</div>
-          <div className="dash-chart-subtitle">Đơn vị: Tỷ VNĐ</div>
+          <div className="dash-chart-title">Dự báo dòng tiền (90 ngày)</div>
+          <div className="dash-chart-subtitle">Kế hoạch thu tiền từ khách hàng</div>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={top5KpiData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <BarChart data={cashflowForecast} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#2a2e39" vertical={false} />
-              <XAxis dataKey="name" stroke="#8b92a5" fontSize={11} tickLine={false} axisLine={false} />
+              <XAxis dataKey="period" stroke="#8b92a5" fontSize={11} tickLine={false} axisLine={false} />
               <YAxis stroke="#8b92a5" fontSize={11} tickLine={false} axisLine={false} />
               <Tooltip cursor={{ fill: '#252932' }} content={<CustomTooltip />} />
-              <Legend wrapperStyle={{ fontSize: '11px', color: 'var(--text-muted)' }} verticalAlign="top" align="right" />
-              <Bar dataKey="Thực tế (tỷ)" fill="#ffcc00" radius={[2, 2, 0, 0]} />
-              <Bar dataKey="KPI (tỷ)" fill="#5c677d" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="expected_amount" name="Tiền dự kiến về" fill="#ff4d94" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

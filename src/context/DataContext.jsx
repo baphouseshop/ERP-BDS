@@ -14,6 +14,10 @@ export const DataProvider = ({ children }) => {
   const [sales, setSales] = useState([]);
   const [allSales, setAllSales] = useState([]);
   const [staff, setStaff] = useState([]);
+  const [executiveScorecard, setExecutiveScorecard] = useState(null);
+  const [trafficLights, setTrafficLights] = useState([]);
+  const [projectPL, setProjectPL] = useState([]);
+  const [cashflowForecast, setCashflowForecast] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
   const [session, setSession] = useState(null);
@@ -106,6 +110,19 @@ export const DataProvider = ({ children }) => {
       });
       if (statsError) throw statsError;
       setDashboardStats(statsData);
+
+      // 1.1 Fetch BOD Core Metrics (Phase 2 Views)
+      const [scorecardRes, trafficRes, plRes, forecastRes] = await Promise.all([
+        supabase.from('v_executive_scorecard').select('*').single(),
+        supabase.from('v_traffic_light_status').select('*'),
+        supabase.from('v_project_p_l').select('*'),
+        supabase.rpc('get_90d_cashflow_forecast')
+      ]);
+      
+      setExecutiveScorecard(scorecardRes.data);
+      setTrafficLights(trafficRes.data || []);
+      setProjectPL(plRes.data || []);
+      setCashflowForecast(forecastRes.data || []);
 
       // 2. Fetch Static Data
       const [empRes, mktListRes, kpiRes] = await Promise.all([
@@ -776,6 +793,7 @@ export const DataProvider = ({ children }) => {
     marketingPage, setMarketingPage, marketingTotal, marketingSearch, setMarketingSearch, marketingSort, setMarketingSort,
     financialsPage, setFinancialsPage, financialsTotal, financialsSearch, setFinancialsSearch, financialsSort, setFinancialsSort,
     dashboardStats, itemsPerPage,
+    executiveScorecard, trafficLights, projectPL, cashflowForecast,
     addLead, editLead, deleteLead, addMultipleLeads, updateLeads,
     addTransaction, editTransaction, deleteTransaction,
     addMarketing, editMarketing, deleteMarketing,
@@ -789,7 +807,8 @@ export const DataProvider = ({ children }) => {
     transactionsPage, transactionsTotal, transSearch, transSort,
     marketingPage, marketingTotal, marketingSearch, marketingSort,
     financialsPage, financialsTotal, financialsSearch, financialsSort,
-    dashboardStats, addLead, editLead, deleteLead, addMultipleLeads, updateLeads,
+    dashboardStats, executiveScorecard, trafficLights, projectPL, cashflowForecast,
+    addLead, editLead, deleteLead, addMultipleLeads, updateLeads,
     addTransaction, editTransaction, deleteTransaction,
     addMarketing, editMarketing, deleteMarketing,
     addFinancial, editFinancial, deleteFinancial,
