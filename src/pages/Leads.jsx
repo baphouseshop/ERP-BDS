@@ -273,7 +273,6 @@ function Leads() {
               key={i} 
               onClick={() => setLeadsPage(i + 1)} 
               className={`btn-page ${leadsPage === i + 1 ? 'active' : ''}`}
-              style={leadsPage === i + 1 ? { background: 'var(--accent)', color: '#000', borderColor: 'var(--accent)' } : {}}
             >
               {i + 1}
             </button>

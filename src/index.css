@@ -1407,7 +1407,42 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .notification-item:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Pagination Buttons */
+.btn-page {
+  background: #000 !important;
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 10px 18px !important;
+  border-radius: 8px !important;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.btn-page:hover:not(:disabled) {
+  background: #111 !important;
+  border-color: var(--accent) !important;
+  transform: translateY(-1px);
+}
+
+.btn-page.active {
+  background: var(--accent) !important;
+  color: #000 !important;
+  border-color: var(--accent) !important;
+  font-weight: 800;
+}
+
+.btn-page:disabled {
+  opacity: 0.2;
+  cursor: not-allowed;
 }
 
 .notification-item.unread {
@@ -2026,21 +2061,35 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 /* AI SIDEBAR STYLES */
 .ai-trigger-btn {
   position: fixed;
-  bottom: 30px;
-  right: 30px;
+  bottom: 25px;
+  right: 25px;
   background: linear-gradient(135deg, var(--purple), var(--cyan));
   color: #fff;
   border: none;
-  padding: 12px 24px;
+  padding: 8px 18px; /* Reduced 30% */
   border-radius: 50px;
   font-weight: 800;
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  gap: 8px;
   cursor: pointer;
   box-shadow: 0 10px 20px rgba(179, 102, 255, 0.3), 0 0 15px rgba(0, 229, 255, 0.4);
   z-index: 999;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  font-size: 13px; /* Smaller font */
+}
+
+@media (max-width: 768px) {
+  .ai-trigger-btn {
+    padding: 12px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+  }
+  .ai-trigger-btn span {
+    display: none; /* Icon only on mobile */
+  }
 }
 
 .ai-trigger-btn:hover {
@@ -2063,7 +2112,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   position: fixed;
   top: 0;
   right: 0;
-  width: 400px;
+  width: 320px; /* Reduced from 400px (approx 30%) */
   height: 100vh;
   background-color: rgba(26, 29, 36, 0.95);
   backdrop-filter: blur(15px);
