@@ -20,22 +20,14 @@ serve(async (req) => {
     }
 
     const systemPrompt = `
-      Bạn là Trợ lý Trí tuệ BOD (BOD Intelligence Assistant) cho Blanca CRM. 
-      Bạn đang hỗ trợ trực tiếp cho Ban Giám đốc (BOD).
+      Bạn là Trợ lý Trí tuệ BOD cho Blanca CRM. 
+      DỮ LIỆU SALES THỰC TẾ: ${JSON.stringify(context.topSales)}
+      KPI & TÀI CHÍNH: ${JSON.stringify(context.scorecard)}
       
-      DỮ LIỆU HIỆN TẠI TỪ HỆ THỐNG:
-      - KPI & Tài chính: ${JSON.stringify(context.scorecard)}
-      - Cảnh báo dòng tiền: ${JSON.stringify(context.alerts)}
-      - Hiệu suất Sales (Top 5): ${JSON.stringify(context.topSales)}
-      - Chỉ số Marketing: ${JSON.stringify(context.marketing)}
-      - Lợi nhuận dự án: ${JSON.stringify(context.projects)}
-      
-      QUY TẮC PHẢN HỒI:
-      1. TRUNG THỰC: Chỉ trả lời dựa trên các chỉ số được cung cấp ở trên.
-      2. PHÂN TÍCH: So sánh dữ liệu sales và marketing nếu được hỏi.
-      3. NGẮN GỌN: Trả lời dưới 120 từ, tập trung vào con số.
-      4. CẢNH BÁO: Nhắc nhở nếu có đèn ĐỎ hoặc VÀNG.
-      5. NGÔN NGỮ: Tiếng Việt.
+      YÊU CẦU:
+      1. Đọc cột "nv" là Tên nhân viên, "ds" là Doanh số.
+      2. Nếu Sếp hỏi ai dẫn đầu, hãy nêu đích danh tên từ danh sách "topSales" có "ds" cao nhất.
+      3. Trả lời cực ngắn, đi thẳng vào vấn đề.
     `;
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
@@ -43,16 +35,26 @@ serve(async (req) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: systemPrompt + '\n\nUser: ' + prompt }] }]
+        contents: [{ parts: [{ text: systemPrompt + '\n\nUser: ' + prompt }] }],
+        generationConfig: {
+          temperature: 0.1,
+          maxOutputTokens: 200,
+        }
       })
     });
 
     const data = await response.json();
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'AI không trả về kết quả.';
+    
+    // Debug lỗi nếu API không trả về content
+    if (!data.candidates || data.candidates.length === 0) {
+       return new Response(JSON.stringify({ reply: 'Gemini API không phản hồi (Cấu trúc rỗng).' }), { headers: corsHeaders })
+    }
+
+    const reply = data.candidates[0].content.parts[0].text;
 
     return new Response(JSON.stringify({ reply }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
 
   } catch (error) {
-    return new Response(JSON.stringify({ reply: 'Lỗi: ' + error.message }), { headers: corsHeaders })
+    return new Response(JSON.stringify({ reply: 'Lỗi hệ thống: ' + error.message }), { headers: corsHeaders })
   }
 })

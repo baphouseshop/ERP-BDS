@@ -30,14 +30,18 @@ const AIChatSidebar = () => {
     setIsLoading(true);
 
     try {
-      // Ưu tiên lấy từ dashboardStats, nếu không có thì lấy từ allSales (dữ liệu thực tế nhất)
-      const salesContext = (dashboardStats?.topSalesPerformers && dashboardStats.topSalesPerformers.length > 0) 
+      // Chỉ lấy TOP 5 người xuất sắc nhất để tránh làm AI bị quá tải dữ liệu (gây lỗi 400/500)
+      const rawSales = (dashboardStats?.topSalesPerformers && dashboardStats.topSalesPerformers.length > 0) 
         ? dashboardStats.topSalesPerformers 
-        : (allSales || staff || []).slice(0, 10).map(s => ({
-            name: s["Tên NV"] || s.ho_ten || s.name,
-            revenue: s["DS THỰC"] || s.total_revenue || s.revenue || 0,
-            status: s["Trạng thái"] || s.trang_thai || "Active"
-          })).sort((a, b) => b.revenue - a.revenue);
+        : (allSales || staff || []);
+
+      const salesContext = rawSales
+        .map(s => ({
+          nv: s["Tên NV"] || s.ho_ten || s.name || "N/A",
+          ds: s["DS THỰC"] || s.total_revenue || s.revenue || 0,
+        }))
+        .sort((a, b) => b.ds - a.ds)
+        .slice(0, 5);
 
       const { data, error } = await supabase.functions.invoke('bod-assistant', {
         body: { 
