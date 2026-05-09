@@ -240,15 +240,10 @@ function Dashboard() {
 
       {/* BOD Analysis */}
       <SectionHead icon="ti-presentation" label="Phân tích chuyên sâu cho BOD" />
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 12 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <ChartCard title="Lãi lỗ (P&L) theo dự án" sub="Đơn vị: Tỷ VNĐ">
-            <BarChart bars={projectPL.map(p => ({ label: p.ten_du_an, val: p.net_profit, color: '#ccff00' }))} />
-          </ChartCard>
-          <ChartCard title="Dự báo dòng tiền (90 ngày)" sub="Kế hoạch thu tiền dự kiến">
-            <BarChart bars={cashflowForecast.map(c => ({ label: c.period, val: c.expected_amount, color: '#ff4d94' }))} />
-          </ChartCard>
-        </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 12 }}>
+        <ChartCard title="Dự báo dòng tiền (90 ngày)" sub="Kế hoạch thu tiền dự kiến">
+          <BarChart bars={cashflowForecast.map(c => ({ label: c.period, val: c.expected_amount, color: '#ff4d94' }))} />
+        </ChartCard>
         <ChartCard title="Theo dõi Chỉ số Sức khỏe" sub="Tình trạng vận hành hiện tại">
           <Table 
             headers={['Chỉ số', 'Giá trị']} 

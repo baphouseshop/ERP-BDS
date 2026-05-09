@@ -212,6 +212,7 @@ export function BarChart({ bars = [] }) {
             style={{
               borderRadius: '4px 4px 0 0',
               width: '100%',
+              maxWidth: 60,
               height: `${Math.max((bar.val / max) * 80, 4)}px`,
               background: bar.color,
               transition: 'opacity .15s',
@@ -219,7 +220,7 @@ export function BarChart({ bars = [] }) {
             }}
             title={`${bar.label}: ${bar.val}`}
           />
-          <div style={{ fontSize: 9, color: '#4b5563', textAlign: 'center', lineHeight: 1.2, width: '100%', overflow: 'hidden' }}>{bar.label}</div>
+          <div style={{ fontSize: 9, color: '#4b5563', textAlign: 'center', lineHeight: 1.2, width: '100%', maxWidth: 60, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{bar.label}</div>
         </div>
       ))}
     </div>
