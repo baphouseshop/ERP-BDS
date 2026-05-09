@@ -9,7 +9,7 @@ const AIChatSidebar = () => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { dashboardStats, executiveScorecard, trafficLights, projectPL, currentUser, staff, allSales } = useData();
+  const { executiveScorecard, projectPL, staff, allSales } = useData();
   const chatEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -30,51 +30,40 @@ const AIChatSidebar = () => {
     setIsLoading(true);
 
     try {
-      // Chỉ lấy TOP 5 người xuất sắc nhất để tránh làm AI bị quá tải dữ liệu
-      const rawSales = (dashboardStats?.topSalesPerformers && dashboardStats.topSalesPerformers.length > 0) 
-        ? dashboardStats.topSalesPerformers 
-        : (allSales || staff || []);
-
-      const salesContext = rawSales
+      // 1. Chuẩn bị dữ liệu Top Sales để phân tích sâu
+      const salesContext = (allSales || [])
         .map(s => {
-          // Lấy doanh số từ mọi trường có thể có (đảm bảo không sót số của Sếp)
-          const revenue = s["DS THỰC"] || s["Doanh số"] || s.total_revenue || s.revenue || s.amount || 0;
+          const revenue = s["DS THỰC"] || s["Doanh số"] || s.total_revenue || 0;
           return {
-            nv: s["Tên NV"] || s.ho_ten || s.name || s.full_name || "N/A",
+            nv: s["Tên NV"] || s.ho_ten || s.name || "N/A",
             ds: typeof revenue === 'string' ? parseFloat(revenue.replace(/[^\d.]/g, '')) : revenue
           };
         })
         .sort((a, b) => b.ds - a.ds)
-        .slice(0, 5);
+        .slice(0, 10);
 
+      // 2. Gọi Edge Function an toàn (không dùng API Key ở Frontend)
       const { data, error } = await supabase.functions.invoke('bod-assistant', {
         body: { 
           prompt: userMessage,
           context: {
-            scorecard: executiveScorecard,
-            alerts: trafficLights,
-            projects: projectPL,
+            totalStaff: staff?.length || 0,
             topSales: salesContext,
-            marketing: dashboardStats?.marketingStats || [],
-            user: currentUser?.full_name
+            scorecard: executiveScorecard,
+            projects: projectPL
           }
         }
       });
 
       if (error) throw error;
 
-      const botMessage = {
-        role: 'assistant',
-        content: data.reply
-      };
-      setMessages(prev => [...prev, botMessage]);
+      setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
     } catch (error) {
       console.error('Chat Error:', error);
-      const errorMessage = {
-        role: 'assistant',
-        content: `Lỗi kết nối AI: ${error.message}. Sếp vui lòng kiểm tra lại mạng hoặc cập nhật API Key mới vào hệ thống.`
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: "Lỗi kết nối: AI chưa thể phản hồi lúc này. Sếp vui lòng kiểm tra lại Key trong Supabase." 
+      }]);
     } finally {
       setIsLoading(false);
     }
@@ -120,7 +109,7 @@ const AIChatSidebar = () => {
       <form className="ai-chat-input-area" onSubmit={handleSend}>
         <input 
           type="text" 
-          placeholder="Hỏi về doanh thu, lãi lỗ..." 
+          placeholder="Hỏi về doanh thu, nhân sự..." 
           value={input}
           onChange={(e) => setInput(e.target.value)}
         />
