@@ -57,8 +57,8 @@ const AIChatSidebar = () => {
 
       // GỌI TRỰC TIẾP GEMINI TỪ FRONTEND ĐỂ TRÁNH LỖI TRUNG GIAN
       const apiKey = "AIzaSyB3N1n_uE9Fna7DrWelugvYpOHtIVxyE-0";
-      const modelName = 'gemini-1.5-flash';
-      const url = `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${apiKey}`;
+      const modelName = 'gemini-2.5-flash';
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
       const response = await fetch(url, {
         method: 'POST',
@@ -71,7 +71,7 @@ const AIChatSidebar = () => {
       const data = await response.json();
       
       if (data.error) {
-        throw new Error(`Lỗi Gemini: ${data.error.message}`);
+        throw new Error(`Lỗi Gemini (${data.error.code}): ${data.error.message}`);
       }
 
       const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "AI không phản hồi.";
