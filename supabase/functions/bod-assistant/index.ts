@@ -1,4 +1,5 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { GoogleGenerativeAI } from 'https://esm.sh/@google/generative-ai'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,8 +14,6 @@ serve(async (req) => {
   try {
     const { prompt, context } = await req.json()
     const apiKey = Deno.env.get('GEMINI_API_KEY') || Deno.env.get('Gemini API Key');
-    
-    // Chuyển về gemini-1.5-flash để đảm bảo tính ổn định cao nhất
     const modelName = Deno.env.get('GEMINI_MODEL') || 'gemini-1.5-flash';
 
     if (!apiKey) {
@@ -23,6 +22,10 @@ serve(async (req) => {
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+
+    // Sử dụng SDK chính thức qua esm.sh
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: modelName });
 
     const systemPrompt = `
       Bạn là Trợ lý Trí tuệ BOD (BOD Intelligence Assistant) cho Blanca CRM. 
@@ -40,28 +43,9 @@ serve(async (req) => {
       4. NGÔN NGỮ: Tiếng Việt.
     `;
 
-    // Sử dụng v1beta để hỗ trợ dải model rộng hơn (bao gồm cả các bản preview)
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{ text: systemPrompt + '\n\nUser: ' + prompt }]
-        }]
-      })
-    })
-
-    const data = await response.json()
-    
-    if (data.error) {
-      console.error('Gemini API Error:', data.error);
-      return new Response(
-        JSON.stringify({ reply: `Lỗi từ Gemini API (${modelName}): ` + (data.error.message || 'Không rõ lỗi') }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Tôi gặp lỗi khi xử lý dữ liệu từ AI.'
+    const result = await model.generateContent(systemPrompt + '\n\nUser: ' + prompt);
+    const response = await result.response;
+    const reply = response.text();
 
     return new Response(
       JSON.stringify({ reply }),
@@ -70,8 +54,9 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Function Error:', error);
+    const currentModel = Deno.env.get('GEMINI_MODEL') || 'gemini-1.5-flash';
     return new Response(
-      JSON.stringify({ reply: 'Lỗi hệ thống: ' + error.message }),
+      JSON.stringify({ reply: `Lỗi hệ thống (${currentModel}): ` + error.message }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
