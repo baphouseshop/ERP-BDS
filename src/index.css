@@ -2613,6 +2613,23 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     margin-top: 24px !important;
     margin-bottom: 16px !important;
   }
+
+  .modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+    margin: 20px 10px;
+  }
+
+  .filter-group {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .automation-filter-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
 }
 
 

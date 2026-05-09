@@ -206,7 +206,7 @@ export function DonutChart({ segments = [], total, label }) {
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: '#9ca3af' }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: seg.color, flexShrink: 0 }} />
             <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 500 }}>{seg.label}</span>
-            <span style={{ marginLeft: 'auto', color: '#6b7280', paddingLeft: 10, fontWeight: 700 }}>{seg.count || seg.pct + '%'}</span>
+            <span style={{ marginLeft: 'auto', color: '#6b7280', paddingLeft: 10, fontWeight: 700 }}>{shortTotal(seg.count) || seg.pct + '%'}</span>
           </div>
         ))}
       </div>
