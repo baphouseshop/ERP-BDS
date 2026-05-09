@@ -353,8 +353,8 @@ export const DataProvider = ({ children }) => {
           "Live Lead": leadCount,
           "Hoa hồng (tr)": totalComm.toFixed(1),
           "Lương cứng (tr)": kpiTarget.salary_million || 0, 
-          "Gọi điện": 0,
-          "Site Visit": 0, 
+          "Gọi điện": empStats.calls_count || 0,
+          "Site Visit": empStats.visits_count || 0, 
           "KH Site Visit": kpiTarget.target_site_visits || 0,
           "HĐMB THỰC TẾ": 0, 
           "KH HĐMB": kpiTarget.target_contracts || 0,
@@ -367,15 +367,14 @@ export const DataProvider = ({ children }) => {
       setAllSales(allSalesData);
 
       const filteredSales = allSalesData.filter(s => {
-        // Chỉ tính các chỉ số cho ai gắn mã của sale (Sàn hoặc Sales)
         const dept = (s["Sàn"] || "").toLowerCase();
         const role = (s["Chức vụ"] || "").toLowerCase();
-        
-        // Loại bỏ Operations, IT, HR, Kế toán khỏi Leaderboard
+        // Bao gồm nhân sự Sales/Kinh doanh, hoặc bất kỳ ai có chức vụ Sale/Kinh doanh dù ở bộ phận nào
         const isSalesStaff = 
           (['sales','kinh doanh','sàn','đại lý'].some(keyword => dept.includes(keyword)) ||
            ['sale','kinh doanh'].some(keyword => role.includes(keyword))) &&
-          !['it','hr','kế toán','operations','vận hành','hành chính'].some(keyword => dept.includes(keyword) || role.includes(keyword));
+          (!['it','hr','kế toán','operations','vận hành','hành chính'].some(keyword => dept.includes(keyword) || role.includes(keyword)) || 
+           ['sale','kinh doanh'].some(keyword => role.includes(keyword)));
         
         if (!isSalesStaff) return false;
         // Admin và BOD thấy tất cả những người thuộc bộ phận sales

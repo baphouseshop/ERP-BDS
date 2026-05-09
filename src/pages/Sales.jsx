@@ -9,7 +9,11 @@ function Sales() {
 
   // Enriched data is already sorted and prepared in DataContext usually,
   // but let's ensure ranking here for the leaderboard.
-  const rankedSales = [...sales].sort((a, b) => Number(b['% KPI']) - Number(a['% KPI']));
+  const rankedSales = [...sales].sort((a, b) => {
+    const kpiDiff = Number(b['% KPI']) - Number(a['% KPI']);
+    if (Math.abs(kpiDiff) > 0.001) return kpiDiff;
+    return Number(b['DS thực (tỷ)']) - Number(a['DS thực (tỷ)']);
+  });
 
   // --- KPI CALCULATIONS ---
   const totalDS = sales.reduce((sum, s) => sum + Number(s['DS thực (tỷ)'] || 0), 0);
