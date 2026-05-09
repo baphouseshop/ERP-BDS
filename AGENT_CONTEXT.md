@@ -1,20 +1,20 @@
-# 專案上下文 (Agent Context)：CRM
+# Bối cảnh Dự án (Agent Context): CRM
 
-> **最後更新時間**：2026-05-09 07:51
-> **自動生成**：由 `prepare_context.py` 產生，供 AI Agent 快速掌握專案全局
+> **Cập nhật lần cuối**: 2026-05-09 09:03
+> **Tự động tạo**: Được tạo bởi `prepare_context.py` để giúp AI Agent nhanh chóng nắm bắt toàn bộ dự án
 
 ---
 
-## 🎯 1. 專案目標 (Project Goal)
-* **核心目的**：This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-* _完整說明見 [README.md](README.md)_
+## 🎯 1. Mục tiêu Dự án (Project Goal)
+* **Mục đích cốt lõi**: Template này cung cấp một thiết lập tối giản để React hoạt động trong Vite với HMR (Hot Module Replacement) và một số quy tắc ESLint.
+* _Xem chi tiết tại [README.md](README.md)_
 
-## 🛠️ 2. 技術棧與環境 (Tech Stack & Environment)
-* **核心套件**：@supabase/supabase-js, lucide-react, react, react-dom, react-hot-toast, react-router-dom, recharts, xlsx
-* **開發套件**：@eslint/js, @types/react, @types/react-dom, @vitejs/plugin-react, eslint, eslint-plugin-react-hooks, eslint-plugin-react-refresh, globals
-* **可用指令**：dev, build, lint, preview
+## 🛠️ 2. Công nghệ & Môi trường (Tech Stack & Environment)
+* **Các gói lõi**: @supabase/supabase-js, lucide-react, react, react-dom, react-hot-toast, react-router-dom, recharts, xlsx
+* **Các gói phát triển**: @eslint/js, @types/react, @types/react-dom, @vitejs/plugin-react, eslint, eslint-plugin-react-hooks, eslint-plugin-react-refresh, globals
+* **Các lệnh khả dụng**: dev, build, lint, preview
 
-### 原始設定檔
+### Các tệp cấu hình gốc
 
 <details><summary>package.json</summary>
 
@@ -57,8 +57,8 @@
 ```
 </details>
 
-## 📂 3. 核心目錄結構 (Core Structure)
-_(💡 AI 讀取守則：請依據此結構尋找對應檔案，勿盲目猜測路徑)_
+## 📂 3. Cấu trúc Thư mục Lõi (Core Structure)
+_(💡 Quy tắc cho AI: Vui lòng dựa vào cấu trúc này để tìm tệp tương ứng, không tự ý đoán đường dẫn)_
 ```text
 CRM/
 ├── AGENT_CONTEXT.md
@@ -121,9 +121,8 @@ CRM/
 └── vite.config.js
 ```
 
-## 🏛️ 4. 架構與設計約定 (Architecture & Conventions)
-* _（尚無 `.auto-skill-local.md`，專案踩坑經驗將在開發過程中自動累積）_
+## 🏛️ 4. Kiến trúc & Quy ước Thiết kế (Architecture & Conventions)
+* _(Hiện chưa có `.auto-skill-local.md`, kinh nghiệm dự án sẽ được tự động tích lũy trong quá trình phát triển)_
 
-## 🚦 5. 目前進度與待辦 (Current Status & TODO)
-* _（尚無日記記錄，或日記中無「下一步」區塊）_
-
+## 🚦 5. Tiến độ Hiện tại & Việc cần làm (Current Status & TODO)
+* _(Chưa có bản ghi nhật ký, hoặc nhật ký không có phần "Bước tiếp theo")_
