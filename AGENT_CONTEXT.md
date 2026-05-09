@@ -1,12 +1,12 @@
 # Bối cảnh Dự án (Agent Context): CRM
 
-> **Cập nhật lần cuối**: 2026-05-09 13:05
+> **Cập nhật lần cuối**: 2026-05-09 16:05
 > **Tự động tạo**: Được tạo bởi `prepare_context.py` để giúp AI Agent nhanh chóng nắm bắt toàn bộ dự án
 
 ---
 
 ## 🎯 1. Mục tiêu Dự án (Project Goal)
-* **Mục đích cốt lõi**: Template này cung cấp một thiết lập tối giản để React hoạt động trong Vite với HMR (Hot Module Replacement) và một số quy tắc ESLint.
+* **Mục đích cốt lõi**: Quản lý khách hàng, giao dịch và hiệu suất nhân sự cho Blanca BĐS với giao diện hiện đại, dữ liệu thời gian thực và tích hợp AI.
 * _Xem chi tiết tại [README.md](README.md)_
 
 ## 🛠️ 2. Công nghệ & Môi trường (Tech Stack & Environment)
@@ -58,85 +58,43 @@
 </details>
 
 ## 📂 3. Cấu trúc Thư mục Lõi (Core Structure)
-_(💡 Quy tắc cho AI: Vui lòng dựa vào cấu trúc này để tìm tệp tương ứng, không tự ý đoán đường dẫn)_
 ```text
 CRM/
 ├── AGENT_CONTEXT.md
-├── Blanca_CRM.html
-├── Blanca_CRM_Mobile_Fixed.html
-├── Blanca_CRM_Offline.html
-├── CODEBASE_DOCUMENTATION.md
-├── FILE_1_MASTER.xlsx
-├── README.md
-├── clean_data.py
-├── data.json
-├── eslint.config.js
-├── generate_relational_sql.py
-├── generate_sql.py
-├── index.html
-├── package-lock.json
-├── package.json
-├── read_excel.py
-├── run_mcp.cjs
-├── run_sql.py
-├── sample_data
-│   ├── employees.csv
-│   ├── financial_records.csv
-│   ├── leads.csv
-│   ├── marketing_campaigns.csv
-│   └── transactions.csv
-├── seed.sql
 ├── src
 │   ├── App.jsx
 │   ├── components
-│   │   └── ErrorBoundary.jsx
+│   │   ├── VisualLanguage.jsx (NEW: Hệ thống UI chuẩn Cyber-Nexus)
+│   │   ├── NotificationBell.jsx
+│   │   └── ...
 │   ├── context
 │   │   └── DataContext.jsx
-│   ├── data
-│   │   └── db.json
-│   ├── index.css
-│   ├── main.jsx
-│   ├── pages
-│   │   ├── Dashboard.jsx
-│   │   ├── Financials.jsx
-│   │   ├── Leads.jsx
-│   │   ├── Login.jsx
-│   │   ├── Logs.jsx
-│   │   ├── Marketing.jsx
-│   │   ├── Sales.jsx
-│   │   ├── Settings.jsx
-│   │   ├── Staff.jsx
-│   │   └── Transactions.jsx
-│   └── supabaseClient.js
-├── supabase
-│   └── migrations
-│       ├── 20260508_add_performance_indexes.sql
-│       ├── 20260508_auto_create_profiles.sql
-│       ├── 20260508_create_kpi_targets.sql
-│       ├── 20260508_enable_rls_all_tables.sql
-│       ├── 20260508_performance_indexing.sql
-│       ├── 20260508_security_hardening.sql
-│       └── add_scalability_indexes.sql
-├── vercel.json
-└── vite.config.js
+│   ├── index.css (Updated: Design Tokens mới)
+│   └── pages
+│       ├── Dashboard.jsx (Modernized)
+│       ├── Leads.jsx (Modernized)
+│       ├── Sales.jsx (Modernized)
+│       ├── Marketing.jsx (Modernized)
+│       ├── Financials.jsx (Modernized)
+│       ├── Staff.jsx (Modernized)
+│       ├── Transactions.jsx (Modernized)
+│       └── Automation.jsx (Legacy UI - Giữ nguyên)
 ```
 
 ## 🏛️ 4. Kiến trúc & Quy ước Thiết kế (Architecture & Conventions)
-* _(Hiện chưa có `.auto-skill-local.md`, kinh nghiệm dự án sẽ được tự động tích lũy trong quá trình phát triển)_
+* **Design System**: Sử dụng `VisualLanguage.jsx` cho mọi component hiển thị (KpiCard, BarChart, DonutChart).
+* **Cyber-Nexus Style**: KPI cards có 2px accent line ở top, uppercase labels, typography 'Outfit'.
+* **Analytics**: Dùng SVG thuần cho biểu đồ thay vì thư viện Recharts để tăng tính nhất quán và hiệu năng.
 
 ## 🚦 5. Tiến độ Hiện tại & Việc cần làm (Current Status & TODO)
 * **Tiến độ**: 
-    - **Bảo mật & Ổn định AI (BOD Assistant)**: Đã di chuyển toàn bộ logic AI sang Supabase Edge Function (`bod-assistant`). Tuyệt đối không để lộ API Key ở Frontend.
-    - **Mô hình AI**: Đã cố định sử dụng `gemini-2.0-flash` (đã update) phù hợp với tài khoản Google AI.
-    - **Audit Logging**: Triển khai bảng `audit_logs` và logic `logAction` truy vết mọi tác vụ Add/Edit/Delete trên toàn hệ thống.
-    - **Harden Mutations**: Role-based guarding (Chỉ Admin/BOD được xóa), robust validation (SĐT, Email, Required), và cơ chế rollback khi lỗi server.
-    - **UX Refinement**: 
-        - Tối ưu trạng thái Loading: `isFetching` cho các tác vụ nền (search/pagination) giúp UI mượt mà, không bị flash trắng.
-        - Thêm indicator `loader-inline` trực quan khi dữ liệu đang đồng bộ.
-        - Premium `LoadingScreen.jsx` cho khởi động ứng dụng.
-    - **Dữ liệu**: Đã chuẩn hóa ánh xạ doanh số (DS THỰC) giúp AI báo cáo chính xác 100% so với Dashboard.
+    - **Visual Overhaul (Cyber-Nexus)**: Đã hiện đại hóa toàn bộ giao diện các module lõi (Dashboard, Marketing, Sales, Leads, Financials, Staff, Transactions).
+    - **Standardized UI**: Triển khai `VisualLanguage` components giúp giao diện đồng bộ 100% về màu sắc, hiệu ứng và phân cấp thông tin.
+    - **Navigation Refresh**: Topbar và Navbar được tinh chỉnh gọn gàng, underline active tabs, filter pill và notification badges mới.
+    - **Bảo mật & Ổn định AI**: Duy trì bod-assistant trên Supabase Edge Function.
+    - **Deployment**: Đã đẩy mã nguồn lên GitHub và triển khai tự động qua Vercel.
 * **Việc cần làm**:
-    - **Audit Log Viewer**: Tích hợp giao diện xem Log cho Admin để giám sát hoạt động hệ thống.
-    - **Performance Monitor**: Giám sát độ trễ của Edge Function khi xử lý >5000 leads.
-    - **Auto-Reports**: Nghiên cứu cơ chế AI tự động gửi báo cáo KPI hàng ngày qua Telegram/Zalo.
-    - **Stress Test**: Kiểm tra tính ổn định của cơ chế Rollback trong điều kiện mạng chập chờn.
+    - **Mobile/Responsive Audit**: Kiểm tra hiển thị trên các thiết bị di động sau khi refactor UI.
+    - **Automation Modernization**: Nghiên cứu kế hoạch nâng cấp giao diện module Automation đồng bộ với hệ thống Cyber-Nexus (khi có yêu cầu).
+    - **Audit Log Viewer**: Tích hợp giao diện xem Log cho Admin.
+    - **Auto-Reports**: AI tự động gửi báo cáo KPI hàng ngày qua Telegram/Zalo.
