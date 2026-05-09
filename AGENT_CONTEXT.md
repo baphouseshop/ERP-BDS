@@ -88,13 +88,17 @@ CRM/
 
 ## 🚦 5. Tiến độ Hiện tại & Việc cần làm (Current Status & TODO)
 * **Tiến độ**: 
-    - **Visual Overhaul (Cyber-Nexus)**: Đã hiện đại hóa toàn bộ giao diện các module lõi. Đã sửa lỗi build Vercel do xuất hiện duplicate default exports trong Dashboard và Financials. Giao diện đồng bộ 100%.
-    - **Standardized UI**: Triển khai `VisualLanguage` components giúp giao diện đồng bộ 100% về màu sắc, hiệu ứng và phân cấp thông tin.
-    - **Navigation Refresh**: Topbar và Navbar được tinh chỉnh gọn gàng, underline active tabs, filter pill và notification badges mới.
-    - **Bảo mật & Ổn định AI**: Duy trì bod-assistant trên Supabase Edge Function.
-    - **Deployment**: Đã đẩy mã nguồn lên GitHub và triển khai tự động qua Vercel.
+    - **Visual Overhaul (Cyber-Nexus)**: Đã hiện đại hóa toàn bộ giao diện các module lõi. Sửa lỗi build Vercel (duplicate default exports).
+    - **Dashboard Refactor (High-Density)**: Hoàn thành tái cấu trúc Dashboard:
+        *   Layout lưới 2x2 cho biểu đồ và 2x2 cho bảng dữ liệu vận hành.
+        *   Bổ sung 4 bảng summary (Sales, Tx, MKT, Finance) và bảng Chỉ số Sức khỏe cho BOD.
+        *   Tối ưu hóa tỉ lệ BarChart (maxWidth 60px) giúp hiển thị cân đối trên màn hình lớn.
+        *   Loại bỏ biểu đồ P&L dự án quá tải để tập trung vào Cashflow Forecast.
+    - **Standardized UI**: Triển khai `VisualLanguage` components đồng bộ 100%.
+    - **Navigation Refresh**: Topbar và Navbar tinh chỉnh gọn gàng (underline active, filter pills).
+    - **Deployment**: Đã đẩy mã nguồn lên GitHub và Vercel (Production Stable).
 * **Việc cần làm**:
-    - **Mobile/Responsive Audit**: Kiểm tra hiển thị trên các thiết bị di động sau khi refactor UI.
-    - **Automation Modernization**: Nghiên cứu kế hoạch nâng cấp giao diện module Automation đồng bộ với hệ thống Cyber-Nexus (khi có yêu cầu).
+    - **Mobile/Responsive Audit**: Kiểm tra hiển thị lưới Dashboard trên các màn hình nhỏ hơn.
+    - **Automation Modernization**: Nghiên cứu nâng cấp giao diện Automation.
     - **Audit Log Viewer**: Tích hợp giao diện xem Log cho Admin.
     - **Auto-Reports**: AI tự động gửi báo cáo KPI hàng ngày qua Telegram/Zalo.
