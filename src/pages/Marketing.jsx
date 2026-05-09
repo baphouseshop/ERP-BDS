@@ -153,40 +153,62 @@ function Marketing() {
 
   return (
     <div style={{ paddingBottom: 40 }}>
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h1 className="page-title" style={{ margin: 0 }}>Marketing</h1>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <select 
-            className="filter-select" 
-            style={{ width: '180px', margin: 0 }}
-            value={`${marketingSort.column}-${marketingSort.ascending ? 'asc' : 'desc'}`} 
-            onChange={e => {
-              const [col, dir] = e.target.value.split('-');
-              setMarketingSort({ column: col, ascending: dir === 'asc' });
-            }}
-          >
-            <option value="thang-desc">Mới nhất lên đầu</option>
-            <option value="thang-asc">Cũ nhất lên đầu</option>
-            <option value="ten_chien_dich-asc">Tên chiến dịch (A-Z)</option>
-            <option value="ten_chien_dich-desc">Tên chiến dịch (Z-A)</option>
-          </select>
-          <button onClick={handleOpenAddModal} className="btn-submit">Thêm Chiến dịch</button>
+      <div className="page-header" style={{ marginBottom: 24 }}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 16
+        }}>
+          <div>
+            <h1 className="page-title" style={{ margin: 0, fontSize: 'clamp(20px, 5vw, 28px)' }}>Marketing</h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>Quản lý hiệu suất và chi phí các chiến dịch</p>
+          </div>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <select 
+              className="filter-select" 
+              style={{ width: 180, margin: 0 }}
+              value={`${marketingSort.column}-${marketingSort.ascending ? 'asc' : 'desc'}`} 
+              onChange={e => {
+                const [col, dir] = e.target.value.split('-');
+                setMarketingSort({ column: col, ascending: dir === 'asc' });
+              }}
+            >
+              <option value="thang-desc">Mới nhất lên đầu</option>
+              <option value="thang-asc">Cũ nhất lên đầu</option>
+              <option value="ten_chien_dich-asc">Tên chiến dịch (A-Z)</option>
+              <option value="ten_chien_dich-desc">Tên chiến dịch (Z-A)</option>
+            </select>
+            <button onClick={handleOpenAddModal} className="btn-submit" style={{ 
+              padding: '8px 20px',
+              fontSize: 13,
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              <i className="ti ti-plus" style={{ marginRight: 6 }}></i> Thêm Chiến dịch
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="filter-bar" style={{ marginBottom: 24 }}>
-        <div style={{ position: 'relative', flex: 1 }}>
-          <input 
-            className="filter-input" 
-            style={{ width: '100%', paddingLeft: 34 }}
-            placeholder="Tìm tên chiến dịch, kênh, ghi chú..." 
-            value={localSearch} 
-            onChange={e => setLocalSearch(e.target.value)} 
-          />
-          <i className="ti ti-search" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+      <div className="filter-bar" style={{ 
+        background: 'var(--bg-secondary)', 
+        border: '1px solid var(--border-color)', 
+        borderRadius: 12, 
+        padding: '16px 20px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        marginBottom: 24,
+        flexWrap: 'wrap'
+      }}>
+        <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
+          <i className="ti ti-search" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}></i>
+          <input className="filter-input" placeholder="Tìm tên chiến dịch, kênh, ghi chú..." style={{ paddingLeft: 36, width: '100%', margin: 0 }} value={localSearch} onChange={e => setLocalSearch(e.target.value)} />
         </div>
-        {marketingSearch && <button className="btn-clear-filter" onClick={clearFilters}>✕ Xóa lọc</button>}
-        <span className="filter-count" style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+        {marketingSearch && <button onClick={clearFilters} style={{ background: 'transparent', border: 'none', color: 'var(--red)', fontSize: 12, cursor: 'pointer', fontWeight: 700 }}>XÓA LỌC</button>}
+        <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 'auto' }}>
           Trang <strong>{marketingPage}</strong> · Tổng <strong>{marketingTotal}</strong> chiến dịch
         </span>
       </div>
@@ -306,22 +328,56 @@ function Marketing() {
       </div>
 
       {marketingTotal > itemsPerPage && (
-        <div className="pagination-container" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '32px' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, marginTop: 32, flexWrap: 'wrap' }}>
           <button 
             onClick={() => setMarketingPage(prev => Math.max(prev - 1, 1))} 
-            disabled={marketingPage === 1}
-            className="btn-cancel"
-            style={{ padding: '6px 12px', opacity: marketingPage === 1 ? 0.5 : 1 }}
-          >Trái</button>
+            disabled={marketingPage === 1} 
+            className="btn-page"
+            style={{ padding: '8px 12px' }}
+          >
+            <i className="ti ti-angle-left"></i>
+          </button>
           
-          <button className="btn-submit" style={{ padding: '6px 12px', background: 'var(--accent)', color: '#000' }}>{marketingPage}</button>
+          {(() => {
+            const pages = [];
+            const showRange = 1;
+            const totalPages = Math.ceil(marketingTotal / itemsPerPage);
+            
+            pages.push(
+              <button key={1} onClick={() => setMarketingPage(1)} className={`btn-page ${marketingPage === 1 ? 'active' : ''}`}>1</button>
+            );
+            
+            if (marketingPage > showRange + 2) {
+              pages.push(<span key="dots-1" style={{ color: 'var(--text-muted)', padding: '0 4px' }}>...</span>);
+            }
+            
+            for (let i = Math.max(2, marketingPage - showRange); i <= Math.min(totalPages - 1, marketingPage + showRange); i++) {
+              pages.push(
+                <button key={i} onClick={() => setMarketingPage(i)} className={`btn-page ${marketingPage === i ? 'active' : ''}`}>{i}</button>
+              );
+            }
+            
+            if (marketingPage < totalPages - showRange - 1) {
+              pages.push(<span key="dots-2" style={{ color: 'var(--text-muted)', padding: '0 4px' }}>...</span>);
+            }
+            
+            if (totalPages > 1) {
+              pages.push(
+                <button key={totalPages} onClick={() => setMarketingPage(totalPages)} className={`btn-page ${marketingPage === totalPages ? 'active' : ''}`}>{totalPages}</button>
+              );
+            }
+            
+            return pages;
+          })()}
           
           <button 
             onClick={() => setMarketingPage(prev => Math.min(prev + 1, Math.ceil(marketingTotal / itemsPerPage)))} 
-            disabled={marketingPage >= Math.ceil(marketingTotal / itemsPerPage)}
-            className="btn-cancel"
-            style={{ padding: '6px 12px', opacity: marketingPage >= Math.ceil(marketingTotal / itemsPerPage) ? 0.5 : 1 }}
-          >Phải</button>
+            disabled={marketingPage >= Math.ceil(marketingTotal / itemsPerPage)} 
+            className="btn-page"
+            style={{ padding: '8px 12px' }}
+          >
+            <i className="ti ti-angle-right"></i>
+          </button>
         </div>
       )}
 

@@ -78,13 +78,24 @@ function Transactions() {
   return (
     <div style={{ paddingBottom: 40 }}>
       <div className="page-header" style={{ marginBottom: 24 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 16
+        }}>
           <div>
-            <h1 className="page-title" style={{ margin: 0 }}>Lịch sử Giao dịch</h1>
+            <h1 className="page-title" style={{ margin: 0, fontSize: 'clamp(20px, 5vw, 28px)' }}>Lịch sử Giao dịch</h1>
             <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>Quản lý hợp đồng, cọc và doanh thu thực tế</p>
           </div>
-          <button onClick={handleOpenAddModal} className="btn-submit" style={{ padding: '8px 24px' }}>
-            + Thêm Giao dịch
+          <button onClick={handleOpenAddModal} className="btn-submit" style={{ 
+            padding: '8px 20px',
+            fontSize: 13,
+            display: 'flex',
+            alignItems: 'center'
+          }}>
+            <i className="ti ti-plus" style={{ marginRight: 6 }}></i> Thêm Giao dịch
           </button>
         </div>
       </div>
@@ -106,8 +117,8 @@ function Transactions() {
         gap: 12,
         marginBottom: 24
       }}>
-        <div style={{ position: 'relative', flex: 1 }}>
-          <i className="ti-search" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}></i>
+        <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
+          <i className="ti ti-search" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}></i>
           <input className="filter-input" placeholder="Tìm khách hàng, mã GD, SP..." style={{ paddingLeft: 36, width: '100%', margin: 0 }} value={localSearch} onChange={e => setLocalSearch(e.target.value)} />
         </div>
         <select className="filter-select" style={{ width: 180, margin: 0 }} value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
@@ -138,9 +149,9 @@ function Transactions() {
             {transactions.map((t, index) => (
               <tr key={index}>
                 <td>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button onClick={() => handleOpenEditModal(t)} style={{ background: 'none', border: 'none', color: 'var(--cyan)', cursor: 'pointer' }}><i className="ti-pencil"></i></button>
-                    <button onClick={() => { if(window.confirm('Xóa giao dịch?')) deleteTransaction(t['Mã GD']) }} style={{ background: 'none', border: 'none', color: 'var(--red)', cursor: 'pointer' }}><i className="ti-trash"></i></button>
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    <button onClick={() => handleOpenEditModal(t)} style={{ background: 'none', border: 'none', color: 'var(--cyan)', cursor: 'pointer', padding: 4 }}><i className="ti ti-pencil" style={{ fontSize: 16 }}></i></button>
+                    <button onClick={() => { if(window.confirm('Xóa giao dịch?')) deleteTransaction(t['Mã GD']) }} style={{ background: 'none', border: 'none', color: 'var(--red)', cursor: 'pointer', padding: 4 }}><i className="ti ti-trash" style={{ fontSize: 16 }}></i></button>
                   </div>
                 </td>
                 <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{t['Mã GD']}</td>
@@ -167,12 +178,55 @@ function Transactions() {
       </div>
 
       {totalPages > 1 && (
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 32 }}>
-          <button onClick={() => setTransactionsPage(Math.max(1, transactionsPage - 1))} disabled={transactionsPage === 1} className="btn-page">Trước</button>
-          {[...Array(totalPages)].map((_, i) => (
-            <button key={i} onClick={() => setTransactionsPage(i+1)} className={`btn-page ${transactionsPage === i+1 ? 'active' : ''}`}>{i+1}</button>
-          ))}
-          <button onClick={() => setTransactionsPage(Math.min(totalPages, transactionsPage + 1))} disabled={transactionsPage === totalPages} className="btn-page">Sau</button>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, marginTop: 32, flexWrap: 'wrap' }}>
+          <button 
+            onClick={() => setTransactionsPage(Math.max(1, transactionsPage - 1))} 
+            disabled={transactionsPage === 1} 
+            className="btn-page"
+            style={{ padding: '8px 12px' }}
+          >
+            <i className="ti ti-angle-left"></i>
+          </button>
+          
+          {(() => {
+            const pages = [];
+            const showRange = 1;
+            
+            pages.push(
+              <button key={1} onClick={() => setTransactionsPage(1)} className={`btn-page ${transactionsPage === 1 ? 'active' : ''}`}>1</button>
+            );
+            
+            if (transactionsPage > showRange + 2) {
+              pages.push(<span key="dots-1" style={{ color: 'var(--text-muted)', padding: '0 4px' }}>...</span>);
+            }
+            
+            for (let i = Math.max(2, transactionsPage - showRange); i <= Math.min(totalPages - 1, transactionsPage + showRange); i++) {
+              pages.push(
+                <button key={i} onClick={() => setTransactionsPage(i)} className={`btn-page ${transactionsPage === i ? 'active' : ''}`}>{i}</button>
+              );
+            }
+            
+            if (transactionsPage < totalPages - showRange - 1) {
+              pages.push(<span key="dots-2" style={{ color: 'var(--text-muted)', padding: '0 4px' }}>...</span>);
+            }
+            
+            if (totalPages > 1) {
+              pages.push(
+                <button key={totalPages} onClick={() => setTransactionsPage(totalPages)} className={`btn-page ${transactionsPage === totalPages ? 'active' : ''}`}>{totalPages}</button>
+              );
+            }
+            
+            return pages;
+          })()}
+          
+          <button 
+            onClick={() => setTransactionsPage(Math.min(totalPages, transactionsPage + 1))} 
+            disabled={transactionsPage === totalPages} 
+            className="btn-page"
+            style={{ padding: '8px 12px' }}
+          >
+            <i className="ti ti-angle-right"></i>
+          </button>
         </div>
       )}
 

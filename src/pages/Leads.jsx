@@ -139,14 +139,31 @@ function Leads() {
   return (
     <div style={{ paddingBottom: 40 }}>
       <div className="page-header" style={{ marginBottom: 24 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-          <div>
-            <h1 className="page-title" style={{ margin: 0 }}>Quản lý Lead</h1>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 16
+        }}>
+          <div style={{ minWidth: 200 }}>
+            <h1 className="page-title" style={{ margin: 0, fontSize: 'clamp(20px, 5vw, 28px)' }}>Quản lý Lead</h1>
             <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>Theo dõi và quản lý dữ liệu khách hàng tiềm năng</p>
           </div>
-          <div style={{ display: 'flex', gap: 12 }}>
-            <button onClick={() => fileInputRef.current.click()} className="btn-cancel" style={{ borderColor: 'var(--cyan)', color: 'var(--cyan)', padding: '8px 16px' }}>
-              <i className="ti-import" style={{ marginRight: 6 }}></i> Nhập Excel
+          <div style={{ 
+            display: 'flex', 
+            gap: 12,
+            flexWrap: 'wrap'
+          }}>
+            <button onClick={() => fileInputRef.current.click()} className="btn-cancel" style={{ 
+              borderColor: 'var(--cyan)', 
+              color: 'var(--cyan)', 
+              padding: '8px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              fontSize: 13
+            }}>
+              <i className="ti ti-import" style={{ marginRight: 6 }}></i> Nhập Excel
             </button>
             <input type="file" accept=".xlsx, .xls, .csv" style={{ display: 'none' }} ref={fileInputRef} onChange={(e) => {
               const file = e.target.files[0];
@@ -160,8 +177,13 @@ function Leads() {
               };
               reader.readAsBinaryString(file);
             }} />
-            <button onClick={handleOpenAddModal} className="btn-submit" style={{ padding: '8px 24px' }}>
-              + Thêm Lead
+            <button onClick={handleOpenAddModal} className="btn-submit" style={{ 
+              padding: '8px 20px',
+              fontSize: 13,
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              <i className="ti ti-plus" style={{ marginRight: 6 }}></i> Thêm Lead
             </button>
           </div>
         </div>
@@ -184,8 +206,8 @@ function Leads() {
         gap: 12,
         marginBottom: 24
       }}>
-        <div style={{ position: 'relative', flex: 1 }}>
-          <i className="ti-search" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}></i>
+        <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
+          <i className="ti ti-search" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}></i>
           <input 
             className="filter-input" 
             placeholder="Tìm theo tên, SĐT, mã lead..." 
@@ -220,8 +242,8 @@ function Leads() {
         <table>
           <thead>
             <tr>
-              <th style={{ width: 100 }}>Thao tác</th>
-              <th onClick={() => handleSort('Mã lead')} style={{ cursor: 'pointer' }}>Mã Lead <i className="ti-exchange-vertical" style={{ fontSize: 10, marginLeft: 4 }}></i></th>
+              <th style={{ width: 80 }}>Thao tác</th>
+              <th onClick={() => handleSort('Mã lead')} style={{ cursor: 'pointer' }}>Mã Lead <i className="ti ti-exchange-vertical" style={{ fontSize: 10, marginLeft: 4 }}></i></th>
               <th onClick={() => handleSort('Họ tên')} style={{ cursor: 'pointer' }}>Họ Tên</th>
               <th>SĐT</th>
               <th>Nguồn</th>
@@ -236,9 +258,9 @@ function Leads() {
             {leads.map((lead, index) => (
               <tr key={index}>
                 <td>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button onClick={() => handleOpenEditModal(lead)} style={{ background: 'none', border: 'none', color: 'var(--cyan)', cursor: 'pointer' }}><i className="ti-pencil"></i></button>
-                    <button onClick={() => { if(window.confirm('Xóa lead?')) deleteLead(lead['Mã lead']) }} style={{ background: 'none', border: 'none', color: 'var(--red)', cursor: 'pointer' }}><i className="ti-trash"></i></button>
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    <button onClick={() => handleOpenEditModal(lead)} style={{ background: 'none', border: 'none', color: 'var(--cyan)', cursor: 'pointer', padding: 4 }} title="Sửa"><i className="ti ti-pencil" style={{ fontSize: 16 }}></i></button>
+                    <button onClick={() => { if(window.confirm('Xóa lead?')) deleteLead(lead['Mã lead']) }} style={{ background: 'none', border: 'none', color: 'var(--red)', cursor: 'pointer', padding: 4 }} title="Xóa"><i className="ti ti-trash" style={{ fontSize: 16 }}></i></button>
                   </div>
                 </td>
                 <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{lead['Mã lead']}</td>
@@ -266,18 +288,76 @@ function Leads() {
       </div>
 
       {totalPages > 1 && (
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 32 }}>
-          <button onClick={() => setLeadsPage(Math.max(1, leadsPage - 1))} disabled={leadsPage === 1} className="btn-page">Trước</button>
-          {[...Array(totalPages)].map((_, i) => (
-            <button 
-              key={i} 
-              onClick={() => setLeadsPage(i + 1)} 
-              className={`btn-page ${leadsPage === i + 1 ? 'active' : ''}`}
-            >
-              {i + 1}
-            </button>
-          ))}
-          <button onClick={() => setLeadsPage(Math.min(totalPages, leadsPage + 1))} disabled={leadsPage === totalPages} className="btn-page">Sau</button>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, marginTop: 32, flexWrap: 'wrap' }}>
+          <button 
+            onClick={() => setLeadsPage(Math.max(1, leadsPage - 1))} 
+            disabled={leadsPage === 1} 
+            className="btn-page"
+            style={{ padding: '8px 12px' }}
+          >
+            <i className="ti ti-angle-left"></i>
+          </button>
+          
+          {(() => {
+            const pages = [];
+            const showRange = 1; // Number of pages to show around current page
+            
+            // Always show first page
+            pages.push(
+              <button 
+                key={1} 
+                onClick={() => setLeadsPage(1)} 
+                className={`btn-page ${leadsPage === 1 ? 'active' : ''}`}
+              >
+                1
+              </button>
+            );
+            
+            if (leadsPage > showRange + 2) {
+              pages.push(<span key="dots-1" style={{ color: 'var(--text-muted)', padding: '0 4px' }}>...</span>);
+            }
+            
+            // Show pages around current
+            for (let i = Math.max(2, leadsPage - showRange); i <= Math.min(totalPages - 1, leadsPage + showRange); i++) {
+              pages.push(
+                <button 
+                  key={i} 
+                  onClick={() => setLeadsPage(i)} 
+                  className={`btn-page ${leadsPage === i ? 'active' : ''}`}
+                >
+                  {i}
+                </button>
+              );
+            }
+            
+            if (leadsPage < totalPages - showRange - 1) {
+              pages.push(<span key="dots-2" style={{ color: 'var(--text-muted)', padding: '0 4px' }}>...</span>);
+            }
+            
+            // Always show last page
+            if (totalPages > 1) {
+              pages.push(
+                <button 
+                  key={totalPages} 
+                  onClick={() => setLeadsPage(totalPages)} 
+                  className={`btn-page ${leadsPage === totalPages ? 'active' : ''}`}
+                >
+                  {totalPages}
+                </button>
+              );
+            }
+            
+            return pages;
+          })()}
+          
+          <button 
+            onClick={() => setLeadsPage(Math.min(totalPages, leadsPage + 1))} 
+            disabled={leadsPage === totalPages} 
+            className="btn-page"
+            style={{ padding: '8px 12px' }}
+          >
+            <i className="ti ti-angle-right"></i>
+          </button>
         </div>
       )}
 
