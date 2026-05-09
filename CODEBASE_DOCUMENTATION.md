@@ -100,4 +100,20 @@ Chứa các file CSV (`leads.csv`, `transactions.csv`, v.v.) được sử dụn
     *   Mọi thay đổi quan trọng nên được commit và push để đồng bộ với môi trường Production trên Vercel.
 
 ---
-*Cập nhật lần cuối bởi Antigravity Agent - 08/05/2026*
+
+## 7. Best Practices & Standard Patterns (Cập nhật 09/05/2026)
+
+Dưới đây là các tiêu chuẩn đã được thống nhất để đảm bảo tính đồng nhất và chuyên nghiệp của hệ thống:
+
+### 1. Xử lý File và Template:
+*   **Định dạng**: Luôn sử dụng thư viện `xlsx` (SheetJS) cho các tính năng tạo mẫu nhập liệu và xuất dữ liệu. Tránh sử dụng định dạng CSV thuần túy để đảm bảo tương thích tốt nhất với Microsoft Excel (hỗ trợ tiếng Việt có dấu, căn chỉnh cột, định dạng ô).
+*   **Vị trí**: Logic tạo mẫu nên được tập trung tại `src/utils/templateGenerator.js`.
+
+### 2. Định dạng Số và Tiền tệ trong Form (UI Patterns):
+*   **Hiển thị tương tác**: Sử dụng mô hình tập trung `formatNumInput` và `parseNumInput` từ tệp `src/components/VisualLanguage.jsx` cho tất cả các ô nhập liệu số/tiền tệ lớn.
+    *   `formatNumInput`: Tự động thêm dấu phân cách phần ngàn (dấu chấm) khi người dùng gõ.
+    *   `parseNumInput`: Loại bỏ các ký tự không phải số trước khi lưu vào State/Database.
+*   **Lợi ích**: Giúp người dùng nhập liệu chính xác mà không làm hỏng định dạng dữ liệu lưu trữ trong PostgreSQL.
+
+---
+*Cập nhật lần cuối bởi Antigravity Agent - 09/05/2026*

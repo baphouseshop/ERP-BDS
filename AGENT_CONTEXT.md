@@ -1,20 +1,20 @@
-# Bối cảnh Dự án (Agent Context): CRM
+# 專案上下文 (Agent Context)：CRM
 
-> **Cập nhật lần cuối**: 2026-05-09 16:05
-> **Tự động tạo**: Được tạo bởi `prepare_context.py` để giúp AI Agent nhanh chóng nắm bắt toàn bộ dự án
+> **最後更新時間**：2026-05-09 20:49
+> **自動生成**：由 `prepare_context.py` 產生，供 AI Agent 快速掌握專案全局
 
 ---
 
-## 🎯 1. Mục tiêu Dự án (Project Goal)
-* **Mục đích cốt lõi**: Quản lý khách hàng, giao dịch và hiệu suất nhân sự cho Blanca BĐS với giao diện hiện đại, dữ liệu thời gian thực và tích hợp AI.
-* _Xem chi tiết tại [README.md](README.md)_
+## 🎯 1. 專案目標 (Project Goal)
+* **核心目的**：This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+* _完整說明見 [README.md](README.md)_
 
-## 🛠️ 2. Công nghệ & Môi trường (Tech Stack & Environment)
-* **Các gói lõi**: @supabase/supabase-js, lucide-react, react, react-dom, react-hot-toast, react-router-dom, recharts, xlsx
-* **Các gói phát triển**: @eslint/js, @types/react, @types/react-dom, @vitejs/plugin-react, eslint, eslint-plugin-react-hooks, eslint-plugin-react-refresh, globals
-* **Các lệnh khả dụng**: dev, build, lint, preview
+## 🛠️ 2. 技術棧與環境 (Tech Stack & Environment)
+* **核心套件**：@supabase/supabase-js, lucide-react, react, react-dom, react-hot-toast, react-router-dom, recharts, xlsx
+* **開發套件**：@eslint/js, @types/react, @types/react-dom, @vitejs/plugin-react, eslint, eslint-plugin-react-hooks, eslint-plugin-react-refresh, globals
+* **可用指令**：dev, build, lint, preview
 
-### Các tệp cấu hình gốc
+### 原始設定檔
 
 <details><summary>package.json</summary>
 
@@ -57,48 +57,98 @@
 ```
 </details>
 
-## 📂 3. Cấu trúc Thư mục Lõi (Core Structure)
+## 📂 3. 核心目錄結構 (Core Structure)
+_(💡 AI 讀取守則：請依據此結構尋找對應檔案，勿盲目猜測路徑)_
 ```text
 CRM/
 ├── AGENT_CONTEXT.md
+├── Blanca_CRM.html
+├── Blanca_CRM_Production.html
+├── CODEBASE_DOCUMENTATION.md
+├── FILE_1_MASTER.xlsx
+├── README.md
+├── clean_data.py
+├── data.json
+├── diary
+│   └── 2026
+│       └── 05
+├── eslint.config.js
+├── generate_relational_sql.py
+├── generate_sql.py
+├── index.html
+├── package-lock.json
+├── package.json
+├── read_excel.py
+├── run_mcp.cjs
+├── run_sql.py
+├── sample_data
+│   ├── employees.csv
+│   ├── financial_records.csv
+│   ├── leads.csv
+│   ├── marketing_campaigns.csv
+│   └── transactions.csv
+├── scratch
+│   └── check_models.py
+├── seed.sql
 ├── src
 │   ├── App.jsx
 │   ├── components
-│   │   ├── VisualLanguage.jsx (NEW: Hệ thống UI chuẩn Cyber-Nexus)
+│   │   ├── AIChatSidebar.jsx
+│   │   ├── AutomationDashboard.jsx
+│   │   ├── AutomationScenarioForm.jsx
+│   │   ├── ErrorBoundary.jsx
+│   │   ├── LoadingScreen.jsx
 │   │   ├── NotificationBell.jsx
-│   │   └── ...
+│   │   └── VisualLanguage.jsx
 │   ├── context
-│   │   └── DataContext.jsx
-│   ├── index.css (Updated: Design Tokens mới)
-│   └── pages
-│       ├── Dashboard.jsx (Modernized)
-│       ├── Leads.jsx (Modernized)
-│       ├── Sales.jsx (Modernized)
-│       ├── Marketing.jsx (Modernized)
-│       ├── Financials.jsx (Modernized)
-│       ├── Staff.jsx (Modernized)
-│       ├── Transactions.jsx (Modernized)
-│       └── Automation.jsx (Legacy UI - Giữ nguyên)
+│   │   ├── DataContext.jsx
+│   │   └── NotificationContext.jsx
+│   ├── data
+│   │   └── db.json
+│   ├── hooks
+│   │   └── useAutomation.js
+│   ├── index.css
+│   ├── main.jsx
+│   ├── pages
+│   │   ├── Automation.jsx
+│   │   ├── Dashboard.jsx
+│   │   ├── Financials.jsx
+│   │   ├── Leads.jsx
+│   │   ├── Login.jsx
+│   │   ├── Logs.jsx
+│   │   ├── Marketing.jsx
+│   │   ├── Sales.jsx
+│   │   ├── Settings.jsx
+│   │   ├── Staff.jsx
+│   │   └── Transactions.jsx
+│   ├── supabaseClient.js
+│   └── utils
+│       ├── leadScoring.js
+│       ├── templateGenerator.js
+│       └── validation.js
+├── supabase
+│   ├── functions
+│   │   └── bod-assistant
+│   └── migrations
+│       ├── 20260508_add_performance_indexes.sql
+│       ├── 20260508_auto_create_profiles.sql
+│       ├── 20260508_create_kpi_targets.sql
+│       ├── 20260508_enable_rls_all_tables.sql
+│       ├── 20260508_performance_indexing.sql
+│       ├── 20260508_security_hardening.sql
+│       └── add_scalability_indexes.sql
+├── vercel.json
+└── vite.config.js
 ```
 
-## 🏛️ 4. Kiến trúc & Quy ước Thiết kế (Architecture & Conventions)
-* **Design System**: Sử dụng `VisualLanguage.jsx` cho mọi component hiển thị (KpiCard, BarChart, DonutChart).
-* **Cyber-Nexus Style**: KPI cards có 2px accent line ở top, uppercase labels, typography 'Outfit'.
-* **Analytics**: Dùng SVG thuần cho biểu đồ thay vì thư viện Recharts để tăng tính nhất quán và hiệu năng.
+## 🏛️ 4. 架構與設計約定 (Architecture & Conventions)
+* _（尚無 `.auto-skill-local.md`，專案踩坑經驗將在開發過程中自動累積）_
 
-## 🚦 5. Tiến độ Hiện tại & Việc cần làm (Current Status & TODO)
-* **Tiến độ**: 
-    - **Visual Overhaul (Cyber-Nexus)**: Đã hiện đại hóa toàn bộ giao diện các module lõi. Sửa lỗi build Vercel (duplicate default exports).
-    - **Dashboard Refactor (High-Density)**: Hoàn thành tái cấu trúc Dashboard:
-        *   Layout lưới 2x2 cho biểu đồ và 2x2 cho bảng dữ liệu vận hành.
-        *   Bổ sung 4 bảng summary (Sales, Tx, MKT, Finance) và bảng Chỉ số Sức khỏe cho BOD.
-        *   Tối ưu hóa tỉ lệ BarChart (maxWidth 60px) giúp hiển thị cân đối trên màn hình lớn.
-        *   Loại bỏ biểu đồ P&L dự án quá tải để tập trung vào Cashflow Forecast.
-    - **Standardized UI**: Triển khai `VisualLanguage` components đồng bộ 100%.
-    - **Navigation Refresh**: Topbar và Navbar tinh chỉnh gọn gàng (underline active, filter pills).
-    - **Deployment**: Đã đẩy mã nguồn lên GitHub và Vercel (Production Stable).
-* **Việc cần làm**:
-    - **Mobile/Responsive Audit**: Kiểm tra hiển thị lưới Dashboard trên các màn hình nhỏ hơn.
-    - **Automation Modernization**: Nghiên cứu nâng cấp giao diện Automation.
-    - **Audit Log Viewer**: Tích hợp giao diện xem Log cho Admin.
-    - **Auto-Reports**: AI tự động gửi báo cáo KPI hàng ngày qua Telegram/Zalo.
+## 🚦 5. 目前進度與待辦 (Current Status & TODO)
+_(自動提取自最近日記 2026-05-09)_
+
+### 🚧 待辦事項
+- [ ] Áp dụng định dạng tiền tệ cho module Financials (nếu khách hàng yêu cầu nhập số nguyên thay vì đơn vị Tỷ).
+- [ ] Bổ sung bước kiểm duyệt (Review) dữ liệu trước khi thực hiện import hàng loạt.
+- [ ] Kiểm tra tính đồng nhất của dữ liệu cũ trong Supabase với định dạng mới.
+
