@@ -12,6 +12,27 @@ export const fmt = (n) => {
   return sign + Number(n).toLocaleString('vi-VN');
 };
 
+/**
+ * Formats a raw number or string with dots as thousand separators.
+ * Example: 1000000 -> 1.000.000
+ */
+export const formatNumInput = (val) => {
+  if (val === null || val === undefined || val === '') return '';
+  // Ensure we are working with a string of digits
+  const raw = val.toString().replace(/\D/g, '');
+  if (!raw) return '';
+  return raw.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+};
+
+/**
+ * Removes all dots and non-numeric characters from a formatted string.
+ */
+export const parseNumInput = (val) => {
+  if (val === null || val === undefined) return '';
+  return val.toString().replace(/\./g, '').replace(/\D/g, '');
+};
+
+
 // ─── styles ───────────────────────────────────────────────────────────────────
 
 const S = {

@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useData } from '../context/DataContext';
 import toast from 'react-hot-toast';
 import { 
-  KpiCard, SectionHead, fmt 
+  KpiCard, SectionHead, fmt, formatNumInput, parseNumInput 
 } from '../components/VisualLanguage';
 import { downloadTemplate } from '../utils/templateGenerator';
 import * as XLSX from 'xlsx';
@@ -89,11 +89,20 @@ function Staff() {
     'Trạng thái': 'Đang làm việc', 'Lương (VNĐ)': 0, 'Quản lý (Mã NV)': '', 'Quyền': 'Sales'
   };
   
-  const [formData, setFormData] = useState(initialFormState);
+  const [formData, setFormData] = useState({
+    'Mã NV': '', 'Tên NV': '', 'Sàn': '', 'Chức vụ': '',
+    'SĐT': '', 'Email': '', 'Ngày vào làm': new Date().toISOString().slice(0, 10),
+    'Trạng thái': 'Đang làm việc', 'Lương (VNĐ)': '', 'Quản lý (Mã NV)': '', 'Quyền': 'Sales'
+  });
 
   const handleOpenAddModal = () => {
     setIsEditMode(false);
-    setFormData({ ...initialFormState, 'Mã NV': `NV${staff.length + 101}` });
+    setFormData({
+      'Mã NV': `EMP${Date.now().toString().slice(-4)}`,
+      'Tên NV': '', 'Sàn': '', 'Chức vụ': '',
+      'SĐT': '', 'Email': '', 'Ngày vào làm': new Date().toISOString().slice(0, 10),
+      'Trạng thái': 'Đang làm việc', 'Lương (VNĐ)': '', 'Quản lý (Mã NV)': '', 'Quyền': 'Sales'
+    });
     setIsModalOpen(true);
   };
 
@@ -330,6 +339,42 @@ function Staff() {
                 <div className="form-group">
                   <label>Email</label>
                   <input type="email" className="input-field" value={formData['Email']} onChange={e => setFormData({...formData, 'Email': e.target.value})} />
+                </div>
+                <div className="form-group">
+                  <label>Ngày vào làm</label>
+                  <input type="date" className="input-field" value={formData['Ngày vào làm']} onChange={e => setFormData({...formData, 'Ngày vào làm': e.target.value})} />
+                </div>
+                <div className="form-group">
+                  <label>Trạng thái</label>
+                  <select className="input-field" value={formData['Trạng thái']} onChange={e => setFormData({...formData, 'Trạng thái': e.target.value})}>
+                    <option value="Đang làm việc">Đang làm việc</option>
+                    <option value="Đã nghỉ việc">Đã nghỉ việc</option>
+                    <option value="Thử việc">Thử việc</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Lương (VNĐ)</label>
+                  <input 
+                    required 
+                    className="input-field" 
+                    value={formatNumInput(formData['Lương (VNĐ)'])} 
+                    onChange={e => setFormData({...formData, 'Lương (VNĐ)': parseNumInput(e.target.value)})} 
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Quản lý (Mã NV)</label>
+                  <input className="input-field" value={formData['Quản lý (Mã NV)']} onChange={e => setFormData({...formData, 'Quản lý (Mã NV)': e.target.value})} />
+                </div>
+                <div className="form-group">
+                  <label>Quyền hệ thống</label>
+                  <select className="input-field" value={formData['Quyền']} onChange={e => setFormData({...formData, 'Quyền': e.target.value})}>
+                    <option value="Sales">Sales</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="HR">HR</option>
+                    <option value="Kế toán">Kế toán</option>
+                    <option value="Admin">Admin</option>
+                    <option value="BOD">BOD</option>
+                  </select>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 12, marginTop: 24, justifyContent: 'flex-end' }}>

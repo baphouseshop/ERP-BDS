@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useData } from '../context/DataContext';
 import { 
-  KpiCard, ChartCard, SectionHead, BarChart, fmt 
+  KpiCard, ChartCard, SectionHead, BarChart, fmt, formatNumInput, parseNumInput 
 } from '../components/VisualLanguage';
 import { downloadTemplate } from '../utils/templateGenerator';
 import * as XLSX from 'xlsx';
@@ -67,15 +67,6 @@ function Marketing() {
     '_id': ''
   });
 
-  const handleNumberChange = (field, value) => {
-    const rawValue = value.replace(/\D/g, '');
-    setFormData(prev => ({...prev, [field]: rawValue}));
-  };
-
-  const displayNumber = (value) => {
-    if (!value) return '';
-    return new Intl.NumberFormat('vi-VN').format(value);
-  };
 
   const handleOpenAddModal = () => {
     setIsEditMode(false);
@@ -458,7 +449,13 @@ function Marketing() {
                 </div>
                 <div className="form-group">
                   <label>Chi phí (VNĐ)</label>
-                  <input required type="text" className="input-field" value={displayNumber(formData['CP (VNĐ)'])} onChange={e => handleNumberChange('CP (VNĐ)', e.target.value)} />
+                  <input 
+                    required 
+                    type="text" 
+                    className="input-field" 
+                    value={formatNumInput(formData['CP (VNĐ)'])} 
+                    onChange={e => setFormData({...formData, 'CP (VNĐ)': parseNumInput(e.target.value)})} 
+                  />
                 </div>
                 <div className="form-group">
                   <label>Click</label>

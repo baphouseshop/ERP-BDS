@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useData } from '../context/DataContext';
 import toast from 'react-hot-toast';
 import { 
-  KpiCard, SectionHead, fmt 
+  KpiCard, SectionHead, fmt, formatNumInput, parseNumInput 
 } from '../components/VisualLanguage';
 import { downloadTemplate } from '../utils/templateGenerator';
 import * as XLSX from 'xlsx';
@@ -313,11 +313,30 @@ function Transactions() {
                 </div>
                 <div className="form-group">
                   <label>Giá Hợp đồng (VNĐ)</label>
-                  <input required className="input-field" value={formData['Giá (VNĐ)']} onChange={e => setFormData({...formData, 'Giá (VNĐ)': e.target.value.replace(/\D/g, '')})} />
+                  <input 
+                    required 
+                    className="input-field" 
+                    value={formatNumInput(formData['Giá (VNĐ)'])} 
+                    onChange={e => setFormData({...formData, 'Giá (VNĐ)': parseNumInput(e.target.value)})} 
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Tiền cọc (VNĐ)</label>
+                  <input 
+                    required 
+                    className="input-field" 
+                    value={formatNumInput(formData['Tiền cọc'])} 
+                    onChange={e => setFormData({...formData, 'Tiền cọc': parseNumInput(e.target.value)})} 
+                  />
                 </div>
                 <div className="form-group">
                   <label>Hoa hồng (VNĐ)</label>
-                  <input required className="input-field" value={formData['Hoa hồng']} onChange={e => setFormData({...formData, 'Hoa hồng': e.target.value.replace(/\D/g, '')})} />
+                  <input 
+                    required 
+                    className="input-field" 
+                    value={formatNumInput(formData['Hoa hồng'])} 
+                    onChange={e => setFormData({...formData, 'Hoa hồng': parseNumInput(e.target.value)})} 
+                  />
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 12, marginTop: 24, justifyContent: 'flex-end' }}>
