@@ -125,4 +125,10 @@ CRM/
 * _(Hiện chưa có `.auto-skill-local.md`, kinh nghiệm dự án sẽ được tự động tích lũy trong quá trình phát triển)_
 
 ## 🚦 5. Tiến độ Hiện tại & Việc cần làm (Current Status & TODO)
-* _(Chưa có bản ghi nhật ký, hoặc nhật ký không có phần "Bước tiếp theo")_
+* **Tiến độ**: 
+    - Đã chuẩn hóa định dạng số (Compact Format - tỷ/tr) trên toàn bộ hệ thống Dashboard, Financials, Marketing.
+    - Đã ổn định AI Assistant (BOD Intelligence) sử dụng Gemini API v1.
+    - Đã hỗ trợ cấu hình linh hoạt API Key và Model thông qua Supabase Secrets.
+* **Việc cần làm**:
+    - Kiểm tra hiệu năng hiển thị khi dữ liệu tăng trưởng lớn.
+    - Tiếp tục tối ưu giao diện theo yêu cầu hiện đại, tinh tế của Sếp.
