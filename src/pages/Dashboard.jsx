@@ -184,7 +184,7 @@ function Dashboard() {
   return (
     <div style={{ fontFamily: 'var(--font-family, system-ui, sans-serif)' }}>
       {/* KPI row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 10, marginBottom: 20 }}>
+      <div className="dash-kpi-grid-res" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 10, marginBottom: 20 }}>
         <KpiCard colorClass="lime"   label="Doanh thu thực thu" value={kpis.revenue}  sub={kpis.revenueSub} />
         <KpiCard colorClass="cyan"   label="Lợi nhuận gộp"      value={kpis.profit}   sub={kpis.profitSub} />
         <KpiCard colorClass="pink"   label="Burn rate (tháng)"  value={kpis.burn}     sub={kpis.burnSub} />
@@ -203,7 +203,7 @@ function Dashboard() {
 
       {/* charts */}
       <SectionHead icon="ti-chart-bar" label="Phân tích chi tiết" />
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12, marginBottom: 24 }}>
+      <div className="dash-grid-res-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12, marginBottom: 24 }}>
         <ChartCard title="Trạng thái Lead CRM" sub={`Tổng ${stats.leads.total} leads`}>
           <DonutChart segments={leadStatusSegments} total={stats.leads.total} />
         </ChartCard>
@@ -223,7 +223,7 @@ function Dashboard() {
 
       {/* Tables Section */}
       <SectionHead icon="ti-layout-grid2" label="Bảng biểu tổng hợp" />
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12, marginBottom: 24 }}>
+      <div className="dash-grid-res-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12, marginBottom: 24 }}>
         <ChartCard title="Top Sales hiệu quả" sub="Theo doanh số và KPI tháng">
           <Table headers={['Nhân viên', 'Doanh số', 'KPI']} rows={tableData.topSales} />
         </ChartCard>
@@ -240,7 +240,7 @@ function Dashboard() {
 
       {/* BOD Analysis */}
       <SectionHead icon="ti-presentation" label="Phân tích chuyên sâu cho BOD" />
-      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 12 }}>
+      <div className="dash-grid-res-2" style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 12 }}>
         <ChartCard title="Dự báo dòng tiền (90 ngày)" sub="Kế hoạch thu tiền dự kiến">
           <BarChart bars={cashflowForecast.map(c => ({ label: c.period, val: c.expected_amount, color: '#ff4d94' }))} />
         </ChartCard>

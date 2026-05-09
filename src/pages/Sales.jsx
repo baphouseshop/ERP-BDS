@@ -40,7 +40,7 @@ function Sales() {
         <h1 className="page-title" style={{ margin: 0 }}>Hiệu suất Sales</h1>
       </div>
 
-      <div className="dash-kpi-grid" style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
+      <div className="dash-kpi-grid-res" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 16, marginBottom: 24 }}>
         <KpiCard 
           label="Tổng Doanh Số" 
           value={totalDS.toFixed(1) + ' tỷ'} 
@@ -79,7 +79,7 @@ function Sales() {
         />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 32 }}>
+      <div className="dash-grid-res-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 32 }}>
         {/* LEADERBOARD */}
         <div>
           <SectionHead label="Bảng xếp hạng hiệu suất" icon="ti-trophy" />

@@ -191,7 +191,7 @@ function Marketing() {
         </span>
       </div>
 
-      <div className="dash-kpi-grid" style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
+      <div className="dash-kpi-grid-res" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 16, marginBottom: 24 }}>
         <KpiCard 
           label="Tổng Chi Phí" 
           value={fmt(totalCP * 1000000)} 
@@ -224,7 +224,7 @@ function Marketing() {
         />
       </div>
 
-      <div className="mkt-charts-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 32 }}>
+      <div className="dash-grid-res-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 32 }}>
         <ChartCard title="Phân bổ Lead & Booking" sub="Thống kê gộp theo kênh tiếp cận">
           <BarChart bars={channels.map(c => ({
             label: c.name.split(' ')[0],
@@ -244,7 +244,7 @@ function Marketing() {
 
       <SectionHead label="Chi tiết từng chiến dịch" icon="ti-list-details" />
       
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 12 }}>
+      <div className="dash-grid-res-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 12 }}>
         {marketing.map((m, index) => {
           const leads = Number(m['Lead'] || 0);
           const bookings = Number(m['Booking'] || 0);

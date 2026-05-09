@@ -154,7 +154,7 @@ export function AlertCard({ type, title, sub, badge }) {
 
 export function SectionHead({ icon, label }) {
   return (
-    <div style={S.sectionHead}>
+    <div className="section-head-res" style={S.sectionHead}>
       {icon && <i className={`ti ${icon}`} aria-hidden="true" style={{ fontSize: 14 }} />}
       {label}
     </div>
@@ -171,7 +171,7 @@ export function DonutChart({ segments = [], total, label }) {
     return arc;
   });
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+    <div className="donut-container-res" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
       <svg width="80" height="80" viewBox="0 0 80 80" aria-hidden="true" style={{ flexShrink: 0 }}>
         <circle cx="40" cy="40" r="28" fill="none" stroke="#1e2130" strokeWidth="12" />
         {arcs.map((arc, i) => (

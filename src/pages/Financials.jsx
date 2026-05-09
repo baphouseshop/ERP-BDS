@@ -119,7 +119,7 @@ function Financials() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 10, marginBottom: 20 }}>
+      <div className="dash-kpi-grid-res" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 10, marginBottom: 20 }}>
         <KpiCard colorClass="lime"   label="Doanh thu thực thu" value={kpiData.rev}    sub={kpiData.revSub} />
         <KpiCard colorClass="pink"   label="Chi phí vận hành"   value={kpiData.ops}    sub={kpiData.opsSub} />
         <KpiCard colorClass="purple" label="Chi phí Marketing"  value={kpiData.mkt}    sub={kpiData.mktSub} />
@@ -128,7 +128,7 @@ function Financials() {
         <KpiCard colorClass="blue"   label="Tổng chi phí"       value={kpiData.exp}    sub={kpiData.expSub} />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
+      <div className="dash-grid-res-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
         <ChartCard title="Thực tế vs Kế hoạch" sub="Đơn vị: Tỷ VNĐ">
           <BarChart bars={barsData} />
         </ChartCard>
