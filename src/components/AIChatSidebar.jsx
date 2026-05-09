@@ -9,7 +9,7 @@ const AIChatSidebar = () => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { dashboardStats, executiveScorecard, trafficLights, projectPL, currentUser, staff } = useData();
+  const { dashboardStats, executiveScorecard, trafficLights, projectPL, currentUser, staff, allSales } = useData();
   const chatEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -30,14 +30,14 @@ const AIChatSidebar = () => {
     setIsLoading(true);
 
     try {
-      // Chuẩn bị dữ liệu Sales từ danh sách nhân viên nếu dashboardStats bị NULL
+      // Ưu tiên lấy từ dashboardStats, nếu không có thì lấy từ allSales (dữ liệu thực tế nhất)
       const salesContext = (dashboardStats?.topSalesPerformers && dashboardStats.topSalesPerformers.length > 0) 
         ? dashboardStats.topSalesPerformers 
-        : (staff || []).slice(0, 10).map(s => ({
-            name: s["Tên NV"] || s.ho_ten,
-            revenue: s.total_revenue || 0,
-            status: s["Trạng thái"] || s.trang_thai
-          }));
+        : (allSales || staff || []).slice(0, 10).map(s => ({
+            name: s["Tên NV"] || s.ho_ten || s.name,
+            revenue: s["DS THỰC"] || s.total_revenue || s.revenue || 0,
+            status: s["Trạng thái"] || s.trang_thai || "Active"
+          })).sort((a, b) => b.revenue - a.revenue);
 
       const { data, error } = await supabase.functions.invoke('bod-assistant', {
         body: { 
