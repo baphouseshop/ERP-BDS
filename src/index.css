@@ -2646,6 +2646,17 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     overflow-y: auto !important;
     padding-bottom: 30px !important;
   }
+
+  /* Full width notification dropdown on mobile */
+  .notification-dropdown {
+    position: fixed !important;
+    top: 80px !important;
+    left: 10px !important;
+    right: 10px !important;
+    width: auto !important;
+    max-width: none !important;
+    z-index: 2001 !important;
+  }
 }
 
 
