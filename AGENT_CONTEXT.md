@@ -88,7 +88,7 @@ CRM/
 
 ## 🚦 5. Tiến độ Hiện tại & Việc cần làm (Current Status & TODO)
 * **Tiến độ**: 
-    - **Visual Overhaul (Cyber-Nexus)**: Đã hiện đại hóa toàn bộ giao diện các module lõi (Dashboard, Marketing, Sales, Leads, Financials, Staff, Transactions).
+    - **Visual Overhaul (Cyber-Nexus)**: Đã hiện đại hóa toàn bộ giao diện các module lõi. Đã sửa lỗi build Vercel do xuất hiện duplicate default exports trong Dashboard và Financials. Giao diện đồng bộ 100%.
     - **Standardized UI**: Triển khai `VisualLanguage` components giúp giao diện đồng bộ 100% về màu sắc, hiệu ứng và phân cấp thông tin.
     - **Navigation Refresh**: Topbar và Navbar được tinh chỉnh gọn gàng, underline active tabs, filter pill và notification badges mới.
     - **Bảo mật & Ổn định AI**: Duy trì bod-assistant trên Supabase Edge Function.
