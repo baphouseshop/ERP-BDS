@@ -1,26 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { 
-  X, Save, MessageSquare, Smartphone, Mail, CheckCircle2, Circle, 
-  Snowflake, Flame, Rocket, Bell, Send, Info, ChevronDown
+  X, Zap, Snowflake, Flame, Rocket, MessageSquare, Smartphone, 
+  Mail, Bell, Send, Info, ChevronDown, CheckCircle2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const SCORE_OPTIONS = [
-  { key: 'lanh', label: 'Lạnh', icon: <Snowflake size={16} />, colorClass: 'cold' },
-  { key: 'am', label: 'Ấm', icon: <Flame size={16} />, colorClass: 'warm' },
-  { key: 'nong', label: 'Nóng', icon: <Rocket size={16} />, colorClass: 'hot' },
+  { key: 'lanh', label: 'Lạnh', icon: <Snowflake size={16} />, class: 'cold' },
+  { key: 'am', label: 'Ấm', icon: <Flame size={16} />, class: 'warm' },
+  { key: 'nong', label: 'Nóng', icon: <Rocket size={16} />, class: 'hot' },
 ];
 
 const CHANNEL_OPTIONS = [
-  { key: 'zalo', label: 'Zalo OA', icon: <MessageSquare size={20} />, class: 'zalo' },
-  { key: 'sms', label: 'SMS Brand', icon: <Smartphone size={20} />, class: 'sms' },
-  { key: 'email', label: 'Email Mkt', icon: <Mail size={20} />, class: 'email' },
-  { key: 'inapp', label: 'In-app', icon: <Bell size={20} />, class: 'inapp' },
-  { key: 'telegram', label: 'Telegram', icon: <Send size={20} />, class: 'telegram' },
+  { key: 'zalo', label: 'Zalo OA', icon: <MessageSquare size={20} /> },
+  { key: 'sms', label: 'SMS', icon: <Smartphone size={20} /> },
+  { key: 'email', label: 'Email', icon: <Mail size={20} /> },
+  { key: 'inapp', label: 'In-app', icon: <Bell size={20} /> },
+  { key: 'telegram', label: 'Telegram', icon: <Send size={20} /> },
 ];
-
-const CHAR_LIMITS = { zalo: 300, sms: 160 };
 
 const DU_AN_LIST = [
   'Tất cả dự án',
@@ -53,7 +51,11 @@ const AutomationScenarioForm = ({ scenario, onClose, onSuccess }) => {
     setLoading(true);
 
     try {
-      const dataToSave = { ...formData };
+      const dataToSave = { 
+        ...formData,
+        du_an_id: formData.du_an_id === 'Tất cả dự án' ? null : formData.du_an_id
+      };
+      
       if (scenario?.id) {
         const { error } = await supabase
           .from('automation_scenarios')
@@ -66,7 +68,7 @@ const AutomationScenarioForm = ({ scenario, onClose, onSuccess }) => {
           .from('automation_scenarios')
           .insert(dataToSave);
         if (error) throw error;
-        toast.success("Đã tạo kịch bản mới");
+        toast.success("Kịch bản đã được kích hoạt");
       }
       onSuccess();
     } catch (error) {
@@ -98,209 +100,173 @@ const AutomationScenarioForm = ({ scenario, onClose, onSuccess }) => {
     }));
   };
 
-  const charCount = (tab) => {
-    if (tab === 'email') return null;
-    const len = formData.noi_dung_template[tab]?.length ?? 0;
-    const max = CHAR_LIMITS[tab];
-    return { len, max, over: max && len > max };
-  };
-
   return (
-    <div className="modal-overlay glass-modal">
-      <div className="modal-content automation-modal-v2 premium-card">
+    <div className="redesign-overlay">
+      <div className="redesign-modal">
         {/* Header */}
-        <div className="modal-header-v2">
+        <div className="redesign-modal-header">
           <div className="header-left">
-            <div className="icon-badge">
-              <Zap size={20} color="#ccff00" />
+            <div className="icon-wrap">
+              <Zap size={20} fill="#ccff00" />
             </div>
-            <div className="header-text">
-              <h2>{scenario ? 'Cấu hình kịch bản' : 'Thiết lập Automation'}</h2>
-              <p>Quy trình chăm sóc Lead tự động đa nền tảng</p>
+            <div>
+              <div className="modal-title">Tạo kịch bản chăm sóc</div>
+              <div className="modal-sub">Thiết lập quy trình gửi tin tự động</div>
             </div>
           </div>
-          <button className="close-btn-round" onClick={onClose}><X size={18} /></button>
+          <button className="close-btn" onClick={onClose}><X size={16} /></button>
         </div>
 
-        <form onSubmit={handleSubmit} className="modal-body-v2">
-          {/* Tên & Dự án */}
-          <div className="form-section">
-            <div className="form-group">
-              <label className="premium-label">Tên kịch bản vận hành</label>
-              <input 
-                type="text" 
-                className="premium-input"
-                value={formData.ten_kich_ban}
-                onChange={e => setFormData({...formData, ten_kich_ban: e.target.value})}
-                placeholder="Ví dụ: Chào mừng Lead Lạnh sau 2h..."
-                required
-              />
+        <form onSubmit={handleSubmit} className="redesign-modal-body">
+          <div className="field">
+            <label>Tên kịch bản</label>
+            <input 
+              className="input" 
+              type="text" 
+              placeholder="Ví dụ: Chào mừng lead lạnh mới..."
+              value={formData.ten_kich_ban}
+              onChange={e => setFormData({...formData, ten_kich_ban: e.target.value})}
+              required
+            />
+          </div>
+
+          <div className="field-row">
+            <div className="field">
+              <label>Dự án áp dụng</label>
+              <select 
+                className="input"
+                value={formData.du_an_id || 'Tất cả dự án'}
+                onChange={e => setFormData({...formData, du_an_id: e.target.value})}
+              >
+                {DU_AN_LIST.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
             </div>
-            
-            <div className="form-row-v2">
-              <div className="form-group flex-2">
-                <label className="premium-label">Dự án áp dụng</label>
-                <div className="select-wrapper">
-                  <select 
-                    className="premium-select"
-                    value={formData.du_an_id}
-                    onChange={e => setFormData({...formData, du_an_id: e.target.value})}
-                  >
-                    {DU_AN_LIST.map(d => <option key={d} value={d}>{d}</option>)}
-                  </select>
-                  <ChevronDown className="select-icon" size={16} />
-                </div>
-              </div>
-              <div className="form-group flex-1">
-                <label className="premium-label">Delay (giờ)</label>
+            <div className="field">
+              <label>Gửi sau (giờ)</label>
+              <div className="delay-wrap">
                 <input 
+                  className="input" 
                   type="number" 
-                  className="premium-input text-center"
+                  value={formData.delay_hours} 
                   min="0"
-                  value={formData.delay_hours}
                   onChange={e => setFormData({...formData, delay_hours: parseInt(e.target.value) || 0})}
+                  style={{ maxWidth: '80px' }}
                 />
+                <span className="delay-unit">giờ kể từ khi trigger</span>
               </div>
             </div>
           </div>
 
-          {/* Phân loại Lead - Horizontal Buttons */}
-          <div className="form-group">
-            <label className="premium-label">Phân loại Lead mục tiêu</label>
-            <div className="score-selector-grid">
+          <div className="field">
+            <label>Phân loại lead</label>
+            <div className="score-selector">
               {SCORE_OPTIONS.map(opt => (
-                <button
+                <div 
                   key={opt.key}
-                  type="button"
-                  className={`score-opt-btn ${formData.lead_score === opt.key ? `active-${opt.colorClass}` : ''}`}
+                  className={`score-opt ${opt.class} ${formData.lead_score === opt.key ? 'active' : ''}`}
                   onClick={() => setFormData({...formData, lead_score: opt.key})}
                 >
                   {opt.icon}
                   <span>{opt.label}</span>
-                </button>
+                </div>
               ))}
             </div>
           </div>
 
-          {/* Kênh truyền thông - Icon Buttons */}
-          <div className="form-group">
-            <label className="premium-label">Kênh gửi tin nhắn</label>
-            <div className="channel-selector-v2">
-              {CHANNEL_OPTIONS.map(ch => {
-                const isSelected = formData.kenh.includes(ch.key);
-                return (
-                  <button
-                    key={ch.key}
-                    type="button"
-                    className={`channel-opt-v2 ${isSelected ? 'selected' : ''}`}
-                    onClick={() => toggleChannel(ch.key)}
-                  >
-                    <div className="channel-icon-v2">{ch.icon}</div>
-                    <span className="channel-label-v2">{ch.label}</span>
-                    <div className="check-dot">
-                      {isSelected ? <CheckCircle2 size={14} /> : <Circle size={14} />}
-                    </div>
-                  </button>
-                );
-              })}
+          <div className="field">
+            <label>Kênh gửi</label>
+            <div className="channel-grid">
+              {CHANNEL_OPTIONS.map(ch => (
+                <div 
+                  key={ch.key}
+                  className={`channel-opt ${formData.kenh.includes(ch.key) ? 'active' : ''}`}
+                  onClick={() => toggleChannel(ch.key)}
+                >
+                  {ch.icon}
+                  <span>{ch.label}</span>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Content Tabs */}
-          <div className="content-section">
-            <div className="tab-bar-v2">
+          <div className="field">
+            <label>Nội dung tin nhắn</label>
+            <div className="tabs">
               {['zalo', 'sms', 'email'].map(t => (
-                <button
+                <button 
                   key={t}
                   type="button"
-                  className={`tab-item-v2 ${activeTab === t ? 'active' : ''} ${!formData.kenh.includes(t) ? 'disabled' : ''}`}
-                  onClick={() => formData.kenh.includes(t) && setActiveTab(t)}
+                  className={`tab ${activeTab === t ? 'active' : ''}`} 
+                  onClick={() => setActiveTab(t)}
                 >
-                  {t.toUpperCase()}
+                  {t.charAt(0).toUpperCase() + t.slice(1)}
                 </button>
               ))}
             </div>
-
-            <div className="tab-content-v2">
+            
+            <div className="content-panel">
               {activeTab === 'zalo' && (
-                <div className="animate-fade-in">
+                <>
                   <textarea 
-                    className="premium-textarea"
-                    rows="4"
+                    className="input" 
+                    rows="4" 
+                    placeholder="Chào {{name}}, cảm ơn bạn đã quan tâm dự án...&#10;&#10;Biến hỗ trợ: {{name}} {{phone}} {{du_an}} {{sales_name}}"
                     value={formData.noi_dung_template.zalo}
                     onChange={e => updateTemplate('zalo', e.target.value)}
-                    placeholder="Chào {{name}}, cảm ơn bạn đã quan tâm..."
-                  />
-                  <div className={`char-counter ${charCount('zalo').over ? 'text-red-400' : ''}`}>
-                    {charCount('zalo').len} / {charCount('zalo').max} ký tự
-                  </div>
-                </div>
+                  ></textarea>
+                  <div className="char-hint">{formData.noi_dung_template.zalo.length} / 300 ký tự</div>
+                </>
               )}
-
               {activeTab === 'sms' && (
-                <div className="animate-fade-in">
+                <>
                   <textarea 
-                    className="premium-textarea"
-                    rows="3"
+                    className="input" 
+                    rows="3" 
+                    placeholder="Blanca BĐS: Chào {{name}}, cảm ơn bạn..."
                     value={formData.noi_dung_template.sms}
                     onChange={e => updateTemplate('sms', e.target.value)}
-                    placeholder="Blanca BĐS: Cam on {{name}} da..."
-                  />
-                  <div className={`char-counter ${charCount('sms').over ? 'text-red-400' : ''}`}>
-                    {charCount('sms').len} / {charCount('sms').max} ký tự · Tin SMS chuẩn
-                  </div>
-                </div>
+                  ></textarea>
+                  <div className="char-hint">{formData.noi_dung_template.sms.length} / 160 ký tự · Tin SMS tiêu chuẩn</div>
+                </>
               )}
-
               {activeTab === 'email' && (
-                <div className="animate-fade-in email-fields">
+                <>
                   <input 
-                    className="premium-input mb-3"
-                    placeholder="Tiêu đề Email..."
+                    className="input" 
+                    type="text" 
+                    placeholder="Tiêu đề email..." 
+                    style={{ marginBottom: '6px' }}
                     value={formData.noi_dung_template.email.subject}
                     onChange={e => updateTemplate('email', { subject: e.target.value })}
                   />
                   <textarea 
-                    className="premium-textarea"
-                    rows="4"
+                    className="input" 
+                    rows="4" 
+                    placeholder="Nội dung email (hỗ trợ HTML)..."
                     value={formData.noi_dung_template.email.body}
                     onChange={e => updateTemplate('email', { body: e.target.value })}
-                    placeholder="Nội dung Email (Hỗ trợ HTML)..."
-                  />
-                </div>
+                  ></textarea>
+                </>
               )}
             </div>
           </div>
 
-          {/* Tip Section */}
-          <div className="automation-tip">
-            <Info size={16} className="text-blue-400 shrink-0" />
-            <p>
-              Sử dụng <code>{'{{name}}'}</code>, <code>{'{{du_an}}'}</code>, <code>{'{{sales_name}}'}</code> để cá nhân hóa tin nhắn tự động.
-            </p>
-          </div>
-
-          {/* Footer */}
-          <div className="modal-footer-v2">
-            <button type="button" className="btn-cancel-v2" onClick={onClose}>Hủy bỏ</button>
-            <button type="submit" className="btn-save-v2" disabled={loading}>
-              {loading ? (
-                <><div className="spinner-mini"></div> Đang xử lý...</>
-              ) : (
-                <><Save size={18} /> {scenario ? 'Cập nhật kịch bản' : 'Kích hoạt Automation'}</>
-              )}
-            </button>
+          <div className="tip">
+            <Info size={15} color="#60a5fa" />
+            <span>Dùng <strong>{"{{name}}"}</strong>, <strong>{"{{du_an}}"}</strong>, <strong>{"{{sales_name}}"}</strong> để cá nhân hóa tin nhắn. Hệ thống tự thay thế khi gửi.</span>
           </div>
         </form>
+
+        <div className="redesign-modal-footer">
+          <button type="button" className="btn-cancel" onClick={onClose}>Hủy</button>
+          <button type="submit" className="btn-primary" onClick={handleSubmit} disabled={loading}>
+            <Zap size={16} fill="#0a0d00" />
+            {loading ? "Đang xử lý..." : scenario ? "Cập nhật kịch bản" : "Kích hoạt kịch bản"}
+          </button>
+        </div>
       </div>
     </div>
   );
 };
-
-const Zap = ({ size, color }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-  </svg>
-);
 
 export default AutomationScenarioForm;
