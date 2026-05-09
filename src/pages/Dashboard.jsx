@@ -178,7 +178,7 @@ function Dashboard() {
     topSales: sales.slice(0, 5).map(s => [s['Tên NV'], fmt(Number(s['Doanh số (tỷ)']) * 1_000_000_000), (Number(s['% KPI']) * 100).toFixed(0) + '%']),
     recentTx: transactions.slice(0, 5).map(t => [t['Tên KH'], t['Phân khu'], fmt(t['Giá trị HĐ (tr)'] * 1_000_000), t['Trạng thái']]),
     mktROI: marketing.slice(0, 5).map(m => [m['Kênh'], m['Lead'], m['Booking'], m['CP (tr)'] + 'tr']),
-    finStats: financials.slice(0, 5).map(f => [f['Hạng mục'], f['Loại'], f['Thực tế (tỷ)'] + ' tỷ'])
+    finStats: financials.slice(0, 5).map(f => [f['Hạng mục'], f['Loại'], fmt(Number(f['Thực tế (tỷ)']) * 1_000_000_000)])
   }), [sales, transactions, marketing, financials]);
 
   return (

@@ -7,7 +7,7 @@ export const fmt = (n) => {
   const num = Math.abs(Number(n));
   const sign = Number(n) < 0 ? '-' : '';
   
-  if (num >= 1_000_000_000) return sign + (num / 1_000_000_000).toFixed(2) + ' tỷ';
+  if (num >= 1_000_000_000) return sign + (num / 1_000_000_000).toFixed(1) + ' tỷ';
   if (num >= 1_000_000)     return sign + (num / 1_000_000).toFixed(1) + ' tr';
   return sign + Number(n).toLocaleString('vi-VN');
 };
@@ -162,7 +162,7 @@ export function SectionHead({ icon, label }) {
 }
 
 export function DonutChart({ segments = [], total, label }) {
-  const circumference = 2 * Math.PI * 28;
+  const circumference = 2 * Math.PI * 36; // Increased radius from 28 to 36
   let offset = 0;
   const arcs = segments.map((seg) => {
     const dash = (seg.pct / 100) * circumference;
@@ -170,31 +170,43 @@ export function DonutChart({ segments = [], total, label }) {
     offset += dash;
     return arc;
   });
+
+  const shortTotal = (val) => {
+    if (typeof val !== 'number') return val;
+    // For large numbers in the center
+    if (val >= 1000) return (val / 1000).toFixed(1) + 'k';
+    // Round to 1 decimal if it's a small decimal (like tỷ)
+    if (val.toString().includes('.') && val.toString().split('.')[1].length > 1) {
+      return val.toFixed(1);
+    }
+    return val;
+  };
+
   return (
-    <div className="donut-container-res" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-      <svg width="80" height="80" viewBox="0 0 80 80" aria-hidden="true" style={{ flexShrink: 0 }}>
-        <circle cx="40" cy="40" r="28" fill="none" stroke="#1e2130" strokeWidth="12" />
+    <div className="donut-container-res" style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+      <svg width="104" height="104" viewBox="0 0 104 104" aria-hidden="true" style={{ flexShrink: 0 }}>
+        <circle cx="52" cy="52" r="36" fill="none" stroke="#1e2130" strokeWidth="16" />
         {arcs.map((arc, i) => (
           <circle
             key={i}
-            cx="40" cy="40" r="28"
+            cx="52" cy="52" r="36"
             fill="none"
             stroke={arc.color}
-            strokeWidth="12"
+            strokeWidth="16"
             strokeDasharray={`${arc.dash} ${circumference - arc.dash}`}
             strokeDashoffset={-arc.offset}
-            transform="rotate(-90 40 40)"
+            transform="rotate(-90 52 52)"
           />
         ))}
-        <text x="40" y="38" textAnchor="middle" fontSize="11" fontWeight="700" fill="#f0f2f5">{total}</text>
-        {label && <text x="40" y="50" textAnchor="middle" fontSize="9" fill="#6b7280">{label}</text>}
+        <text x="52" y="52" textAnchor="middle" dominantBaseline="middle" fontSize="14" fontWeight="800" fill="#f0f2f5">{shortTotal(total)}</text>
+        {label && <text x="52" y="66" textAnchor="middle" fontSize="10" fontWeight="600" fill="#6b7280" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</text>}
       </svg>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
         {segments.map((seg, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: '#9ca3af' }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: seg.color, flexShrink: 0 }} />
-            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{seg.label}</span>
-            <span style={{ marginLeft: 'auto', color: '#6b7280', paddingLeft: 8 }}>{seg.count || seg.pct + '%'}</span>
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: '#9ca3af' }}>
+            <div style={{ width: 8, height: 8, borderRadius: '50%', background: seg.color, flexShrink: 0 }} />
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 500 }}>{seg.label}</span>
+            <span style={{ marginLeft: 'auto', color: '#6b7280', paddingLeft: 10, fontWeight: 700 }}>{seg.count || seg.pct + '%'}</span>
           </div>
         ))}
       </div>

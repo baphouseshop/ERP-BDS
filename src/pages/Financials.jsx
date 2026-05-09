@@ -178,7 +178,7 @@ function Financials() {
                 <td>{f['Tháng']}</td>
                 <td style={{ fontWeight: 'bold' }}>{f['Hạng mục']}</td>
                 <td>{f['Loại']}</td>
-                <td style={{ color: f['Loại'] === 'Income' ? 'var(--accent)' : 'var(--danger)', fontWeight: 'bold' }}>{f['Thực tế (tỷ)']} tỷ</td>
+                <td style={{ color: f['Loại'] === 'Income' ? 'var(--accent)' : 'var(--danger)', fontWeight: 'bold' }}>{Number(f['Thực tế (tỷ)'] || 0).toFixed(1)} tỷ</td>
                 <td>{f['KH (tỷ)']} tỷ</td>
                 <td>{f['% Hoàn thành'] ? Number(f['% Hoàn thành']).toFixed(0) : 0}%</td>
                 <td>{f['Người duyệt']}</td>
