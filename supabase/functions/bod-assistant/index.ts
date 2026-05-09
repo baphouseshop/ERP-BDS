@@ -19,28 +19,23 @@ serve(async (req) => {
       return new Response(JSON.stringify({ reply: 'Lỗi: Thiếu API Key.' }), { headers: corsHeaders })
     }
 
-    // NẾU HỎI VỀ DỮ LIỆU CÔNG VIỆC, HÃY HIỆN DIAGNOSTIC NẾU DỮ LIỆU TRỐNG
-    const hasSalesData = context.topSales && Array.isArray(context.topSales) && context.topSales.length > 0;
-    
-    if (prompt.toLowerCase().includes('nhân viên') && !hasSalesData) {
-      return new Response(
-        JSON.stringify({ 
-          reply: `CHẨN ĐOÁN DỮ LIỆU:\n- Dashboard Stats có nhận được: ${context.topSales ? 'Có biến nhưng rỗng' : 'Biến NULL'}\n- Context Scorecard: ${context.scorecard ? 'Đã nhận' : 'Trống'}\n\nSếp vui lòng đợi Dashboard tải xong hoàn toàn dữ liệu rồi hãy hỏi AI nhé!` 
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
     const systemPrompt = `
-      Bạn là Trợ lý Trí tuệ BOD (BOD Intelligence Assistant).
-      DỮ LIỆU:
-      - KPI: ${JSON.stringify(context.scorecard)}
-      - Sales: ${JSON.stringify(context.topSales)}
-      - Marketing: ${JSON.stringify(context.marketing)}
-      - Dự án: ${JSON.stringify(context.projects)}
+      Bạn là Trợ lý Trí tuệ BOD (BOD Intelligence Assistant) cho Blanca CRM. 
+      Bạn đang hỗ trợ trực tiếp cho Ban Giám đốc (BOD).
       
-      Nếu không thấy dữ liệu Sales, hãy báo là "Hệ thống chưa đồng bộ xong dữ liệu Sales".
-      Trả lời ngắn gọn, tiếng Việt.
+      DỮ LIỆU HIỆN TẠI TỪ HỆ THỐNG:
+      - KPI & Tài chính: ${JSON.stringify(context.scorecard)}
+      - Cảnh báo dòng tiền: ${JSON.stringify(context.alerts)}
+      - Hiệu suất Sales (Top 5): ${JSON.stringify(context.topSales)}
+      - Chỉ số Marketing: ${JSON.stringify(context.marketing)}
+      - Lợi nhuận dự án: ${JSON.stringify(context.projects)}
+      
+      QUY TẮC PHẢN HỒI:
+      1. TRUNG THỰC: Chỉ trả lời dựa trên các chỉ số được cung cấp ở trên.
+      2. PHÂN TÍCH: So sánh dữ liệu sales và marketing nếu được hỏi.
+      3. NGẮN GỌN: Trả lời dưới 120 từ, tập trung vào con số.
+      4. CẢNH BÁO: Nhắc nhở nếu có đèn ĐỎ hoặc VÀNG.
+      5. NGÔN NGỮ: Tiếng Việt.
     `;
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;

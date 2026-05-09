@@ -30,8 +30,13 @@ const AIChatSidebar = () => {
     setIsLoading(true);
 
     try {
-      // Gửi yêu cầu đến Supabase Edge Function (Sẽ triển khai ở bước sau)
-      // Hiện tại chúng ta sẽ sử dụng logic xử lý trực tiếp hoặc thông qua RPC
+      // Chuẩn bị dữ liệu Sales từ danh sách nhân viên nếu dashboardStats bị NULL
+      const salesContext = dashboardStats?.topSalesPerformers || staff?.slice(0, 5).map(s => ({
+        name: s["Tên NV"],
+        revenue: 0, // Fallback đơn giản
+        status: s["Trạng thái"]
+      }));
+
       const { data, error } = await supabase.functions.invoke('bod-assistant', {
         body: { 
           prompt: userMessage,
@@ -39,8 +44,8 @@ const AIChatSidebar = () => {
             scorecard: executiveScorecard,
             alerts: trafficLights,
             projects: projectPL,
-            topSales: dashboardStats?.topSalesPerformers,
-            marketing: dashboardStats?.marketingStats,
+            topSales: salesContext,
+            marketing: dashboardStats?.marketingStats || [],
             user: currentUser?.full_name
           }
         }
