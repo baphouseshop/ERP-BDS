@@ -1,93 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useData } from '../context/DataContext';
-import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, 
-  PieChart, Pie, Cell 
-} from 'recharts';
+import { KpiCard, SectionHead, DonutChart, BarChart, ChartCard, fmt } from '../components/VisualLanguage';
 
-const CustomTooltip = ({ active, payload, label }) => {
-  if (active && payload && payload.length) {
-    return (
-      <div style={{ backgroundColor: 'var(--bg-tertiary)', padding: '10px', border: '1px solid var(--border-color)', borderRadius: '4px' }}>
-        <p style={{ margin: 0, fontWeight: 'bold' }}>{label || payload[0].name}</p>
-        {payload.map((p, idx) => (
-          <p key={idx} style={{ margin: 0, color: p.color || p.fill }}>
-            {p.name}: {p.value}
-          </p>
-        ))}
-      </div>
-    );
-  }
-  return null;
-};
-
-const formatCompact = (val, isBillion = false) => {
-  if (val === undefined || val === null || val === '') return '-';
-  let num = Number(val);
-  if (isBillion) num = num * 1000000000;
-  const absNum = Math.abs(num);
-  const sign = num < 0 ? '-' : '';
-  
-  if (absNum >= 1000000000) return sign + (absNum / 1000000000).toFixed(2) + ' tỷ';
-  if (absNum >= 1000000) return sign + (absNum / 1000000).toFixed(1) + ' tr';
-  return sign + absNum.toLocaleString('vi-VN');
-};
-
-const renderProgressBar = (item, color, icon, calcTotal, calcKH) => {
-  const actual = calcTotal(item);
-  const target = calcKH(item);
-  let pct = target > 0 ? (actual / target) * 100 : 0;
-  const isExceeded = pct > 100;
-  
-  // For costs, exceeding 100% is bad, but for revenue it's good.
-  const isCost = item['Loại'] === 'Chi phí' || item['Loại'] === 'Expense';
-  const displayColor = isExceeded && isCost ? 'var(--danger)' : color;
-  
-  // Cap visual bar at 100%
-  const barWidth = Math.min(pct, 100);
-
-  return (
-    <div className="fin-progress-item" key={item['Hạng mục']}>
-      <div className="fin-progress-header">
-        <div className="fin-progress-title">
-          <span style={{ fontSize: '16px' }}>{icon}</span>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span>{item['Hạng mục']}</span>
-            <span className="fin-progress-subtitle">{item['Ghi chú']} · Duyệt: {item['Người duyệt']}</span>
-          </div>
-        </div>
-        <div className="fin-progress-stats">
-          <span className="fin-progress-kh">KH: {target} tỷ</span>
-          <span className="fin-progress-val" style={{ color: displayColor }}>{actual} tỷ</span>
-          <span className="fin-progress-pct" style={{ color: displayColor, backgroundColor: displayColor + '33' }}>
-            {pct.toFixed(0)}%
-          </span>
-        </div>
-      </div>
-      <div className="fin-progress-bar-bg">
-        <div 
-          className="fin-progress-bar-fill" 
-          style={{ width: `${barWidth}%`, backgroundColor: displayColor }}
-        />
-      </div>
-    </div>
-  );
-};
-
-function Financials() {
+export default function Financials() {
   const { 
-    financials, 
-    financialsTotal,
-    financialsPage, setFinancialsPage,
-    financialsSearch, setFinancialsSearch,
-    financialsSort, setFinancialsSort,
+    financials, financialsTotal, financialsPage, setFinancialsPage,
+    financialsSearch, setFinancialsSearch, financialsSort, setFinancialsSort,
     staff, addFinancial, editFinancial, deleteFinancial,
-    itemsPerPage, dashboardStats, transactions
+    itemsPerPage, dashboardStats
   } = useData();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  
   const [filterType, setFilterType] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   
@@ -103,34 +27,60 @@ function Financials() {
     '_id': ''
   });
 
+  // --- STATS ---
+  const stats = dashboardStats?.financial_stats || {
+    revenue: 0, revenue_kh: 0, ops_cost: 0, ops_cost_kh: 0,
+    mkt_cost: 0, mkt_cost_kh: 0, salary_cost: 0, salary_cost_kh: 0,
+    expense: 0
+  };
+
+  const kpiData = useMemo(() => {
+    const rev = Number(stats.revenue || 0) * 1_000_000_000;
+    const revKh = Number(stats.revenue_kh || 0) * 1_000_000_000;
+    const ops = Number(stats.ops_cost || 0) * 1_000_000_000;
+    const opsKh = Number(stats.ops_cost_kh || 0) * 1_000_000_000;
+    const mkt = Number(stats.mkt_cost || 0) * 1_000_000_000;
+    const mktKh = Number(stats.mkt_cost_kh || 0) * 1_000_000_000;
+    const sal = Number(stats.salary_cost || 0) * 1_000_000_000;
+    const salKh = Number(stats.salary_cost_kh || 0) * 1_000_000_000;
+    const exp = Number(stats.expense || 0) * 1_000_000_000;
+    const profit = rev - exp;
+
+    return {
+      rev: fmt(rev), revSub: `KH: ${fmt(revKh)} · ${revKh ? ((rev/revKh)*100).toFixed(0) : 0}%`,
+      ops: fmt(ops), opsSub: `KH: ${fmt(opsKh)} · ${opsKh ? ((ops/opsKh)*100).toFixed(0) : 0}%`,
+      mkt: fmt(mkt), mktSub: `KH: ${fmt(mktKh)} · ${mktKh ? ((mkt/mktKh)*100).toFixed(0) : 0}%`,
+      sal: fmt(sal), salSub: `KH: ${fmt(salKh)} · ${salKh ? ((sal/salKh)*100).toFixed(0) : 0}%`,
+      profit: fmt(profit), profitSub: `${rev ? ((profit/rev)*100).toFixed(1) : 0}% biên LN`,
+      exp: fmt(exp), expSub: 'VH + MKT + Lương'
+    };
+  }, [stats]);
+
+  // --- CHARTS ---
+  const barsData = [
+    { label: 'D.Thu', val: Number(stats.revenue || 0), color: '#ccff00' },
+    { label: 'LN Gộp', val: Number(stats.revenue || 0) - Number(stats.expense || 0), color: '#00e5ff' },
+    { label: 'CP VH', val: Number(stats.ops_cost || 0), color: '#ff4d94' },
+    { label: 'CP MKT', val: Number(stats.mkt_cost || 0), color: '#a78bfa' },
+    { label: 'Lương', val: Number(stats.salary_cost || 0), color: '#ffcc00' }
+  ];
+
+  const costSegments = [
+    { label: 'Vận hành', pct: stats.expense ? Math.round((stats.ops_cost / stats.expense) * 100) : 0, color: '#ff4d94', count: stats.ops_cost + ' tỷ' },
+    { label: 'Marketing', pct: stats.expense ? Math.round((stats.mkt_cost / stats.expense) * 100) : 0, color: '#a78bfa', count: stats.mkt_cost + ' tỷ' },
+    { label: 'Lương & HH', pct: stats.expense ? Math.round((stats.salary_cost / stats.expense) * 100) : 0, color: '#ffcc00', count: stats.salary_cost + ' tỷ' }
+  ];
+
+  // --- HANDLERS ---
   const handleOpenAddModal = () => {
     setIsEditMode(false);
-    setFormData({
-      'Tháng': new Date().toISOString().slice(0, 7),
-      'Hạng mục': '',
-      'Loại': 'Doanh thu',
-      'Thực tế (tỷ)': '',
-      'KH (tỷ)': '',
-      'Ghi chú': '',
-      'Người duyệt': '',
-      '_approver_id': ''
-    });
+    setFormData({ 'Tháng': new Date().toISOString().slice(0, 7), 'Hạng mục': '', 'Loại': 'Doanh thu', 'Thực tế (tỷ)': '', 'KH (tỷ)': '', 'Ghi chú': '', 'Người duyệt': '', '_approver_id': '' });
     setIsModalOpen(true);
   };
 
   const handleOpenEditModal = (f) => {
     setIsEditMode(true);
-    setFormData({
-      'Tháng': f['Tháng'] || '',
-      'Hạng mục': f['Hạng mục'] || '',
-      'Loại': f['Loại'] || 'Doanh thu',
-      'Thực tế (tỷ)': f['Thực tế (tỷ)'] || '',
-      'KH (tỷ)': f['KH (tỷ)'] || '',
-      'Ghi chú': f['Ghi chú'] || '',
-      'Người duyệt': f['Người duyệt'] || '',
-      '_approver_id': f['_approver_id'] || '',
-      '_id': f['_id'] || ''
-    });
+    setFormData({ 'Tháng': f['Tháng'] || '', 'Hạng mục': f['Hạng mục'] || '', 'Loại': f['Loại'] || 'Doanh thu', 'Thực tế (tỷ)': f['Thực tế (tỷ)'] || '', 'KH (tỷ)': f['KH (tỷ)'] || '', 'Ghi chú': f['Ghi chú'] || '', 'Người duyệt': f['Người duyệt'] || '', '_approver_id': f['_approver_id'] || '', '_id': f['_id'] || '' });
     setIsModalOpen(true);
   };
 
@@ -139,158 +89,27 @@ function Financials() {
     const actual = Number(formData['Thực tế (tỷ)']);
     const target = Number(formData['KH (tỷ)']);
     const pct = target > 0 ? (actual / target) * 100 : 0;
-    
-    const payload = {
-      ...formData,
-      '% Hoàn thành': pct,
-      'Chênh lệch': actual - target
-    };
-
-    if (isEditMode) {
-      editFinancial(payload);
-    } else {
-      addFinancial(payload);
-    }
+    const payload = { ...formData, '% Hoàn thành': pct, 'Chênh lệch': actual - target };
+    if (isEditMode) editFinancial(payload);
+    else addFinancial(payload);
     setIsModalOpen(false);
   };
 
   const handleStaffChange = (e) => {
     const maNV = e.target.value;
     const selectedStaff = staff.find(s => s['Mã NV'] === maNV);
-    if (selectedStaff) {
-      setFormData({ ...formData, '_approver_id': maNV, 'Người duyệt': selectedStaff['Tên NV'] });
-    } else {
-      setFormData({ ...formData, '_approver_id': '', 'Người duyệt': '' });
-    }
+    setFormData({ ...formData, '_approver_id': maNV, 'Người duyệt': selectedStaff ? selectedStaff['Tên NV'] : '' });
   };
 
-  const handleSearchChange = (e) => {
-    setFinancialsSearch(e.target.value);
-    setFinancialsPage(1);
-  };
-
-  const clearFilters = () => {
-    setFinancialsSearch('');
-    setFilterType('');
-    setFilterCategory('');
-    setFinancialsPage(1);
-  };
-
-  const totalPages = Math.ceil(financialsTotal / itemsPerPage);
-  
-  // Calculate unique categories for filter
   const uniqueCategories = Array.from(new Set(financials.map(f => f['Hạng mục']).filter(Boolean)));
-
-  // --- DATA EXTRACTION ---
-  // Map: accept both English (Supabase) and Vietnamese (local/db.json) category names
-  const categoryAliases = {
-    'Doanh thu thực thu': ['Revenue', 'Doanh thu thực thu', 'Doanh thu HĐMB'],
-    'Chi phí vận hành': ['General Ops', 'Chi phí vận hành'],
-    'Chi phí Marketing': ['Marketing', 'Chi phí Marketing'],
-    'Quỹ lương & Hoa hồng': ['Salaries', 'Quỹ lương & Hoa hồng']
-  };
-
-  const stats = dashboardStats?.financial_stats || {
-    revenue: 0, revenue_kh: 0,
-    ops_cost: 0, ops_cost_kh: 0,
-    mkt_cost: 0, mkt_cost_kh: 0,
-    salary_cost: 0, salary_cost_kh: 0,
-    expense: 0
-  };
-
-  const doanhThuT = Number(stats.revenue || 0);
-  const doanhThuKH = Number(stats.revenue_kh || 0);
-  
-  const chiPhiVHT = Number(stats.ops_cost || 0);
-  const chiPhiVHKH = Number(stats.ops_cost_kh || 0);
-  
-  const chiPhiMktT = Number(stats.mkt_cost || 0);
-  const chiPhiMktKH = Number(stats.mkt_cost_kh || 0);
-  
-  const luongHHT = Number(stats.salary_cost || 0);
-  const luongHHKH = Number(stats.salary_cost_kh || 0);
-
-  const sumChiPhi = Number(stats.expense || 0);
-  const sumChiPhiKH = chiPhiVHKH + chiPhiMktKH + luongHHKH;
-
-  const loiNhuanT = doanhThuT - sumChiPhi;
-  const loiNhuanKH = doanhThuKH - sumChiPhiKH;
-
-  // Mock object constructor for rendering Progress Bars
-  const createFinObj = (name, actual, target, type) => ({
-    'Hạng mục': name, 'Thực tế (tỷ)': actual, 'KH (tỷ)': target, 'Loại': type, 'Ghi chú': '', 'Người duyệt': '-'
-  });
-
-  const doanhThuObj = createFinObj('Doanh thu thực thu', doanhThuT.toFixed(2), doanhThuKH.toFixed(2), 'Income');
-  const chiPhiVHObj = createFinObj('Chi phí vận hành', chiPhiVHT.toFixed(2), chiPhiVHKH.toFixed(2), 'Expense');
-  const chiPhiMktObj = createFinObj('Chi phí Marketing', chiPhiMktT.toFixed(2), chiPhiMktKH.toFixed(2), 'Expense');
-  const luongHHObj = createFinObj('Quỹ lương & Hoa hồng', luongHHT.toFixed(2), luongHHKH.toFixed(2), 'Expense');
-  const loiNhuanObj = createFinObj('Lợi nhuận gộp', loiNhuanT.toFixed(2), loiNhuanKH.toFixed(2), 'Income');
-
-  const calcTotal = (item) => Number(item['Thực tế (tỷ)'] || 0);
-  const calcKH = (item) => Number(item['KH (tỷ)'] || 1); // fallback 1 to avoid div by 0
-
-  // --- CHART DATA ---
-  const actualVsPlanData = [
-    { name: 'Doanh thu thực thu', 'Thực tế (tỷ)': doanhThuT.toFixed(2), 'KH (tỷ)': doanhThuKH.toFixed(2) },
-    { name: 'Chi phí vận hành', 'Thực tế (tỷ)': chiPhiVHT.toFixed(2), 'KH (tỷ)': chiPhiVHKH.toFixed(2) },
-    { name: 'Chi phí Marketing', 'Thực tế (tỷ)': chiPhiMktT.toFixed(2), 'KH (tỷ)': chiPhiMktKH.toFixed(2) },
-    { name: 'Quỹ lương & Hoa hồng', 'Thực tế (tỷ)': luongHHT.toFixed(2), 'KH (tỷ)': luongHHKH.toFixed(2) },
-    { name: 'Lợi nhuận gộp', 'Thực tế (tỷ)': loiNhuanT.toFixed(2), 'KH (tỷ)': loiNhuanKH.toFixed(2) },
-  ];
-
-  const costStructureData = [
-    { name: 'Chi phí vận hành', value: Number(chiPhiVHT.toFixed(2)) },
-    { name: 'Chi phí Marketing', value: Number(chiPhiMktT.toFixed(2)) },
-    { name: 'Quỹ lương & Hoa hồng', value: Number(luongHHT.toFixed(2)) }
-  ];
-  const COST_COLORS = ['#ff4d94', '#4da6ff', '#ffcc00'];
-
-  // --- LINKED DATA CALCULATION ---
-  // Transactions -> Commissions
-  const sumHH = transactions.reduce((sum, t) => sum + Number(t['Hoa hồng'] || 0), 0);
-  
-  // Marketing -> ROI
-  const evaluateROI = (rate) => {
-    if(rate >= 0.1) return { text: 'Xuất sắc', color: 'var(--accent)' };
-    if(rate >= 0.05) return { text: 'Tốt', color: 'var(--success)' };
-    if(rate >= 0.02) return { text: 'Trung bình', color: 'var(--warning)' };
-    return <div style={{ color: 'var(--text-muted)' }}>-</div>;
-  };
-
-
-
-
-  const handleSort = (key) => {
-    let column = key;
-    if (key === 'Tháng') column = 'thang';
-    if (key === 'Hạng mục') column = 'hang_muc';
-    if (key === 'Loại') column = 'loai';
-    if (key === 'Thực tế (tỷ)') column = 'thuc_te';
-    if (key === 'KH (tỷ)') column = 'ke_hoach';
-    
-    setFinancialsSort(prev => ({
-      column,
-      ascending: prev.column === column ? !prev.ascending : false
-    }));
-  };
-
-
+  const totalPages = Math.ceil(financialsTotal / itemsPerPage);
 
   return (
     <div>
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1 className="page-title">Tài chính</h1>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <select 
-            className="filter-select" 
-            style={{ width: '180px' }}
-            value={`${financialsSort.column}-${financialsSort.ascending ? 'asc' : 'desc'}`} 
-            onChange={e => {
-              const [column, dir] = e.target.value.split('-');
-              setFinancialsSort({ column, ascending: dir === 'asc' });
-            }}
-          >
+          <select className="filter-select" style={{ width: '180px' }} value={`${financialsSort.column}-${financialsSort.ascending ? 'asc' : 'desc'}`} onChange={e => { const [column, dir] = e.target.value.split('-'); setFinancialsSort({ column, ascending: dir === 'asc' }); }}>
             <option value="thang-desc">Mới nhất lên đầu</option>
             <option value="thang-asc">Cũ nhất lên đầu</option>
             <option value="hang_muc-asc">Hạng mục (A-Z)</option>
@@ -300,201 +119,84 @@ function Financials() {
         </div>
       </div>
 
-      {/* TOP KPI CARDS */}
-      <div className="dash-kpi-grid">
-        <div className="dash-kpi-card card-revenue">
-          <div className="dash-kpi-title">DOANH THU THỰC THU</div>
-          <div className="dash-kpi-value">{formatCompact(doanhThuT, true)}</div>
-          <div className="dash-kpi-subtext">KH: {doanhThuKH.toFixed(2)} tỷ · {doanhThuKH ? ((doanhThuT/doanhThuKH)*100).toFixed(0) : 0}%</div>
-        </div>
-        
-        <div className="dash-kpi-card" style={{ borderTopColor: '#ff4d94' }}>
-          <div className="dash-kpi-title">CHI PHÍ VẬN HÀNH</div>
-          <div className="dash-kpi-value" style={{ color: '#ff4d94' }}>{formatCompact(chiPhiVHT, true)}</div>
-          <div className="dash-kpi-subtext">KH: {chiPhiVHKH.toFixed(2)} tỷ · {chiPhiVHKH ? ((chiPhiVHT/chiPhiVHKH)*100).toFixed(0) : 0}%</div>
-        </div>
-
-        <div className="dash-kpi-card" style={{ borderTopColor: '#4da6ff' }}>
-          <div className="dash-kpi-title">CHI PHÍ MARKETING</div>
-          <div className="dash-kpi-value" style={{ color: '#4da6ff' }}>{formatCompact(chiPhiMktT, true)}</div>
-          <div className="dash-kpi-subtext">KH: {chiPhiMktKH.toFixed(2)} tỷ · {chiPhiMktKH ? ((chiPhiMktT/chiPhiMktKH)*100).toFixed(0) : 0}%</div>
-        </div>
-
-        <div className="dash-kpi-card" style={{ borderTopColor: '#ffcc00' }}>
-          <div className="dash-kpi-title">QUỸ LƯƠNG & HOA HỒNG</div>
-          <div className="dash-kpi-value" style={{ color: '#ffcc00' }}>{formatCompact(luongHHT, true)}</div>
-          <div className="dash-kpi-subtext">KH: {luongHHKH.toFixed(2)} tỷ · {luongHHKH ? ((luongHHT/luongHHKH)*100).toFixed(0) : 0}%</div>
-        </div>
-
-        <div className="dash-kpi-card card-profit">
-          <div className="dash-kpi-title">LỢI NHUẬN GỘP</div>
-          <div className="dash-kpi-value">{formatCompact(loiNhuanT, true)}</div>
-          <div className="dash-kpi-subtext">KH: {loiNhuanKH.toFixed(2)} tỷ · {loiNhuanKH ? ((loiNhuanT/loiNhuanKH)*100).toFixed(0) : 0}%</div>
-        </div>
-
-        <div className="dash-kpi-card" style={{ borderTopColor: '#b366ff' }}>
-          <div className="dash-kpi-title">TỔNG CHI PHÍ</div>
-          <div className="dash-kpi-value" style={{ color: '#b366ff' }}>{formatCompact(sumChiPhi, true)}</div>
-          <div className="dash-kpi-subtext">VH + MKT + Lương & HH</div>
-        </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 10, marginBottom: 20 }}>
+        <KpiCard colorClass="lime"   label="Doanh thu thực thu" value={kpiData.rev}    sub={kpiData.revSub} />
+        <KpiCard colorClass="pink"   label="Chi phí vận hành"   value={kpiData.ops}    sub={kpiData.opsSub} />
+        <KpiCard colorClass="purple" label="Chi phí Marketing"  value={kpiData.mkt}    sub={kpiData.mktSub} />
+        <KpiCard colorClass="amber"  label="Lương & Hoa hồng"   value={kpiData.sal}    sub={kpiData.salSub} />
+        <KpiCard colorClass="cyan"   label="Lợi nhuận gộp"      value={kpiData.profit} sub={kpiData.profitSub} />
+        <KpiCard colorClass="blue"   label="Tổng chi phí"       value={kpiData.exp}    sub={kpiData.expSub} />
       </div>
 
-      {/* CHARTS SECTION */}
-      <div className="fin-charts-grid">
-        <div className="dash-chart-card">
-          <div className="dash-chart-title">Thực tế vs Kế hoạch</div>
-          <div className="dash-chart-subtitle">Đơn vị: Tỷ VNĐ</div>
-          <div style={{ height: '250px' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={actualVsPlanData} margin={{ top: 20, right: 30, left: -20, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2a2e39" vertical={false} />
-                <XAxis dataKey="name" stroke="#8b92a5" fontSize={10} tickLine={false} axisLine={false} angle={-15} textAnchor="end" />
-                <YAxis stroke="#8b92a5" fontSize={11} tickLine={false} axisLine={false} />
-                <Tooltip cursor={{ fill: '#252932' }} content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ fontSize: '11px', color: 'var(--text-muted)' }} verticalAlign="top" />
-                <Bar dataKey="Thực tế (tỷ)" fill="#ccff00" radius={[2, 2, 0, 0]} />
-                <Bar dataKey="KH (tỷ)" fill="#5c677d" radius={[2, 2, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="dash-chart-card">
-          <div className="dash-chart-title">Cơ cấu chi phí</div>
-          <div className="dash-chart-subtitle">Tổng: {sumChiPhi.toFixed(2)} tỷ</div>
-          <div style={{ height: '250px' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={costStructureData} cx="40%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={5} dataKey="value">
-                  {costStructureData.map((entry, index) => <Cell key={`cell-${index}`} fill={COST_COLORS[index % COST_COLORS.length]} />)}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-                <Legend layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{ fontSize: '11px', color: 'var(--text-muted)' }} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
+        <ChartCard title="Thực tế vs Kế hoạch" sub="Đơn vị: Tỷ VNĐ">
+          <BarChart bars={barsData} />
+        </ChartCard>
+        <ChartCard title="Cơ cấu chi phí" sub={`Tổng chi phí: ${stats.expense} tỷ`}>
+          <DonutChart segments={costSegments} total={stats.expense} label="tỷ" />
+        </ChartCard>
       </div>
 
-      {/* DETAILED LIST & MANAGEMENT */}
-      <div className="fin-details-section">
-        <div className="dash-chart-title" style={{ marginBottom: '5px' }}>Quản lý chi tiết hạng mục</div>
-        
-        {/* FILTER BAR */}
-        <div className="filter-bar" style={{ marginTop: '15px', marginBottom: '15px' }}>
-          <input 
-            className="filter-input" 
-            placeholder="🔍 Tìm hạng mục, ghi chú, người duyệt..." 
-            value={financialsSearch} 
-            onChange={handleSearchChange} 
-          />
-          <select className="filter-select" value={filterType} onChange={e => setFilterType(e.target.value)}>
-            <option value="">-- Tất cả loại --</option>
-            <option value="Income">Thu nhập (Income)</option>
-            <option value="Expense">Chi phí (Expense)</option>
-          </select>
-          <select className="filter-select" value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
-            <option value="">-- Tất cả hạng mục --</option>
-            {uniqueCategories.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
-          {(financialsSearch || filterType || filterCategory) && <button className="btn-clear-filter" onClick={clearFilters}>✕ Xóa lọc</button>}
-          <span className="filter-count">Hiển thị <strong>{financials.length}</strong>/{financialsTotal}</span>
-        </div>
+      <SectionHead icon="ti-list" label="Quản lý chi tiết hạng mục" />
+      <div className="filter-bar" style={{ marginBottom: 15 }}>
+        <input className="filter-input" placeholder="🔍 Tìm hạng mục, ghi chú, người duyệt..." value={financialsSearch} onChange={e => setFinancialsSearch(e.target.value)} />
+        <select className="filter-select" value={filterType} onChange={e => setFilterType(e.target.value)}>
+          <option value="">-- Tất cả loại --</option>
+          <option value="Income">Thu nhập (Income)</option>
+          <option value="Expense">Chi phí (Expense)</option>
+        </select>
+        <select className="filter-select" value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
+          <option value="">-- Tất cả hạng mục --</option>
+          {uniqueCategories.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+        {(financialsSearch || filterType || filterCategory) && <button className="btn-clear-filter" onClick={() => { setFinancialsSearch(''); setFilterType(''); setFilterCategory(''); }}>✕ Xóa lọc</button>}
+      </div>
 
-        <div className="table-container" style={{ marginTop: '10px' }}>
-          <table>
-            <thead>
-              <tr>
-                <th>Thao tác</th>
-                <th>Tháng</th>
-                <th>Hạng mục</th>
-                <th>Loại</th>
-                <th>Thực tế (tỷ)</th>
-                <th>KH (tỷ)</th>
-                <th>Hoàn thành</th>
-                <th>Duyệt bởi</th>
+      <div className="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Thao tác</th>
+              <th>Tháng</th>
+              <th>Hạng mục</th>
+              <th>Loại</th>
+              <th>Thực tế (tỷ)</th>
+              <th>KH (tỷ)</th>
+              <th>Hoàn thành</th>
+              <th>Duyệt bởi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {financials.map((f, i) => (
+              <tr key={i}>
+                <td>
+                  <div style={{ display: 'flex', gap: '5px' }}>
+                    <button onClick={() => handleOpenEditModal(f)} className="btn-edit">Sửa</button>
+                    <button onClick={() => { if(window.confirm(`Xóa bản ghi ${f['Hạng mục']}?`)) deleteFinancial(f['_id']); }} className="btn-cancel" style={{ padding: '2px 8px', fontSize: '12px', borderColor: 'var(--danger)', color: 'var(--danger)' }}>Xóa</button>
+                  </div>
+                </td>
+                <td>{f['Tháng']}</td>
+                <td style={{ fontWeight: 'bold' }}>{f['Hạng mục']}</td>
+                <td>{f['Loại']}</td>
+                <td style={{ color: f['Loại'] === 'Income' ? 'var(--accent)' : 'var(--danger)', fontWeight: 'bold' }}>{f['Thực tế (tỷ)']} tỷ</td>
+                <td>{f['KH (tỷ)']} tỷ</td>
+                <td>{f['% Hoàn thành'] ? Number(f['% Hoàn thành']).toFixed(0) : 0}%</td>
+                <td>{f['Người duyệt']}</td>
               </tr>
-            </thead>
-            <tbody>
-              {financials.map((f, i) => (
-                <tr key={i}>
-                  <td>
-                    <div style={{ display: 'flex', gap: '5px' }}>
-                      <button onClick={() => handleOpenEditModal(f)} className="btn-edit">Sửa</button>
-                      <button 
-                        onClick={() => {
-                          if(window.confirm(`Xóa bản ghi ${f['Hạng mục']}?`)) {
-                            deleteFinancial(f['_id']);
-                          }
-                        }} 
-                        className="btn-cancel" 
-                        style={{ padding: '2px 8px', fontSize: '12px', borderColor: 'var(--danger)', color: 'var(--danger)' }}
-                      >Xóa</button>
-                    </div>
-                  </td>
-                  <td>{f['Tháng']}</td>
-                  <td style={{ fontWeight: 'bold' }}>{f['Hạng mục']}</td>
-                  <td>{f['Loại']}</td>
-                  <td style={{ color: f['Loại'] === 'Income' ? 'var(--accent)' : 'var(--danger)', fontWeight: 'bold' }}>{f['Thực tế (tỷ)']} tỷ</td>
-                  <td>{f['KH (tỷ)']} tỷ</td>
-                  <td>{f['% Hoàn thành'] ? Number(f['% Hoàn thành']).toFixed(0) : 0}%</td>
-                  <td>{f['Người duyệt']}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination Controls */}
-        {totalPages > 1 && (
-          <div className="pagination-container" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '20px', marginBottom: '40px' }}>
-            <button 
-              onClick={() => setFinancialsPage(financialsPage - 1)} 
-              disabled={financialsPage === 1}
-              style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: financialsPage === 1 ? 'not-allowed' : 'pointer', opacity: financialsPage === 1 ? 0.5 : 1 }}
-            >
-              Trải
-            </button>
-            
-            {[...Array(totalPages)].map((_, idx) => {
-              const pageNum = idx + 1;
-              if (totalPages > 7) {
-                if (pageNum !== 1 && pageNum !== totalPages && (pageNum < financialsPage - 1 || pageNum > financialsPage + 1)) {
-                  if (pageNum === 2 && financialsPage > 3) return <span key="dots1" style={{ color: 'var(--text-muted)' }}>...</span>;
-                  if (pageNum === totalPages - 1 && financialsPage < totalPages - 2) return <span key="dots2" style={{ color: 'var(--text-muted)' }}>...</span>;
-                  return null;
-                }
-              }
-              return (
-                <button
-                  key={pageNum}
-                  onClick={() => setFinancialsPage(pageNum)}
-                  style={{
-                    padding: '6px 12px',
-                    borderRadius: '4px',
-                    border: '1px solid',
-                    borderColor: financialsPage === pageNum ? 'var(--accent)' : 'var(--border-color)',
-                    background: financialsPage === pageNum ? 'var(--accent)' : 'var(--bg-secondary)',
-                    color: financialsPage === pageNum ? '#000' : 'var(--text-main)',
-                    fontWeight: 'bold',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {pageNum}
-                </button>
-              );
-            })}
-
-            <button 
-              onClick={() => setFinancialsPage(financialsPage + 1)} 
-              disabled={financialsPage === totalPages}
-              style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: financialsPage === totalPages ? 'not-allowed' : 'pointer', opacity: financialsPage === totalPages ? 0.5 : 1 }}
-            >
-              Phải
-            </button>
-          </div>
-        )}
+            ))}
+          </tbody>
+        </table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="pagination-container" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '20px', marginBottom: '40px' }}>
+          <button onClick={() => setFinancialsPage(financialsPage - 1)} disabled={financialsPage === 1} className="btn-nav">Trái</button>
+          {[...Array(totalPages)].map((_, idx) => (
+            <button key={idx} onClick={() => setFinancialsPage(idx + 1)} className={financialsPage === idx + 1 ? 'btn-nav active' : 'btn-nav'}>{idx + 1}</button>
+          ))}
+          <button onClick={() => setFinancialsPage(financialsPage + 1)} disabled={financialsPage === totalPages} className="btn-nav">Phải</button>
+        </div>
+      )}
 
       {isModalOpen && (
         <div className="modal-overlay">
@@ -550,5 +252,6 @@ function Financials() {
     </div>
   );
 }
+
 
 export default Financials;

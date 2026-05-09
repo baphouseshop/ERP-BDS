@@ -1,173 +1,119 @@
 import React from 'react';
 import { useData } from '../context/DataContext';
 import { 
-  BarChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart, Cell
-} from 'recharts';
-
-const CustomTooltip = ({ active, payload, label }) => {
-  if (active && payload && payload.length) {
-    return (
-      <div style={{ backgroundColor: 'var(--bg-tertiary)', padding: '10px', border: '1px solid var(--border-color)', borderRadius: '4px' }}>
-        <p style={{ margin: 0, fontWeight: 'bold' }}>{label}</p>
-        {payload.map((p, idx) => (
-          <p key={idx} style={{ margin: 0, color: p.color || p.fill || p.stroke }}>
-            {p.name}: {p.value}
-          </p>
-        ))}
-      </div>
-    );
-  }
-  return null;
-};
+  KpiCard, ChartCard, SectionHead, BarChart, fmt 
+} from '../components/VisualLanguage';
 
 function Sales() {
-  const { sales, transactions, leads } = useData();
+  const { sales, staff } = useData();
 
-  // --- DATA CONNECTIONS & PROCESSING ---
-  // Data is now pre-aggregated in DataContext using the dashboard_stats RPC (Server-Side)
-  const enrichedSales = sales;
+  // Enriched data is already sorted and prepared in DataContext usually,
+  // but let's ensure ranking here for the leaderboard.
+  const rankedSales = [...sales].sort((a, b) => Number(b['% KPI']) - Number(a['% KPI']));
 
-  // Sort by KPI descending for Leaderboard
-  const rankedSales = [...enrichedSales].sort((a, b) => Number(b['% KPI']) - Number(a['% KPI']));
-
-  // --- KPI CARD CALCULATIONS ---
-  const totalDS = enrichedSales.reduce((sum, s) => sum + Number(s['DS thực (tỷ)'] || 0), 0);
+  // --- KPI CALCULATIONS ---
+  const totalDS = sales.reduce((sum, s) => sum + Number(s['DS thực (tỷ)'] || 0), 0);
   const topAgent = rankedSales[0] || {};
   
-  const totalCalls = enrichedSales.reduce((sum, s) => sum + Number(s['Gọi điện'] || 0), 0);
-  const avgCalls = Math.round(totalCalls / (enrichedSales.length || 1));
+  const totalCalls = sales.reduce((sum, s) => sum + Number(s['Gọi điện'] || 0), 0);
+  const avgCalls = Math.round(totalCalls / (sales.length || 1));
   
-  const totalVisits = enrichedSales.reduce((sum, s) => sum + Number(s['Site Visit'] || 0), 0);
-  const avgVisits = Math.round(totalVisits / (enrichedSales.length || 1));
+  const totalVisits = sales.reduce((sum, s) => sum + Number(s['Site Visit'] || 0), 0);
+  const avgVisits = Math.round(totalVisits / (sales.length || 1));
 
   const underKpiAgents = rankedSales.filter(s => Number(s['% KPI']) < 1);
   const underKpiNames = underKpiAgents.map(s => s['Tên NV'].split(' ').pop()).join(' · ');
 
-  const totalLuong = enrichedSales.reduce((sum, s) => sum + Number(s['Lương cứng (tr)'] || 0), 0);
-  const totalHH = enrichedSales.reduce((sum, s) => sum + Number(s['Hoa hồng (tr)'] || 0), 0);
+  const totalLuong = sales.reduce((sum, s) => sum + Number(s['Lương cứng (tr)'] || 0), 0);
+  const totalHH = sales.reduce((sum, s) => sum + Number(s['Hoa hồng (tr)'] || 0), 0);
   const totalPayout = totalLuong + totalHH;
 
-  // --- CHART DATA ---
-  const chartData = enrichedSales.map(s => ({
-    name: s['Tên NV'].split(' ').pop(), // Just first name
-    'DS Thực (tỷ)': Number(s['DS thực (tỷ)'] || 0),
-    'KPI (tỷ)': Number(s['KH DS (tỷ)'] || 0),
-    'Cuộc gọi': Number(s['Gọi điện'] || 0),
-    'Site Visit TT': Number(s['Site Visit'] || 0),
-    'KH Site Visit': Number(s['KH Site Visit'] || 0)
-  }));
-
-  // --- HELPERS ---
   const getKpiColor = (pct) => {
-    if (pct >= 1) return 'var(--accent)';
-    if (pct >= 0.8) return 'var(--warning)';
-    return 'var(--danger)';
+    if (pct >= 1) return '#ccff00';
+    if (pct >= 0.8) return '#ffcc00';
+    return '#f87171';
   };
 
   return (
-    <div>
-      {/* TOP KPI CARDS */}
-      <div className="dash-kpi-grid">
-        <div className="dash-kpi-card card-revenue">
-          <div className="dash-kpi-title">TỔNG DS TEAM</div>
-          <div className="dash-kpi-value">{totalDS.toFixed(1)}<span className="dash-kpi-unit">tỷ</span></div>
-          <div className="dash-kpi-subtext">{enrichedSales.length} nhân viên</div>
-        </div>
-        
-        <div className="dash-kpi-card" style={{ borderTopColor: '#ff8c00' }}>
-          <div className="dash-kpi-title">#1 — {topAgent['Tên NV']?.split(' ').pop()}</div>
-          <div className="dash-kpi-value" style={{ color: '#ff8c00' }}>{Math.round((topAgent['% KPI']||0)*100)}<span className="dash-kpi-unit">%</span></div>
-          <div className="dash-kpi-subtext">DS {topAgent['DS thực (tỷ)']} tỷ · HH {topAgent['Hoa hồng (tr)']}tr</div>
-        </div>
-
-        <div className="dash-kpi-card" style={{ borderTopColor: '#4da6ff' }}>
-          <div className="dash-kpi-title">TỔNG CUỘC GỌI</div>
-          <div className="dash-kpi-value" style={{ color: '#4da6ff' }}>{totalCalls.toLocaleString()}</div>
-          <div className="dash-kpi-subtext">TB {avgCalls} cuộc/người</div>
-        </div>
-
-        <div className="dash-kpi-card" style={{ borderTopColor: '#00e5ff' }}>
-          <div className="dash-kpi-title">TỔNG SITE VISIT</div>
-          <div className="dash-kpi-value" style={{ color: '#00e5ff' }}>{totalVisits}</div>
-          <div className="dash-kpi-subtext">TB {avgVisits} lượt/người</div>
-        </div>
-
-        <div className="dash-kpi-card" style={{ borderTopColor: '#ff4d94' }}>
-          <div className="dash-kpi-title">DƯỚI KPI</div>
-          <div className="dash-kpi-value" style={{ color: '#ff4d94' }}>{underKpiAgents.length}</div>
-          <div className="dash-kpi-subtext">{underKpiNames || 'Không có'}</div>
-        </div>
-
-        <div className="dash-kpi-card" style={{ borderTopColor: '#b366ff' }}>
-          <div className="dash-kpi-title">TỔNG LƯƠNG + HH</div>
-          <div className="dash-kpi-value" style={{ color: '#b366ff' }}>{totalPayout.toFixed(0)}<span className="dash-kpi-unit">tr</span></div>
-          <div className="dash-kpi-subtext">Lương cứng + Hoa hồng</div>
-        </div>
+    <div style={{ paddingBottom: 40 }}>
+      <div className="page-header" style={{ marginBottom: 20 }}>
+        <h1 className="page-title" style={{ margin: 0 }}>Hiệu suất Sales</h1>
       </div>
 
-      <div className="sales-layout-grid">
-        {/* LEFT COLUMN: LEADERBOARD */}
+      <div className="dash-kpi-grid" style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
+        <KpiCard 
+          label="Tổng Doanh Số" 
+          value={totalDS.toFixed(1) + ' tỷ'} 
+          sub={`${sales.length} nhân sự sales`}
+          colorClass="lime"
+        />
+        <KpiCard 
+          label="Top #1 Sales" 
+          value={topAgent['Tên NV']?.split(' ').pop() || '—'} 
+          sub={`Đạt ${Math.round((topAgent['% KPI']||0)*100)}% KPI`}
+          colorClass="amber"
+        />
+        <KpiCard 
+          label="Tổng Cuộc Gọi" 
+          value={totalCalls.toLocaleString()} 
+          sub={`TB ${avgCalls} cuộc/người`}
+          colorClass="cyan"
+        />
+        <KpiCard 
+          label="Tổng Site Visit" 
+          value={totalVisits.toLocaleString()} 
+          sub={`TB ${avgVisits} lượt/người`}
+          colorClass="cyan"
+        />
+        <KpiCard 
+          label="Dưới KPI" 
+          value={underKpiAgents.length.toString()} 
+          sub={underKpiNames || 'Không có'}
+          colorClass="red"
+        />
+        <KpiCard 
+          label="Tổng Chi Lương" 
+          value={fmt(totalPayout * 1000000)} 
+          sub="Lương cứng + Hoa hồng"
+          colorClass="purple"
+        />
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 32 }}>
+        {/* LEADERBOARD */}
         <div>
-          <div className="section-title">▶ Bảng xếp hạng T04/2026</div>
-          <div className="sales-leaderboard">
+          <SectionHead label="Bảng xếp hạng hiệu suất" icon="ti-trophy" />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 12 }}>
             {rankedSales.map((agent, index) => {
               const pct = Number(agent['% KPI']);
-              const pctFormatted = Math.round(pct * 100);
               const color = getKpiColor(pct);
-              const rankClass = index === 0 ? 'agent-rank-1' : index === 1 ? 'agent-rank-2' : index === 2 ? 'agent-rank-3' : 'agent-rank-other';
-              const icon = index === 0 ? '🏆' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
-
               return (
-                <div key={index} className={`agent-card ${rankClass}`}>
-                  <div className="agent-card-header">
-                    <div className="agent-profile">
-                      <div className="agent-avatar">{agent['Tên NV'].charAt(0)}</div>
-                      <div>
-                        <div className="agent-name">
-                          {agent['Tên NV']} 
-                          <span className="agent-badge" style={{ backgroundColor: index < 3 ? color+'33' : '', color: index < 3 ? color : '' }}>
-                            {icon} #{index + 1}
-                          </span>
-                        </div>
-                        <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                          {agent['Mã NV']} · {agent['Sàn']}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="agent-kpi-badge" style={{ color: color }}>
-                      {pctFormatted}% KPI
-                    </div>
+                <div key={index} style={{ 
+                  background: 'var(--bg-secondary)', 
+                  border: '1px solid var(--border-color)', 
+                  borderLeft: `3px solid ${color}`,
+                  borderRadius: 10, 
+                  padding: '12px 16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 16
+                }}>
+                  <div style={{ 
+                    width: 32, height: 32, borderRadius: '50%', 
+                    background: index < 3 ? color : 'var(--bg-tertiary)', 
+                    color: index < 3 ? '#000' : 'var(--text-muted)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 14, fontWeight: 800
+                  }}>
+                    {index + 1}
                   </div>
-
-                  <div className="agent-stats-grid">
-                    <div className="agent-stat-item">
-                      <div className="agent-stat-val" style={{ color: color }}>{agent['DS thực (tỷ)']}t</div>
-                      <div className="agent-stat-label">DS THỰC</div>
-                    </div>
-                    <div className="agent-stat-item">
-                      <div className="agent-stat-val">{agent['Gọi điện']}</div>
-                      <div className="agent-stat-label">GỌI ĐIỆN</div>
-                    </div>
-                    <div className="agent-stat-item">
-                      <div className="agent-stat-val">{agent['Site Visit']}</div>
-                      <div className="agent-stat-label">SITE VISIT</div>
-                    </div>
-                    <div className="agent-stat-item">
-                      <div className="agent-stat-val" style={{ color: 'var(--accent)' }}>{agent['Live HĐMB+CỌC']}</div>
-                      <div className="agent-stat-label">HĐMB+CỌC</div>
-                    </div>
-                    <div className="agent-stat-item">
-                      <div className="agent-stat-val" style={{ color: 'var(--cyan)' }}>{agent['Live Lead']}</div>
-                      <div className="agent-stat-label">LEAD CRM</div>
-                    </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-main)' }}>{agent['Tên NV']}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{agent['Mã NV']} · {agent['Sàn']}</div>
                   </div>
-
-                  <div className="agent-progress-bar">
-                    <div className="agent-progress-fill" style={{ width: `${Math.min(pctFormatted, 100)}%`, backgroundColor: color }}></div>
-                  </div>
-                  
-                  <div className="agent-note" style={{ color: color }}>
-                    ▶ {agent['Ghi chú']}
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: color }}>{Math.round(pct * 100)}%</div>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase' }}>KPI</div>
                   </div>
                 </div>
               );
@@ -175,97 +121,70 @@ function Sales() {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: CHARTS */}
+        {/* CHARTS */}
         <div>
-          <div className="section-title">▶ So sánh hiệu suất</div>
-          
-          <div className="dash-chart-card" style={{ height: '350px', marginBottom: '20px' }}>
-            <div className="dash-chart-title">Doanh số vs KPI (tỷ)</div>
-            <div className="dash-chart-subtitle">Xanh ≥100% · Vàng 80-99% · Đỏ &lt;80%</div>
-            <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={chartData} margin={{ top: 20, right: 20, bottom: 20, left: -20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2a2e39" vertical={false} />
-                <XAxis dataKey="name" stroke="#8b92a5" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="#8b92a5" fontSize={11} tickLine={false} axisLine={false} />
-                <Tooltip cursor={{ fill: '#252932' }} content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ fontSize: '11px', color: 'var(--text-muted)' }} verticalAlign="top" />
-                <Bar dataKey="DS Thực (tỷ)" radius={[4, 4, 0, 0]}>
-                  {chartData.map((entry, index) => {
-                    const pct = entry['DS Thực (tỷ)'] / entry['KPI (tỷ)'];
-                    return <Cell key={`cell-${index}`} fill={getKpiColor(pct)} />;
-                  })}
-                </Bar>
-                <Line type="monotone" dataKey="KPI (tỷ)" stroke="#8b92a5" strokeWidth={2} strokeDasharray="5 5" dot={{ r: 4, fill: '#8b92a5' }} />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
+          <SectionHead label="So sánh hiệu suất" icon="ti-chart-bar" />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 12 }}>
+            <ChartCard title="Doanh số thực tế (tỷ)" sub="So sánh doanh số giữa các nhân sự">
+              <BarChart bars={sales.map(s => ({
+                label: s['Tên NV'].split(' ').pop(),
+                val: Number(s['DS thực (tỷ)'] || 0),
+                color: getKpiColor(Number(s['% KPI']))
+              }))} />
+            </ChartCard>
 
-          <div className="dash-chart-card" style={{ height: '350px' }}>
-            <div className="dash-chart-title">Cuộc gọi & Site Visit</div>
-            <div className="dash-chart-subtitle">Hiệu suất</div>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 20, right: 20, bottom: 20, left: -20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2a2e39" vertical={false} />
-                <XAxis dataKey="name" stroke="#8b92a5" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="#8b92a5" fontSize={11} tickLine={false} axisLine={false} />
-                <Tooltip cursor={{ fill: '#252932' }} content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ fontSize: '11px', color: 'var(--text-muted)' }} verticalAlign="top" />
-                <Bar dataKey="Cuộc gọi" fill="#4da6ff" radius={[2, 2, 0, 0]} />
-                <Bar dataKey="Site Visit TT" fill="#ccff00" radius={[2, 2, 0, 0]} />
-                <Bar dataKey="KH Site Visit" fill="#5c677d" radius={[2, 2, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <ChartCard title="Hoạt động Site Visit" sub="Lượt dẫn khách đi xem thực tế">
+              <BarChart bars={sales.map(s => ({
+                label: s['Tên NV'].split(' ').pop(),
+                val: Number(s['Site Visit'] || 0),
+                color: '#00e5ff'
+              }))} />
+            </ChartCard>
           </div>
         </div>
       </div>
 
-      {/* DETAILED DATA TABLE */}
-      <div className="fin-table-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
-          <div className="dash-chart-title">Chi tiết KPI từng nhân viên</div>
-          <div className="agent-badge">{enrichedSales.length} NV</div>
-        </div>
+      <SectionHead label="Chi tiết KPI nhân sự" icon="ti-table" />
+      <div className="table-container" style={{ marginTop: 12 }}>
         <table>
           <thead>
             <tr>
               <th>Mã NV</th>
-              <th>Tên</th>
+              <th>Họ tên</th>
               <th>Sàn</th>
               <th>DS Thực (tỷ)</th>
               <th>KH DS</th>
               <th>% KPI</th>
-              <th>Gọi</th>
-              <th>Visit/KH</th>
-              <th>HĐMB TT/KH</th>
-              <th>Cọc TT/KH</th>
-              <th>Lương (tr)</th>
-              <th>HH (tr)</th>
+              <th>Gọi điện</th>
+              <th>Visit / KH</th>
+              <th>HĐMB / KH</th>
+              <th>Lương + HH</th>
               <th>Xếp loại</th>
             </tr>
           </thead>
           <tbody>
-            {enrichedSales.map((s, i) => {
+            {sales.map((s, i) => {
               const color = getKpiColor(Number(s['% KPI']));
+              const totalIncome = Number(s['Lương cứng (tr)'] || 0) + Number(s['Hoa hồng (tr)'] || 0);
               return (
                 <tr key={i}>
-                  <td style={{ color: 'var(--text-muted)' }}>{s['Mã NV']}</td>
-                  <td style={{ fontWeight: 'bold' }}>{s['Tên NV']}</td>
+                  <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{s['Mã NV']}</td>
+                  <td style={{ fontWeight: 700 }}>{s['Tên NV']}</td>
                   <td>{s['Sàn']}</td>
-                  <td style={{ color: color, fontWeight: 'bold', fontSize: '14px' }}>{s['DS thực (tỷ)']}</td>
-                  <td>{s['KH DS (tỷ)']}</td>
+                  <td style={{ color: color, fontWeight: 800 }}>{s['DS thực (tỷ)']}</td>
+                  <td style={{ color: 'var(--text-muted)' }}>{s['KH DS (tỷ)']}</td>
                   <td>
-                    <span className="badge-eval" style={{ color: color }}>
-                      {Math.round(Number(s['% KPI'])*100)}%
-                    </span>
+                    <span style={{ color: color, fontWeight: 700 }}>{Math.round(Number(s['% KPI'])*100)}%</span>
                   </td>
                   <td>{s['Gọi điện']}</td>
-                  <td>{s['Site Visit']}/{s['KH Site Visit']}</td>
-                  <td style={{ color: s['Live HĐMB+CỌC'] > 0 ? 'var(--accent)' : ''}}>{s['HĐMB THỰC TẾ']}/{s['KH HĐMB']}</td>
-                  <td>{s['CỌC']}/{s['KH CỌC']}</td>
-                  <td>{s['Lương cứng (tr)']}</td>
-                  <td style={{ color: '#ff8c00', fontWeight: 'bold' }}>{s['Hoa hồng (tr)']}</td>
+                  <td>{s['Site Visit']} / {s['KH Site Visit']}</td>
+                  <td>{s['HĐMB THỰC TẾ']} / {s['KH HĐMB']}</td>
+                  <td style={{ fontWeight: 700, color: 'var(--accent)' }}>{fmt(totalIncome * 1000000)}</td>
                   <td>
-                    <span className="badge-eval" style={{ color: color }}>
+                    <span style={{ 
+                      padding: '2px 8px', borderRadius: 4, fontSize: 10, fontWeight: 700,
+                      background: `${color}15`, color: color, border: `1px solid ${color}30`
+                    }}>
                       {s['XẾP LOẠI KPI']}
                     </span>
                   </td>
@@ -275,7 +194,6 @@ function Sales() {
           </tbody>
         </table>
       </div>
-
     </div>
   );
 }

@@ -82,8 +82,23 @@ function DateFilter() {
 
   return (
     <div className="date-filter-container" style={{ position: 'relative', marginLeft: '20px' }}>
-      <button className="global-filter-select" onClick={() => setIsOpen(!isOpen)} style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', padding: '6px 12px', borderRadius: '6px', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
-        📅 {getDisplayText()}
+      <button className="global-filter-select" onClick={() => setIsOpen(!isOpen)} style={{ 
+        backgroundColor: 'rgba(204, 255, 0, 0.05)', 
+        color: 'var(--text-primary)', 
+        border: '1px solid rgba(204, 255, 0, 0.2)', 
+        padding: '5px 14px', 
+        borderRadius: '99px', 
+        fontSize: '11px', 
+        fontWeight: '800',
+        cursor: 'pointer', 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: '6px',
+        textTransform: 'uppercase',
+        letterSpacing: '0.05em'
+      }}>
+        <i className="ti ti-filter" style={{ fontSize: '13px', color: 'var(--accent)' }}></i>
+        {getDisplayText()}
       </button>
 
       {isOpen && (
@@ -164,7 +179,7 @@ function TopBar() {
     return () => clearInterval(timer);
   }, []);
 
-  const dateStr = `${currentTime.getDate().toString().padStart(2, '0')}/${(currentTime.getMonth() + 1).toString().padStart(2, '0')}/${currentTime.getFullYear()} - ${currentTime.getHours().toString().padStart(2, '0')}:${currentTime.getMinutes().toString().padStart(2, '0')}`;
+  const dateStr = currentTime.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ', ' + currentTime.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
 
   const role = currentUser?.role || 'Admin';
 

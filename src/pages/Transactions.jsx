@@ -1,35 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { useData } from '../context/DataContext';
 import toast from 'react-hot-toast';
+import { 
+  KpiCard, SectionHead, fmt 
+} from '../components/VisualLanguage';
 
 function Transactions() {
   const { 
-    transactions, 
-    transactionsTotal, 
-    transactionsPage, 
-    setTransactionsPage, 
-    transSearch,
-    setTransSearch,
-    transSort,
-    setTransSort,
-    dashboardStats,
-    itemsPerPage,
-    leads, 
-    staff, 
-    addTransaction, 
-    editTransaction, 
-    deleteTransaction 
+    transactions, transactionsTotal, transactionsPage, setTransactionsPage, 
+    transSearch, setTransSearch, transSort, setTransSort,
+    itemsPerPage, leads, staff, 
+    addTransaction, editTransaction, deleteTransaction 
   } = useData();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
 
+  // --- KPI CALCULATIONS ---
+  const totalRevenue = transactions.reduce((sum, t) => sum + Number(t['Giá (VNĐ)'] || 0), 0);
+  const totalCommission = transactions.reduce((sum, t) => sum + Number(t['Hoa hồng'] || 0), 0);
+  const closedCount = transactions.filter(t => t['Trạng thái'] === 'Đã hoàn thành' || t['Trạng thái'] === 'Đã ký HĐMB').length;
+
   // --- FILTER STATE ---
   const [filterStatus, setFilterStatus] = useState('');
-  const [filterZone, setFilterZone] = useState('');
-  const [filterSales, setFilterSales] = useState('');
-  const [sortConfig, setSortConfig] = useState({ key: 'Ngày GD', direction: 'desc' });
-  const totalPages = Math.ceil(transactionsTotal / itemsPerPage);
   const [localSearch, setLocalSearch] = useState(transSearch);
+  
   useEffect(() => {
     const timer = setTimeout(() => {
       if (localSearch !== transSearch) {
@@ -38,11 +33,7 @@ function Transactions() {
       }
     }, 500);
     return () => clearTimeout(timer);
-  }, [localSearch]);
-
-  useEffect(() => {
-    setLocalSearch(transSearch);
-  }, [transSearch]);
+  }, [localSearch, transSearch, setTransSearch, setTransactionsPage]);
 
   const handleSort = (key) => {
     const keyMap = { 'Mã GD': 'ma_gd', 'Ngày GD': 'ngay_gd', 'Giá (VNĐ)': 'gia', 'Trạng thái': 'trang_thai' };
@@ -50,396 +41,158 @@ function Transactions() {
     setTransSort({ column: dbKey, ascending: transSort.column === dbKey ? !transSort.ascending : false });
   };
 
-  const hasActiveFilters = transSearch || filterStatus || filterZone || filterSales;
-  const clearFilters = () => { 
-    setLocalSearch('');
-    setTransSearch(''); 
-    setFilterStatus(''); 
-    setFilterZone(''); 
-    setFilterSales(''); 
-    setTransactionsPage(1);
-  };
+  const totalPages = Math.ceil(transactionsTotal / itemsPerPage);
+
   const [formData, setFormData] = useState({
-    'Mã GD': '',
-    'Ngày GD': '',
-    'Mã Lead': '',
-    'Mã SP': '',
-    'Phân khu': '',
-    'Giá (VNĐ)': '',
-    'Tiền cọc': '',
-    'Hoa hồng': '',
-    'Mã nhân viên': '',
-    'Sales': '',
-    'Trạng thái': 'Đã đặt cọc',
-    'Ghi chú': ''
+    'Mã GD': '', 'Ngày GD': new Date().toISOString().slice(0, 10),
+    'Mã Lead': '', 'Mã SP': '', 'Phân khu': 'Sapphire',
+    'Giá (VNĐ)': '', 'Tiền cọc': '', 'Hoa hồng': '',
+    'Mã nhân viên': '', 'Sales': '', 'Trạng thái': 'Đã đặt cọc', 'Ghi chú': ''
   });
-
-  const formatTy = (value) => {
-    return (Number(value) / 1000000000).toFixed(2) + ' tỷ';
-  };
-
-  const formatTr = (value) => {
-    return (Number(value) / 1000000).toFixed(1) + ' tr';
-  };
-
-  const handleNumberChange = (field, value) => {
-    const rawValue = value.replace(/\D/g, '');
-    setFormData(prev => ({...prev, [field]: rawValue}));
-  };
-
-  const displayNumber = (value) => {
-    if (!value) return '';
-    return new Intl.NumberFormat('vi-VN').format(value);
-  };
-
-  const handleStaffChange = (e) => {
-    const maNV = e.target.value;
-    const selectedStaff = staff.find(s => s['Mã NV'] === maNV);
-    if (selectedStaff) {
-      setFormData({
-        ...formData,
-        'Mã nhân viên': maNV,
-        'Sales': selectedStaff['Tên NV']
-      });
-    } else {
-      setFormData({
-        ...formData,
-        'Mã nhân viên': maNV,
-        'Sales': ''
-      });
-    }
-  };
 
   const handleOpenEditModal = (t) => {
     setIsEditMode(true);
-    setFormData({
-      'Mã GD': t['Mã GD'] || '',
-      'Ngày GD': t['Ngày GD'] || '',
-      'Mã Lead': t['Mã Lead'] || '',
-      'Mã SP': t['Mã SP'] || '',
-      'Phân khu': t['Phân khu'] || '',
-      'Giá (VNĐ)': t['Giá (VNĐ)'] || '',
-      'Tiền cọc': t['Tiền cọc'] || '',
-      'Hoa hồng': t['Hoa hồng'] || '',
-      'Mã nhân viên': t['Mã nhân viên'] || '',
-      'Sales': t['Sales'] || '',
-      'Trạng thái': t['Trạng thái'] || 'Đã đặt cọc',
-      'Ghi chú': t['Ghi chú'] || ''
-    });
+    setFormData({ ...t });
     setIsModalOpen(true);
   };
 
   const handleOpenAddModal = () => {
     setIsEditMode(false);
     setFormData({
-      'Mã GD': '',
+      'Mã GD': `GD${Date.now().toString().slice(-4)}`,
       'Ngày GD': new Date().toISOString().slice(0, 10),
-      'Mã Lead': '',
-      'Mã SP': '',
-      'Phân khu': '',
-      'Giá (VNĐ)': '',
-      'Tiền cọc': '',
-      'Hoa hồng': '',
-      'Mã nhân viên': '',
-      'Sales': '',
-      'Trạng thái': 'Đã đặt cọc',
-      'Ghi chú': ''
+      'Mã Lead': '', 'Mã SP': '', 'Phân khu': 'Sapphire',
+      'Giá (VNĐ)': '', 'Tiền cọc': '', 'Hoa hồng': '',
+      'Mã nhân viên': '', 'Sales': '', 'Trạng thái': 'Đã đặt cọc', 'Ghi chú': ''
     });
     setIsModalOpen(true);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!isEditMode && transactions.some(t => t['Mã GD'] === formData['Mã GD'])) {
-       toast.error('Mã giao dịch này đã tồn tại trong hệ thống!');
-       return;
-    }
-    // Also check for duplicate Mã SP to prevent selling the same product twice unless it was cancelled
-    if (transactions.some(t => t['Mã SP'] === formData['Mã SP'] && t['Mã GD'] !== formData['Mã GD'] && t['Trạng thái'] !== 'Đã hủy')) {
-       toast.error('Mã sản phẩm này đã được bán hoặc đặt cọc trong một giao dịch khác!');
-       return;
-    }
-    
-    if (isEditMode) {
-      editTransaction(formData);
-    } else {
-      addTransaction(formData);
-    }
+    if (isEditMode) editTransaction(formData);
+    else addTransaction(formData);
     setIsModalOpen(false);
   };
 
-  const uniqueSalesNames = Array.from(new Set(staff.map(s => s['Tên NV']).filter(Boolean))).sort();
-  const uniqueStatuses = ['Đang giữ chỗ', 'Giữ chỗ', 'Đã đặt cọc', 'Đã ký HĐMB', 'Đã hoàn thành', 'Đã hủy'];
-  const uniqueZones = Array.from(new Set(transactions.map(t => t['Phân khu']).filter(Boolean))).sort();
-
   return (
-    <div>
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 className="page-title">Giao dịch</h1>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <select 
-            className="filter-select" 
-            style={{ width: '180px', margin: 0 }}
-            value={`${sortConfig.key}-${sortConfig.direction}`} 
-            onChange={e => {
-              const [key, dir] = e.target.value.split('-');
-              setSortConfig({ key, direction: dir });
-            }}
-          >
-            <option value="Ngày GD-desc">Mới nhất lên đầu</option>
-            <option value="Ngày GD-asc">Cũ nhất lên đầu</option>
-            <option value="Khách hàng-asc">Khách hàng (A-Z)</option>
-            <option value="Khách hàng-desc">Khách hàng (Z-A)</option>
-            <option value="Ngày GD-desc">Ngày GD (Mới nhất)</option>
-          </select>
-          <button onClick={handleOpenAddModal} className="btn-submit">Thêm Giao dịch</button>
+    <div style={{ paddingBottom: 40 }}>
+      <div className="page-header" style={{ marginBottom: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+          <div>
+            <h1 className="page-title" style={{ margin: 0 }}>Lịch sử Giao dịch</h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>Quản lý hợp đồng, cọc và doanh thu thực tế</p>
+          </div>
+          <button onClick={handleOpenAddModal} className="btn-submit" style={{ padding: '8px 24px' }}>
+            + Thêm Giao dịch
+          </button>
         </div>
       </div>
 
-      {/* FILTER BAR */}
-      <div className="filter-bar">
-        <input className="filter-input" placeholder="🔍 Tìm khách hàng, mã GD, mã NV, mã Lead..." value={localSearch} onChange={e => setLocalSearch(e.target.value)} />
-        <select className="filter-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+      <div className="dash-kpi-grid" style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
+        <KpiCard label="Tổng Doanh Số" value={fmt(totalRevenue)} sub="Giá trị hợp đồng" colorClass="lime" />
+        <KpiCard label="Tổng Hoa Hồng" value={fmt(totalCommission)} sub="Phải chi trả" colorClass="amber" />
+        <KpiCard label="Giao dịch Chốt" value={closedCount.toString()} sub="Đã ký HĐMB / Hoàn thành" colorClass="cyan" />
+        <KpiCard label="Đang Xử Lý" value={(transactionsTotal - closedCount).toString()} sub="Giữ chỗ / Đã cọc" colorClass="purple" />
+      </div>
+
+      <div className="filter-bar" style={{ 
+        background: 'var(--bg-secondary)', 
+        border: '1px solid var(--border-color)', 
+        borderRadius: 12, 
+        padding: '16px 20px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        marginBottom: 24
+      }}>
+        <div style={{ position: 'relative', flex: 1 }}>
+          <i className="ti-search" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}></i>
+          <input className="filter-input" placeholder="Tìm khách hàng, mã GD, SP..." style={{ paddingLeft: 36, width: '100%', margin: 0 }} value={localSearch} onChange={e => setLocalSearch(e.target.value)} />
+        </div>
+        <select className="filter-select" style={{ width: 180, margin: 0 }} value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
           <option value="">-- Trạng thái --</option>
-          {uniqueStatuses.map(s => <option key={s} value={s}>{s}</option>)}
+          {['Đang giữ chỗ', 'Giữ chỗ', 'Đã đặt cọc', 'Đã ký HĐMB', 'Đã hoàn thành', 'Đã hủy'].map(s => <option key={s} value={s}>{s}</option>)}
         </select>
-        <select className="filter-select" value={filterZone} onChange={e => setFilterZone(e.target.value)}>
-          <option value="">-- Phân khu --</option>
-          {uniqueZones.map(s => <option key={s} value={s}>{s}</option>)}
-        </select>
-        {hasActiveFilters && <button className="btn-clear-filter" onClick={clearFilters}>✕ Xóa lọc</button>}
-        <span className="filter-count">Tổng cộng: <strong>{transactionsTotal}</strong> giao dịch</span>
+        {(localSearch || filterStatus) && (
+          <button onClick={() => { setLocalSearch(''); setFilterStatus(''); }} style={{ background: 'transparent', border: 'none', color: 'var(--red)', fontSize: 12, cursor: 'pointer', fontWeight: 700 }}>XÓA LỌC</button>
+        )}
       </div>
 
       <div className="table-container">
         <table>
           <thead>
             <tr>
-              <th>Thao tác</th>
-              <th onClick={() => handleSort('Mã GD')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                 Mã GD {transSort.column === 'ma_gd' ? (transSort.ascending ? '🔼' : '🔽') : '↕️'}
-              </th>
-              <th onClick={() => handleSort('Khách hàng')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                Khách hàng ↕️
-              </th>
-              <th onClick={() => handleSort('Ngày GD')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                Ngày {sortConfig.key === 'Ngày GD' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
-              </th>
-              <th onClick={() => handleSort('Mã SP')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                Mã SP {sortConfig.key === 'Mã SP' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
-              </th>
-              <th onClick={() => handleSort('Phân khu')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                Phân khu {sortConfig.key === 'Phân khu' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
-              </th>
-              <th onClick={() => handleSort('Giá (VNĐ)')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                Giá HĐ {sortConfig.key === 'Giá (VNĐ)' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
-              </th>
-              <th onClick={() => handleSort('Tiền cọc')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                Tiền cọc {sortConfig.key === 'Tiền cọc' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
-              </th>
-              <th onClick={() => handleSort('Hoa hồng')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                Hoa hồng {sortConfig.key === 'Hoa hồng' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
-              </th>
-              <th onClick={() => handleSort('Trạng thái')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                Trạng thái {sortConfig.key === 'Trạng thái' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
-              </th>
-              <th onClick={() => handleSort('Sales')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                Sales {sortConfig.key === 'Sales' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
-              </th>
-              <th onClick={() => handleSort('Mã nhân viên')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                Mã NV {sortConfig.key === 'Mã nhân viên' ? (sortConfig.direction === 'asc' ? '🔼' : '🔽') : '↕️'}
-              </th>
-              <th>Ghi chú</th>
+              <th style={{ width: 100 }}>Thao tác</th>
+              <th onClick={() => handleSort('Mã GD')} style={{ cursor: 'pointer' }}>Mã GD</th>
+              <th>Ngày GD</th>
+              <th>Khách hàng</th>
+              <th>Mã SP</th>
+              <th>Giá HĐ</th>
+              <th>Hoa hồng</th>
+              <th>Trạng thái</th>
+              <th>Sales</th>
             </tr>
           </thead>
           <tbody>
             {transactions.map((t, index) => (
               <tr key={index}>
                 <td>
-                  <div style={{ display: 'flex', gap: '5px' }}>
-                    <button onClick={() => handleOpenEditModal(t)} className="btn-edit">Sửa</button>
-                    <button 
-                      onClick={() => {
-                        if(window.confirm(`Bạn có chắc chắn muốn xóa giao dịch ${t['Mã GD']}?`)) {
-                          deleteTransaction(t['Mã GD']);
-                        }
-                      }} 
-                      className="btn-cancel" 
-                      style={{ padding: '2px 8px', fontSize: '12px', borderColor: 'var(--danger)', color: 'var(--danger)' }}
-                    >Xóa</button>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button onClick={() => handleOpenEditModal(t)} style={{ background: 'none', border: 'none', color: 'var(--cyan)', cursor: 'pointer' }}><i className="ti-pencil"></i></button>
+                    <button onClick={() => { if(window.confirm('Xóa giao dịch?')) deleteTransaction(t['Mã GD']) }} style={{ background: 'none', border: 'none', color: 'var(--red)', cursor: 'pointer' }}><i className="ti-trash"></i></button>
                   </div>
                 </td>
-                <td style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{t['Mã GD']}</td>
-                <td style={{ fontWeight: 'bold', color: 'var(--cyan)' }}>{t['Khách hàng']}</td>
+                <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{t['Mã GD']}</td>
                 <td>{t['Ngày GD']}</td>
-                <td>{t['Mã SP']}</td>
+                <td style={{ fontWeight: 700 }}>{t['Khách hàng']}</td>
+                <td style={{ color: 'var(--cyan)' }}>{t['Mã SP']}</td>
+                <td style={{ fontWeight: 700 }}>{fmt(t['Giá (VNĐ)'] || 0)}</td>
+                <td style={{ color: 'var(--amber)', fontWeight: 700 }}>{fmt(t['Hoa hồng'] || 0)}</td>
                 <td>
                   <span style={{
-                    padding: '2px 8px', borderRadius: '12px', fontSize: '11px', border: '1px solid currentColor',
-                    color: t['Phân khu'] === 'Sapphire' ? 'var(--cyan)' : t['Phân khu'] === 'Ruby' ? 'var(--pink)' : 'var(--success)'
-                  }}>
-                    {t['Phân khu']}
-                  </span>
-                </td>
-                <td style={{ color: 'var(--text-main)', fontWeight: 'bold' }}>{formatTy(t['Giá (VNĐ)'])}</td>
-                <td>{formatTr(t['Tiền cọc'])}</td>
-                <td style={{ color: 'var(--warning)', fontWeight: 'bold' }}>{formatTr(t['Hoa hồng'])}</td>
-                <td>
-                  <span style={{
-                    padding: '4px 10px',
-                    borderRadius: '20px',
-                    backgroundColor: 
-                      t['Trạng thái'] === 'Đã ký HĐMB' || t['Trạng thái'] === 'Đã hoàn thành' ? 'rgba(0, 204, 102, 0.2)' :
-                      t['Trạng thái'] === 'Đã đặt cọc' ? 'rgba(0, 229, 255, 0.2)' :
-                      t['Trạng thái'] === 'Giữ chỗ' || t['Trạng thái'] === 'Đang giữ chỗ' ? 'rgba(204, 255, 0, 0.2)' :
-                      t['Trạng thái'] === 'Đã hủy' ? 'rgba(255, 77, 148, 0.2)' : 'rgba(139, 146, 165, 0.2)',
-                    color: 
-                      t['Trạng thái'] === 'Đã ký HĐMB' || t['Trạng thái'] === 'Đã hoàn thành' ? '#00cc66' :
-                      t['Trạng thái'] === 'Đã đặt cọc' ? '#00e5ff' :
-                      t['Trạng thái'] === 'Giữ chỗ' || t['Trạng thái'] === 'Đang giữ chỗ' ? '#ccff00' :
-                      t['Trạng thái'] === 'Đã hủy' ? '#ff4d94' : '#8b92a5',
-                    fontSize: '11px',
-                    fontWeight: '800',
+                    padding: '2px 10px', borderRadius: 4, fontSize: 10, fontWeight: 800,
                     border: '1px solid currentColor',
-                    display: 'inline-block',
-                    whiteSpace: 'nowrap'
+                    background: t['Trạng thái'].includes('Đã') ? 'rgba(0, 204, 102, 0.1)' : 'rgba(204, 255, 0, 0.1)',
+                    color: t['Trạng thái'].includes('Đã ký') ? '#00cc66' : t['Trạng thái'].includes('đặt cọc') ? '#00e5ff' : '#ccff00'
                   }}>
                     {t['Trạng thái']}
                   </span>
                 </td>
-                <td style={{ fontWeight: 'bold' }}>{t['Sales']}</td>
-                <td style={{ color: 'var(--text-muted)' }}>{t['Mã nhân viên']}</td>
-                <td style={{ fontSize: '12px' }}>{t['Ghi chú']}</td>
+                <td><span style={{ fontSize: 12 }}>{t['Sales']}</span></td>
               </tr>
             ))}
           </tbody>
-          <tfoot>
-            <tr>
-              <td colSpan="4" style={{ textAlign: 'right', fontWeight: 'bold', color: 'var(--text-muted)', paddingTop: '15px', borderBottom: 'none' }}>TỔNG (Trang này)</td>
-              <td style={{ color: 'var(--accent)', fontWeight: 'bold', fontSize: '15px', paddingTop: '15px', borderBottom: 'none' }}>
-                {formatTy(transactions.reduce((sum, t) => sum + Number(t['Giá (VNĐ)'] || 0), 0))}
-              </td>
-              <td style={{ fontWeight: 'bold', paddingTop: '15px', borderBottom: 'none' }}>
-                {formatTr(transactions.reduce((sum, t) => sum + Number(t['Tiền cọc'] || 0), 0))}
-              </td>
-              <td style={{ color: 'var(--warning)', fontWeight: 'bold', fontSize: '15px', paddingTop: '15px', borderBottom: 'none' }}>
-                {formatTr(transactions.reduce((sum, t) => sum + Number(t['Hoa hồng'] || 0), 0))}
-              </td>
-              <td colSpan="3" style={{ borderBottom: 'none' }}></td>
-            </tr>
-          </tfoot>
         </table>
       </div>
 
       {totalPages > 1 && (
-        <div className="pagination-container" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '20px', marginBottom: '40px' }}>
-          <button 
-            onClick={() => setTransactionsPage(prev => Math.max(prev - 1, 1))} 
-            disabled={transactionsPage === 1}
-            style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: transactionsPage === 1 ? 'not-allowed' : 'pointer', opacity: transactionsPage === 1 ? 0.5 : 1 }}
-          >
-            Trái
-          </button>
-          
-          {[...Array(totalPages)].map((_, idx) => {
-            const pageNum = idx + 1;
-            if (totalPages > 7) {
-              if (pageNum !== 1 && pageNum !== totalPages && (pageNum < transactionsPage - 1 || pageNum > transactionsPage + 1)) {
-                if (pageNum === 2 && transactionsPage > 3) return <span key="dots1" style={{ color: 'var(--text-muted)' }}>...</span>;
-                if (pageNum === totalPages - 1 && transactionsPage < totalPages - 2) return <span key="dots2" style={{ color: 'var(--text-muted)' }}>...</span>;
-                return null;
-              }
-            }
-            return (
-              <button
-                key={pageNum}
-                onClick={() => setTransactionsPage(pageNum)}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '4px',
-                  border: '1px solid',
-                  borderColor: transactionsPage === pageNum ? 'var(--accent)' : 'var(--border-color)',
-                  background: transactionsPage === pageNum ? 'var(--accent)' : 'var(--bg-secondary)',
-                  color: transactionsPage === pageNum ? '#000' : 'var(--text-main)',
-                  fontWeight: 'bold',
-                  cursor: 'pointer'
-                }}
-              >
-                {pageNum}
-              </button>
-            );
-          })}
-
-          <button 
-            onClick={() => setTransactionsPage(prev => Math.min(prev + 1, totalPages))} 
-            disabled={transactionsPage === totalPages}
-            style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: transactionsPage === totalPages ? 'not-allowed' : 'pointer', opacity: transactionsPage === totalPages ? 0.5 : 1 }}
-          >
-            Phải
-          </button>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 32 }}>
+          <button onClick={() => setTransactionsPage(Math.max(1, transactionsPage - 1))} disabled={transactionsPage === 1} className="btn-page">Trước</button>
+          {[...Array(totalPages)].map((_, i) => (
+            <button key={i} onClick={() => setTransactionsPage(i+1)} className={`btn-page ${transactionsPage === i+1 ? 'active' : ''}`}>{i+1}</button>
+          ))}
+          <button onClick={() => setTransactionsPage(Math.min(totalPages, transactionsPage + 1))} disabled={transactionsPage === totalPages} className="btn-page">Sau</button>
         </div>
       )}
 
       {isModalOpen && (
         <div className="modal-overlay">
-          <div className="modal-content">
-            <h2 className="modal-title">{isEditMode ? 'Chỉnh sửa Giao dịch' : 'Thêm Giao dịch mới'}</h2>
-            <form onSubmit={handleSubmit}>
-              <div className="form-grid">
+          <div className="modal-content" style={{ width: 700 }}>
+            <SectionHead label={isEditMode ? 'Chỉnh sửa Giao dịch' : 'Thêm Giao dịch'} icon="ti-receipt" />
+            <form onSubmit={handleSubmit} style={{ marginTop: 20 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                 <div className="form-group">
-                  <label>Mã Giao dịch</label>
-                  <input required disabled={isEditMode} className="input-field" value={formData['Mã GD']} onChange={e => setFormData({...formData, 'Mã GD': e.target.value})} placeholder="GD007" />
+                  <label>Mã GD</label>
+                  <input required disabled={isEditMode} className="input-field" value={formData['Mã GD']} onChange={e => setFormData({...formData, 'Mã GD': e.target.value})} />
                 </div>
                 <div className="form-group">
-                  <label>Khách hàng (Mã Lead)</label>
-                  <select required className="input-field" value={formData['Mã Lead']} onChange={e => setFormData({...formData, 'Mã Lead': e.target.value})}>
-                    <option value="">-- Chọn Khách hàng --</option>
-                    {leads.map((l, idx) => (
-                      <option key={idx} value={l['Mã lead']}>{l['Mã lead']} - {l['Họ tên']}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Ngày Giao dịch</label>
+                  <label>Ngày GD</label>
                   <input required type="date" className="input-field" value={formData['Ngày GD']} onChange={e => setFormData({...formData, 'Ngày GD': e.target.value})} />
                 </div>
                 <div className="form-group">
-                  <label>Mã Sản phẩm</label>
-                  <input required className="input-field" value={formData['Mã SP']} onChange={e => setFormData({...formData, 'Mã SP': e.target.value})} placeholder="VIN-X123" />
-                </div>
-                <div className="form-group">
-                  <label>Phân khu</label>
-                  <select className="input-field" value={formData['Phân khu']} onChange={e => setFormData({...formData, 'Phân khu': e.target.value})}>
-                    <option value="">Chọn phân khu</option>
-                    <option value="Sapphire">Sapphire</option>
-                    <option value="Ruby">Ruby</option>
-                    <option value="Diamond">Diamond</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Giá Hợp đồng (VNĐ)</label>
-                  <input required type="text" className="input-field" value={displayNumber(formData['Giá (VNĐ)'])} onChange={e => handleNumberChange('Giá (VNĐ)', e.target.value)} placeholder="5.000.000.000" />
-                </div>
-                <div className="form-group">
-                  <label>Tiền cọc (VNĐ)</label>
-                  <input required type="text" className="input-field" value={displayNumber(formData['Tiền cọc'])} onChange={e => handleNumberChange('Tiền cọc', e.target.value)} placeholder="100.000.000" />
-                </div>
-                <div className="form-group">
-                  <label>Hoa hồng (VNĐ)</label>
-                  <input required type="text" className="input-field" value={displayNumber(formData['Hoa hồng'])} onChange={e => handleNumberChange('Hoa hồng', e.target.value)} placeholder="50.400.000" />
-                </div>
-                <div className="form-group">
-                  <label>Nhân sự (Mã NV)</label>
-                  <select required className="input-field" value={formData['Mã nhân viên']} onChange={handleStaffChange}>
-                    <option value="">-- Chọn nhân sự --</option>
-                    {staff.map((s, idx) => (
-                      <option key={idx} value={s['Mã NV']}>{s['Mã NV']} - {s['Tên NV']}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Tên Sales (Tự động)</label>
-                  <input required disabled className="input-field" value={formData['Sales']} style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-muted)' }} />
+                  <label>Mã SP</label>
+                  <input required className="input-field" value={formData['Mã SP']} onChange={e => setFormData({...formData, 'Mã SP': e.target.value})} />
                 </div>
                 <div className="form-group">
                   <label>Trạng thái</label>
@@ -449,14 +202,18 @@ function Transactions() {
                     <option value="Giữ chỗ">Giữ chỗ</option>
                   </select>
                 </div>
-                <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                  <label>Ghi chú</label>
-                  <input className="input-field" value={formData['Ghi chú']} onChange={e => setFormData({...formData, 'Ghi chú': e.target.value})} placeholder="Ghi chú thêm..." />
+                <div className="form-group">
+                  <label>Giá Hợp đồng (VNĐ)</label>
+                  <input required className="input-field" value={formData['Giá (VNĐ)']} onChange={e => setFormData({...formData, 'Giá (VNĐ)': e.target.value.replace(/\D/g, '')})} />
+                </div>
+                <div className="form-group">
+                  <label>Hoa hồng (VNĐ)</label>
+                  <input required className="input-field" value={formData['Hoa hồng']} onChange={e => setFormData({...formData, 'Hoa hồng': e.target.value.replace(/\D/g, '')})} />
                 </div>
               </div>
-              <div className="modal-actions">
+              <div style={{ display: 'flex', gap: 12, marginTop: 24, justifyContent: 'flex-end' }}>
                 <button type="button" onClick={() => setIsModalOpen(false)} className="btn-cancel">Hủy</button>
-                <button type="submit" className="btn-submit">Lưu Giao dịch</button>
+                <button type="submit" className="btn-submit">Lưu giao dịch</button>
               </div>
             </form>
           </div>

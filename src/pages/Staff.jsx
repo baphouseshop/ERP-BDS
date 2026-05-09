@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
 import toast from 'react-hot-toast';
+import { 
+  KpiCard, SectionHead, fmt 
+} from '../components/VisualLanguage';
 
 function Staff() {
   const { staff, addStaff, editStaff, deleteStaff } = useData();
@@ -18,6 +21,10 @@ function Staff() {
   const uniqueDepts = [...new Set(staff.map(s => s['Sàn']).filter(Boolean))];
   const uniqueStatuses = [...new Set(staff.map(s => s['Trạng thái']).filter(Boolean))];
 
+  // --- KPI CALCULATIONS ---
+  const activeStaff = staff.filter(s => s['Trạng thái'] === 'Đang làm việc').length;
+  const totalPayroll = staff.reduce((sum, s) => sum + Number(s['Lương (VNĐ)'] || 0), 0);
+
   const filteredStaff = staff.filter(s => {
     const text = searchText.toLowerCase().trim();
     if (text && !(
@@ -32,373 +39,193 @@ function Staff() {
     return true;
   }).sort((a, b) => {
     if (!sortConfig.key) return 0;
-    
     let aValue = a[sortConfig.key];
     let bValue = b[sortConfig.key];
-
-    // Handle date sorting
-    if (['Mã NV', 'Ngày vào làm'].includes(sortConfig.key)) {
-      aValue = aValue ? new Date(aValue).getTime() : 0;
-      bValue = bValue ? new Date(bValue).getTime() : 0;
-    } else if (['Lương (VNĐ)'].includes(sortConfig.key)) {
+    if (['Lương (VNĐ)'].includes(sortConfig.key)) {
       aValue = Number(aValue || 0);
       bValue = Number(bValue || 0);
     } else {
       aValue = String(aValue || '').toLowerCase();
       bValue = String(bValue || '').toLowerCase();
     }
-
     if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
     if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
     return 0;
   });
 
-  const handleSort = (key) => {
-    let direction = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
-    setSortConfig({ key, direction });
-  };
-
-  // Pagination Logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentStaff = filteredStaff.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredStaff.length / itemsPerPage);
 
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
-  const hasActiveFilters = searchText || filterDept || filterStatusF;
   const clearFilters = () => { setSearchText(''); setFilterDept(''); setFilterStatusF(''); };
   
   const initialFormState = {
-    'Mã NV': '',
-    'Tên NV': '',
-    'Sàn': '',
-    'Chức vụ': '',
-    'SĐT': '',
-    'Email': '',
-    'Ngày vào làm': '',
-    'Trạng thái': 'Active',
-    'Lương (VNĐ)': 0,
-    'Quản lý (Mã NV)': '',
-    'Quyền': 'Sales'
+    'Mã NV': '', 'Tên NV': '', 'Sàn': '', 'Chức vụ': 'Sale',
+    'SĐT': '', 'Email': '', 'Ngày vào làm': new Date().toISOString().slice(0, 10),
+    'Trạng thái': 'Đang làm việc', 'Lương (VNĐ)': 0, 'Quản lý (Mã NV)': '', 'Quyền': 'Sales'
   };
   
   const [formData, setFormData] = useState(initialFormState);
 
   const handleOpenAddModal = () => {
     setIsEditMode(false);
-    setFormData(initialFormState);
+    setFormData({ ...initialFormState, 'Mã NV': `NV${staff.length + 101}` });
     setIsModalOpen(true);
   };
 
   const handleOpenEditModal = (member) => {
     setIsEditMode(true);
-    setFormData({
-      'Mã NV': member['Mã NV'] || '',
-      'Tên NV': member['Tên NV'] || '',
-      'Sàn': member['Sàn'] || '',
-      'Chức vụ': member['Chức vụ'] || '',
-      'SĐT': member['SĐT'] || '',
-      'Email': member['Email'] || '',
-      'Ngày vào làm': member['Ngày vào làm'] || '',
-      'Trạng thái': member['Trạng thái'] || 'Active',
-      'Lương (VNĐ)': member['Lương (VNĐ)'] || 0,
-      'Quản lý (Mã NV)': member['Quản lý (Mã NV)'] || '',
-      'Quyền': member['Quyền'] || 'Sales'
-    });
+    setFormData({ ...member });
     setIsModalOpen(true);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    if (isEditMode) {
-      if (formData['SĐT'] && staff.some(s => s['Mã NV'] !== formData['Mã NV'] && s['SĐT'] === formData['SĐT'])) {
-        toast.error('Số điện thoại này đã được sử dụng cho một nhân viên khác!');
-        return;
-      }
-      if (formData['Email'] && staff.some(s => s['Mã NV'] !== formData['Mã NV'] && s['Email'] === formData['Email'])) {
-        toast.error('Email này đã được sử dụng cho một nhân viên khác!');
-        return;
-      }
-      editStaff(formData);
-    } else {
-      if (staff.some(s => s['Mã NV'] === formData['Mã NV'])) {
-        toast.error('Mã nhân viên đã tồn tại!');
-        return;
-      }
-      if (formData['SĐT'] && staff.some(s => s['SĐT'] === formData['SĐT'])) {
-        toast.error('Số điện thoại này đã tồn tại trong hệ thống!');
-        return;
-      }
-      if (formData['Email'] && staff.some(s => s['Email'] === formData['Email'])) {
-        toast.error('Email này đã tồn tại trong hệ thống!');
-        return;
-      }
-      addStaff(formData);
-    }
-    
+    if (isEditMode) editStaff(formData);
+    else addStaff(formData);
     setIsModalOpen(false);
   };
 
   return (
-    <div>
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h1 className="page-title">Quản lý Nhân sự</h1>
-          <p style={{ color: 'var(--text-muted)' }}>Quản lý danh sách nhân viên, thông tin liên hệ và đại lý.</p>
-        </div>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <select 
-            className="filter-select" 
-            style={{ width: '180px', margin: 0 }}
-            value={`${sortConfig.key}-${sortConfig.direction}`} 
-            onChange={e => {
-              const [key, dir] = e.target.value.split('-');
-              setSortConfig({ key, direction: dir });
-            }}
-          >
-            <option value="Mã NV-asc">Mã NV (Tăng dần)</option>
-            <option value="Mã NV-desc">Mã NV (Giảm dần)</option>
-            <option value="Tên NV-asc">Họ tên (A-Z)</option>
-            <option value="Tên NV-desc">Họ tên (Z-A)</option>
-            <option value="Mã NV-asc">Mã NV (Tăng dần)</option>
-            <option value="Mã NV-desc">Mã NV (Giảm dần)</option>
-          </select>
-          <button onClick={handleOpenAddModal} className="btn-submit">
+    <div style={{ paddingBottom: 40 }}>
+      <div className="page-header" style={{ marginBottom: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+          <div>
+            <h1 className="page-title" style={{ margin: 0 }}>Quản lý Nhân sự</h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>Danh sách nhân viên và sơ đồ tổ chức Blanca CRM</p>
+          </div>
+          <button onClick={handleOpenAddModal} className="btn-submit" style={{ padding: '8px 24px' }}>
             + Thêm Nhân viên
           </button>
         </div>
       </div>
 
-      {/* FILTER BAR */}
-      <div className="filter-bar">
-        <input className="filter-input" placeholder="🔍 Tìm theo tên, mã NV, SĐT, email..." value={searchText} onChange={e => setSearchText(e.target.value)} />
-        <select className="filter-select" value={filterDept} onChange={e => setFilterDept(e.target.value)}>
-          <option value="">-- Sàn / Phòng ban --</option>
+      <div className="dash-kpi-grid" style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
+        <KpiCard label="Tổng Nhân Sự" value={staff.length.toString()} sub="Toàn hệ thống" colorClass="lime" />
+        <KpiCard label="Đang làm việc" value={activeStaff.toString()} sub={`${staff.length - activeStaff} đã nghỉ`} colorClass="cyan" />
+        <KpiCard label="Tổng Quỹ Lương" value={fmt(totalPayroll)} sub="Lương cứng / Tháng" colorClass="purple" />
+        <KpiCard label="Sàn / Đại lý" value={uniqueDepts.length.toString()} sub="Đơn vị liên kết" colorClass="amber" />
+      </div>
+
+      <div className="filter-bar" style={{ 
+        background: 'var(--bg-secondary)', 
+        border: '1px solid var(--border-color)', 
+        borderRadius: 12, 
+        padding: '16px 20px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        marginBottom: 24
+      }}>
+        <div style={{ position: 'relative', flex: 1 }}>
+          <i className="ti-search" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}></i>
+          <input className="filter-input" placeholder="Tìm tên, mã NV, chức vụ..." style={{ paddingLeft: 36, width: '100%', margin: 0 }} value={searchText} onChange={e => setSearchText(e.target.value)} />
+        </div>
+        <select className="filter-select" style={{ width: 180, margin: 0 }} value={filterDept} onChange={e => setFilterDept(e.target.value)}>
+          <option value="">-- Tất cả Sàn --</option>
           {uniqueDepts.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
-        <select className="filter-select" value={filterStatusF} onChange={e => setFilterStatusF(e.target.value)}>
+        <select className="filter-select" style={{ width: 150, margin: 0 }} value={filterStatusF} onChange={e => setFilterStatusF(e.target.value)}>
           <option value="">-- Trạng thái --</option>
           {uniqueStatuses.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
-        {hasActiveFilters && <button className="btn-clear-filter" onClick={clearFilters}>✕ Xóa lọc</button>}
-        <span className="filter-count">Hiển thị <strong>{filteredStaff.length}</strong>/{staff.length}</span>
+        {(searchText || filterDept || filterStatusF) && (
+          <button onClick={clearFilters} style={{ background: 'transparent', border: 'none', color: 'var(--red)', fontSize: 12, cursor: 'pointer', fontWeight: 700 }}>XÓA LỌC</button>
+        )}
       </div>
 
       <div className="table-container">
         <table>
           <thead>
             <tr>
-              <th>Thao tác</th>
-              <th onClick={() => handleSort('Mã NV')} style={{ cursor: 'pointer' }}>Mã NV {sortConfig.key === 'Mã NV' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
-              <th onClick={() => handleSort('Tên NV')} style={{ cursor: 'pointer' }}>Họ Tên {sortConfig.key === 'Tên NV' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
-              <th onClick={() => handleSort('Sàn')} style={{ cursor: 'pointer' }}>Sàn / Đại lý {sortConfig.key === 'Sàn' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
-              <th onClick={() => handleSort('Chức vụ')} style={{ cursor: 'pointer' }}>Chức vụ {sortConfig.key === 'Chức vụ' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
-              <th onClick={() => handleSort('SĐT')} style={{ cursor: 'pointer' }}>SĐT {sortConfig.key === 'SĐT' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
-              <th onClick={() => handleSort('Email')} style={{ cursor: 'pointer' }}>Email {sortConfig.key === 'Email' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
-              <th onClick={() => handleSort('Ngày vào làm')} style={{ cursor: 'pointer' }}>Ngày vào làm {sortConfig.key === 'Ngày vào làm' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
-              <th onClick={() => handleSort('Trạng thái')} style={{ cursor: 'pointer' }}>Trạng thái {sortConfig.key === 'Trạng thái' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
-              <th onClick={() => handleSort('Quyền')} style={{ cursor: 'pointer' }}>Quyền {sortConfig.key === 'Quyền' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
-              <th onClick={() => handleSort('Lương (VNĐ)')} style={{ cursor: 'pointer' }}>Lương (VNĐ) {sortConfig.key === 'Lương (VNĐ)' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
-              <th onClick={() => handleSort('Quản lý (Mã NV)')} style={{ cursor: 'pointer' }}>Quản lý {sortConfig.key === 'Quản lý (Mã NV)' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+              <th style={{ width: 100 }}>Thao tác</th>
+              <th>Mã NV</th>
+              <th>Họ Tên</th>
+              <th>Sàn / Đại lý</th>
+              <th>Chức vụ</th>
+              <th>SĐT</th>
+              <th>Trạng thái</th>
+              <th>Quyền</th>
+              <th>Lương (VNĐ)</th>
             </tr>
           </thead>
           <tbody>
             {currentStaff.map((member, index) => (
               <tr key={index}>
                 <td>
-                  <div style={{ display: 'flex', gap: '5px' }}>
-                    <button onClick={() => handleOpenEditModal(member)} className="btn-edit">Sửa</button>
-                    <button 
-                      onClick={() => {
-                        if(window.confirm(`Bạn có chắc chắn muốn xóa nhân viên ${member['Tên NV']}?`)) {
-                          deleteStaff(member['Mã NV']);
-                        }
-                      }} 
-                      className="btn-cancel" 
-                      style={{ padding: '2px 8px', fontSize: '12px', borderColor: 'var(--danger)', color: 'var(--danger)' }}
-                    >Xóa</button>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button onClick={() => handleOpenEditModal(member)} style={{ background: 'none', border: 'none', color: 'var(--cyan)', cursor: 'pointer' }}><i className="ti-pencil"></i></button>
+                    <button onClick={() => { if(window.confirm('Xóa nhân viên?')) deleteStaff(member['Mã NV']) }} style={{ background: 'none', border: 'none', color: 'var(--red)', cursor: 'pointer' }}><i className="ti-trash"></i></button>
                   </div>
                 </td>
-                <td style={{ fontWeight: 'bold' }}>{member['Mã NV']}</td>
-                <td style={{ fontWeight: 'bold', color: 'var(--accent)' }}>{member['Tên NV']}</td>
+                <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{member['Mã NV']}</td>
+                <td style={{ fontWeight: 700 }}>{member['Tên NV']}</td>
                 <td>{member['Sàn']}</td>
-                <td>{member['Chức vụ']}</td>
-                <td>{member['SĐT']}</td>
-                <td>{member['Email']}</td>
-                <td>{member['Ngày vào làm'] ? member['Ngày vào làm'].split('-').reverse().join('/') : ''}</td>
+                <td><span style={{ fontSize: 12 }}>{member['Chức vụ']}</span></td>
+                <td style={{ color: 'var(--cyan)' }}>{member['SĐT']}</td>
                 <td>
                   <span style={{ 
-                    padding: '4px 10px',
-                    borderRadius: '20px',
-                    backgroundColor: member['Trạng thái'] === 'Đang làm việc' ? 'rgba(0, 204, 102, 0.2)' : 'rgba(255, 77, 148, 0.2)',
-                    color: member['Trạng thái'] === 'Đang làm việc' ? '#00cc66' : '#ff4d94',
-                    fontWeight: '800', 
-                    fontSize: '11px',
+                    padding: '2px 10px', borderRadius: 4, fontSize: 10, fontWeight: 800,
                     border: '1px solid currentColor',
-                    display: 'inline-block'
+                    background: member['Trạng thái'] === 'Đang làm việc' ? 'rgba(0, 204, 102, 0.1)' : 'rgba(255, 77, 148, 0.1)',
+                    color: member['Trạng thái'] === 'Đang làm việc' ? '#00cc66' : '#ff4d94'
                   }}>
                     {member['Trạng thái']}
                   </span>
                 </td>
-                <td>
-                  <span className="badge" style={{ 
-                    backgroundColor: 'rgba(0, 243, 255, 0.1)', 
-                    color: 'var(--accent)',
-                    border: '1px solid rgba(0, 243, 255, 0.2)',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    fontSize: '11px'
-                  }}>{member['Quyền']}</span>
-                </td>
-                <td>{Number(member['Lương (VNĐ)'] || 0).toLocaleString()} đ</td>
-                <td>{member['Quản lý (Mã NV)']}</td>
+                <td><span style={{ color: 'var(--accent)', fontSize: 11 }}>{member['Quyền']}</span></td>
+                <td style={{ fontWeight: 700 }}>{fmt(member['Lương (VNĐ)'] || 0)}</td>
               </tr>
             ))}
-            {filteredStaff.length === 0 && (
-              <tr>
-                <td colSpan="11" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '20px' }}>Chưa có dữ liệu nhân sự.</td>
-              </tr>
-            )}
           </tbody>
         </table>
       </div>
 
       {totalPages > 1 && (
-        <div className="pagination-container" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '20px', marginBottom: '40px' }}>
-          <button 
-            onClick={() => paginate(currentPage - 1)} 
-            disabled={currentPage === 1}
-            style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', opacity: currentPage === 1 ? 0.5 : 1 }}
-          >
-            Trang trước
-          </button>
-          
-          {[...Array(totalPages)].map((_, idx) => {
-            const pageNum = idx + 1;
-            if (totalPages > 7) {
-              if (pageNum !== 1 && pageNum !== totalPages && (pageNum < currentPage - 1 || pageNum > currentPage + 1)) {
-                if (pageNum === 2 && currentPage > 3) return <span key="dots1" style={{ color: 'var(--text-muted)', alignSelf: 'center' }}>...</span>;
-                if (pageNum === totalPages - 1 && currentPage < totalPages - 2) return <span key="dots2" style={{ color: 'var(--text-muted)', alignSelf: 'center' }}>...</span>;
-                return null;
-              }
-            }
-            return (
-              <button
-                key={pageNum}
-                onClick={() => paginate(pageNum)}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '4px',
-                  border: '1px solid',
-                  borderColor: currentPage === pageNum ? 'var(--accent)' : 'var(--border-color)',
-                  background: currentPage === pageNum ? 'var(--accent)' : 'var(--bg-secondary)',
-                  color: currentPage === pageNum ? '#fff' : 'var(--text-main)',
-                  fontWeight: 'bold',
-                  cursor: 'pointer'
-                }}
-              >
-                {pageNum}
-              </button>
-            );
-          })}
-
-          <button 
-            onClick={() => paginate(currentPage + 1)} 
-            disabled={currentPage === totalPages}
-            style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', opacity: currentPage === totalPages ? 0.5 : 1 }}
-          >
-            Trang sau
-          </button>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 32 }}>
+          <button onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1} className="btn-page">Trước</button>
+          {[...Array(totalPages)].map((_, i) => (
+            <button key={i} onClick={() => setCurrentPage(i+1)} className={`btn-page ${currentPage === i+1 ? 'active' : ''}`}>{i+1}</button>
+          ))}
+          <button onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages} className="btn-page">Sau</button>
         </div>
       )}
 
       {isModalOpen && (
         <div className="modal-overlay">
-          <div className="modal-content" style={{ width: '800px', maxWidth: '95%', maxHeight: '90vh', overflowY: 'auto' }}>
-            <h2 className="modal-title">{isEditMode ? 'Chỉnh sửa Nhân viên' : 'Thêm Nhân viên mới'}</h2>
-            <form onSubmit={handleSubmit}>
-              <div className="form-grid">
+          <div className="modal-content" style={{ width: 600 }}>
+            <SectionHead label={isEditMode ? 'Chỉnh sửa Nhân viên' : 'Thêm Nhân viên'} icon="ti-id-badge" />
+            <form onSubmit={handleSubmit} style={{ marginTop: 20 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                 <div className="form-group">
-                  <label>Mã nhân viên *</label>
-                  <input required disabled={isEditMode} className="input-field" value={formData['Mã NV']} onChange={e => setFormData({...formData, 'Mã NV': e.target.value})} placeholder="VD: GH001" style={isEditMode ? {backgroundColor: 'var(--bg-tertiary)'} : {}} />
+                  <label>Mã NV</label>
+                  <input required disabled={isEditMode} className="input-field" value={formData['Mã NV']} onChange={e => setFormData({...formData, 'Mã NV': e.target.value})} />
                 </div>
                 <div className="form-group">
-                  <label>Họ và tên *</label>
-                  <input required className="input-field" value={formData['Tên NV']} onChange={e => setFormData({...formData, 'Tên NV': e.target.value})} placeholder="Nguyễn Văn A" />
+                  <label>Họ tên</label>
+                  <input required className="input-field" value={formData['Tên NV']} onChange={e => setFormData({...formData, 'Tên NV': e.target.value})} />
                 </div>
                 <div className="form-group">
-                  <label>Sàn / Đại lý *</label>
-                  <input required className="input-field" value={formData['Sàn']} onChange={e => setFormData({...formData, 'Sàn': e.target.value})} placeholder="Đại lý F1" />
+                  <label>Sàn</label>
+                  <input required className="input-field" value={formData['Sàn']} onChange={e => setFormData({...formData, 'Sàn': e.target.value})} />
                 </div>
                 <div className="form-group">
-                  <label>Chức vụ *</label>
-                  <select required className="input-field" value={formData['Chức vụ']} onChange={e => setFormData({...formData, 'Chức vụ': e.target.value})}>
-                    <option value="">-- Chọn chức vụ --</option>
-                    <option value="Sale">Sale</option>
-                    <option value="Teamlead">Teamlead</option>
-                    <option value="Giám đốc sàn">Giám đốc sàn</option>
-                    <option value="Giám đốc">Giám đốc</option>
-                    <option value="HR">HR</option>
-                    <option value="Admin">Admin</option>
-                    <option value="Kế toán">Kế toán</option>
-                    <option value="IT">IT</option>
-                    <option value="Marketing">Marketing</option>
-                    <option value="Hành chính">Hành chính</option>
-                  </select>
+                  <label>Chức vụ</label>
+                  <input className="input-field" value={formData['Chức vụ']} onChange={e => setFormData({...formData, 'Chức vụ': e.target.value})} />
                 </div>
                 <div className="form-group">
-                  <label>Số điện thoại *</label>
-                  <input required type="tel" className="input-field" value={formData['SĐT']} onChange={e => setFormData({...formData, 'SĐT': e.target.value})} placeholder="0901234567" />
+                  <label>SĐT</label>
+                  <input required className="input-field" value={formData['SĐT']} onChange={e => setFormData({...formData, 'SĐT': e.target.value})} />
                 </div>
                 <div className="form-group">
                   <label>Email</label>
-                  <input type="email" className="input-field" value={formData['Email']} onChange={e => setFormData({...formData, 'Email': e.target.value})} placeholder="email@blanca.vn" />
-                </div>
-                <div className="form-group">
-                  <label>Ngày vào làm</label>
-                  <input type="date" className="input-field" value={formData['Ngày vào làm']} onChange={e => setFormData({...formData, 'Ngày vào làm': e.target.value})} />
-                </div>
-                <div className="form-group">
-                  <label>Trạng thái</label>
-                  <select className="input-field" value={formData['Trạng thái']} onChange={e => setFormData({ ...formData, 'Trạng thái': e.target.value })}>
-                    <option value="Đang làm việc">Đang làm việc</option>
-                    <option value="Đã nghỉ việc">Đã nghỉ việc</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Quyền hệ thống</label>
-                  <select className="input-field" value={formData['Quyền']} onChange={e => setFormData({...formData, 'Quyền': e.target.value})}>
-                    <option value="Sales">Sales (Mặc định)</option>
-                    <option value="Teamlead">Teamlead</option>
-                    <option value="Admin">Admin (Quản trị)</option>
-                    <option value="BOD">BOD (Ban giám đốc)</option>
-                    <option value="Kế toán">Kế toán</option>
-                    <option value="Marketing">Marketing</option>
-                    <option value="HR">HR</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Lương cứng (VNĐ)</label>
-                  <input type="number" className="input-field" value={formData['Lương (VNĐ)']} onChange={e => setFormData({...formData, 'Lương (VNĐ)': e.target.value})} placeholder="10000000" />
-                </div>
-                <div className="form-group">
-                  <label>Người quản lý (Mã NV)</label>
-                  <select className="input-field" value={formData['Quản lý (Mã NV)']} onChange={e => setFormData({...formData, 'Quản lý (Mã NV)': e.target.value})}>
-                    <option value="">-- Không có --</option>
-                    {staff.filter(s => s['Mã NV'] !== formData['Mã NV']).map((s, idx) => (
-                      <option key={idx} value={s['Mã NV']}>{s['Mã NV']} - {s['Tên NV']}</option>
-                    ))}
-                  </select>
+                  <input type="email" className="input-field" value={formData['Email']} onChange={e => setFormData({...formData, 'Email': e.target.value})} />
                 </div>
               </div>
-              <div className="modal-actions" style={{ marginTop: '20px' }}>
+              <div style={{ display: 'flex', gap: 12, marginTop: 24, justifyContent: 'flex-end' }}>
                 <button type="button" onClick={() => setIsModalOpen(false)} className="btn-cancel">Hủy</button>
-                <button type="submit" className="btn-submit">{isEditMode ? 'Lưu thay đổi' : 'Thêm mới'}</button>
+                <button type="submit" className="btn-submit">Lưu thông tin</button>
               </div>
             </form>
           </div>

@@ -1,33 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 import { useData } from '../context/DataContext';
-
-const CustomTooltip = ({ active, payload, label }) => {
-  if (active && payload && payload.length) {
-    return (
-      <div style={{ backgroundColor: 'var(--bg-tertiary)', padding: '10px', border: '1px solid var(--border-color)', borderRadius: '4px' }}>
-        <p style={{ margin: 0, fontWeight: 'bold' }}>{label || payload[0].name}</p>
-        {payload.map((p, idx) => (
-          <p key={idx} style={{ margin: 0, color: p.color || p.fill }}>
-            {p.name}: {p.value}
-          </p>
-        ))}
-      </div>
-    );
-  }
-  return null;
-};
-
-const formatCompact = (val) => {
-  if (val === undefined || val === null || val === '') return '-';
-  const num = Math.abs(Number(val));
-  const sign = Number(val) < 0 ? '-' : '';
-  
-  if (num >= 1000000000) return sign + (num / 1000000000).toFixed(2) + ' tỷ';
-  if (num >= 1000000) return sign + (num / 1000000).toFixed(1) + ' tr';
-  if (num >= 1000) return sign + num.toLocaleString('vi-VN');
-  return sign + num.toString();
-};
+import { 
+  KpiCard, ChartCard, SectionHead, BarChart, fmt 
+} from '../components/VisualLanguage';
 
 function Marketing() {
   const { 
@@ -48,18 +23,16 @@ function Marketing() {
         setMarketingSearch(localSearch);
         setMarketingPage(1);
       }
-    }, 500); // 500ms delay
+    }, 500);
     return () => clearTimeout(timer);
   }, [localSearch]);
 
-  // Sync local search when global search is cleared
   useEffect(() => {
     setLocalSearch(marketingSearch);
   }, [marketingSearch]);
-  const [filterChannel, setFilterChannel] = useState('');
 
   const [formData, setFormData] = useState({
-    'Tháng': new Date().toISOString().slice(0, 7), // YYYY-MM
+    'Tháng': new Date().toISOString().slice(0, 7),
     'Tên chiến dịch': '',
     'Kênh': 'Facebook Ads',
     'CP (VNĐ)': '',
@@ -126,16 +99,14 @@ function Marketing() {
     };
 
     if (isEditMode) {
-      // Assuming Tên chiến dịch is the unique ID here
       editMarketing(payload);
     } else {
       addMarketing(payload);
     }
-    
     setIsModalOpen(false);
   };
 
-  // --- KPI CALCULATIONS (Using Server-Side Aggregation) ---
+  // --- KPI CALCULATIONS ---
   const mktStats = dashboardStats?.mkt_performance || { total_cost: 0, total_leads: 0, total_bookings: 0, channels: {} };
   const totalCP = Number((mktStats.total_cost || 0).toFixed(1));
   const totalLead = mktStats.total_leads || 0;
@@ -157,49 +128,37 @@ function Marketing() {
     worstChannel = sortedChannels[sortedChannels.length - 1];
   }
 
-  // --- CHART DATA ---
-  const chart1Data = channels.map(c => ({
-    name: c.name.replace('Sự kiện ', '').replace(' Ads', ''), // Shorten names for axis
-    Lead: c.Lead,
-    Booking: c.Booking
-  }));
-
-  const chart2Data = channels.map(c => ({
-    name: c.name.replace('Sự kiện ', '').replace(' Ads', ''),
-    'Tỷ lệ CĐ (%)': c.Lead > 0 ? Number(((c.Booking / c.Lead) * 100).toFixed(2)) : 0
-  }));
-
+  // --- COLORS ---
   const COLORS = {
-    'Facebook': '#4da6ff',
+    'Facebook': '#ccff00',
     'Google': '#00e5ff',
     'TikTok': '#ff4d94',
-    'Offline': '#ccff00'
+    'Offline': '#ffcc00'
   };
-  
   const getChannelColor = (name) => {
     for (let key in COLORS) {
       if (name.includes(key)) return COLORS[key];
     }
-    return '#8884d8';
+    return '#60a5fa';
   };
 
   const evalColor = (rate) => {
-    if (rate >= 10) return 'var(--success)';
-    if (rate >= 5) return 'var(--cyan)';
-    if (rate >= 2) return 'var(--warning)';
-    return 'var(--danger)';
+    if (rate >= 10) return '#ccff00';
+    if (rate >= 5) return '#00e5ff';
+    if (rate >= 2) return '#ffcc00';
+    return '#f87171';
   };
 
-  const clearFilters = () => { setMarketingSearch(''); setFilterChannel(''); };
+  const clearFilters = () => { setLocalSearch(''); setMarketingSearch(''); };
 
   return (
-    <div>
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 className="page-title">Marketing</h1>
+    <div style={{ paddingBottom: 40 }}>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <h1 className="page-title" style={{ margin: 0 }}>Marketing</h1>
         <div style={{ display: 'flex', gap: '10px' }}>
           <select 
             className="filter-select" 
-            style={{ width: '180px' }}
+            style={{ width: '180px', margin: 0 }}
             value={`${marketingSort.column}-${marketingSort.ascending ? 'asc' : 'desc'}`} 
             onChange={e => {
               const [col, dir] = e.target.value.split('-');
@@ -215,280 +174,202 @@ function Marketing() {
         </div>
       </div>
 
-      {/* FILTER BAR */}
-      <div className="filter-bar" style={{ marginBottom: '20px' }}>
-        <input 
-          className="filter-input" 
-          placeholder="🔍 Tìm tên chiến dịch, kênh, ghi chú..." 
-          value={localSearch} 
-          onChange={e => setLocalSearch(e.target.value)} 
-        />
-        {/* Optional: Filter by channel could be implemented server-side as well, but for now we focus on text search */}
+      <div className="filter-bar" style={{ marginBottom: 24 }}>
+        <div style={{ position: 'relative', flex: 1 }}>
+          <input 
+            className="filter-input" 
+            style={{ width: '100%', paddingLeft: 34 }}
+            placeholder="Tìm tên chiến dịch, kênh, ghi chú..." 
+            value={localSearch} 
+            onChange={e => setLocalSearch(e.target.value)} 
+          />
+          <i className="ti ti-search" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+        </div>
         {marketingSearch && <button className="btn-clear-filter" onClick={clearFilters}>✕ Xóa lọc</button>}
-        <span className="filter-count">Hiển thị trang <strong>{marketingPage}</strong> (Tổng <strong>{marketingTotal}</strong> bản ghi)</span>
+        <span className="filter-count" style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+          Trang <strong>{marketingPage}</strong> · Tổng <strong>{marketingTotal}</strong> chiến dịch
+        </span>
       </div>
 
-      {/* KPI GRID */}
-      <div className="dash-kpi-grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)' }}>
-        <div className="dash-kpi-card" style={{ borderTopColor: 'var(--text-muted)' }}>
-          <div className="dash-kpi-title">TỔNG CP MARKETING</div>
-          <div className="dash-kpi-value" style={{ color: 'var(--warning)' }}>{formatCompact(totalCP * 1000000)}</div>
-          <div className="dash-kpi-subtext">KH 500tr - Đạt {Math.round((totalCP/500)*100)}%</div>
-        </div>
-        
-        <div className="dash-kpi-card" style={{ borderTopColor: 'var(--cyan)' }}>
-          <div className="dash-kpi-title">TỔNG LEAD</div>
-          <div className="dash-kpi-value" style={{ color: 'var(--cyan)' }}>{totalLead}</div>
-          <div className="dash-kpi-subtext">{marketing.length} chiến dịch - {channels.length} kênh</div>
-        </div>
-
-        <div className="dash-kpi-card" style={{ borderTopColor: 'var(--cyan)' }}>
-          <div className="dash-kpi-title">TỔNG BOOKING</div>
-          <div className="dash-kpi-value" style={{ color: 'var(--cyan)' }}>{totalBooking}</div>
-          <div className="dash-kpi-subtext">CĐ TB {avgConv.toFixed(1)}% - CPL TB {avgCPL.toFixed(0)}k</div>
-        </div>
-
-        <div className="dash-kpi-card" style={{ borderTopColor: 'var(--warning)' }}>
-          <div className="dash-kpi-title">KÊNH TỐT NHẤT</div>
-          <div className="dash-kpi-value" style={{ color: 'var(--warning)', fontSize: '20px', marginTop: '10px' }}>
-            🎪 {bestChannel ? bestChannel.name : '-'}
-          </div>
-          <div className="dash-kpi-subtext">
-            {bestChannel ? `CĐ ${((bestChannel.Booking/bestChannel.Lead)*100).toFixed(2)}% - ${bestChannel.Booking} booking` : ''}
-          </div>
-        </div>
-
-        <div className="dash-kpi-card" style={{ borderTopColor: 'var(--danger)' }}>
-          <div className="dash-kpi-title">CẦN CẢI THIỆN</div>
-          <div className="dash-kpi-value" style={{ color: 'var(--danger)', fontSize: '20px', marginTop: '10px' }}>
-            🎵 {worstChannel ? worstChannel.name : '-'}
-          </div>
-          <div className="dash-kpi-subtext">
-            {worstChannel ? `CĐ ${((worstChannel.Booking/worstChannel.Lead)*100).toFixed(0)}% - Đề xuất cắt giảm` : ''}
-          </div>
-        </div>
+      <div className="dash-kpi-grid" style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
+        <KpiCard 
+          label="Tổng Chi Phí" 
+          value={fmt(totalCP * 1000000)} 
+          sub={`KH 500tr · Đạt ${Math.round((totalCP/500)*100)}%`}
+          colorClass="amber"
+        />
+        <KpiCard 
+          label="Tổng Lead" 
+          value={totalLead.toLocaleString()} 
+          sub={`${marketing.length} chiến dịch · ${channels.length} kênh`}
+          colorClass="cyan"
+        />
+        <KpiCard 
+          label="Tổng Booking" 
+          value={totalBooking.toLocaleString()} 
+          sub={`CĐ TB ${avgConv.toFixed(1)}% · CPL ${avgCPL.toFixed(0)}k`}
+          colorClass="lime"
+        />
+        <KpiCard 
+          label="Kênh Hiệu Quả" 
+          value={bestChannel ? bestChannel.name : '—'} 
+          sub={bestChannel ? `CĐ ${((bestChannel.Booking/bestChannel.Lead)*100).toFixed(1)}% · ${bestChannel.Booking} book` : ''}
+          colorClass="lime"
+        />
+        <KpiCard 
+          label="Kênh Yếu" 
+          value={worstChannel ? worstChannel.name : '—'} 
+          sub={worstChannel ? `CĐ ${((worstChannel.Booking/worstChannel.Lead)*100).toFixed(1)}% · Cần tối ưu` : ''}
+          colorClass="red"
+        />
       </div>
 
-      {/* CHARTS ROW */}
-      <div className="mkt-charts-grid">
-        <div className="dash-chart-card">
-          <div className="dash-chart-title">Lead & Booking theo kênh (gộp)</div>
-          <div className="dash-chart-subtitle">Tất cả chiến dịch</div>
-          <div style={{ height: '250px', marginTop: '15px' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chart1Data} margin={{ top: 20, right: 30, left: -20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2a2e39" vertical={false} />
-                <XAxis dataKey="name" stroke="#8b92a5" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="#8b92a5" fontSize={11} tickLine={false} axisLine={false} />
-                <Tooltip cursor={{ fill: '#252932' }} content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ fontSize: '11px', color: 'var(--text-muted)' }} verticalAlign="top" />
-                <Bar dataKey="Lead" fill="#4da6ff" radius={[2, 2, 0, 0]} barSize={30} />
-                <Bar dataKey="Booking" fill="#00e5ff" radius={[2, 2, 0, 0]} barSize={30} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+      <div className="mkt-charts-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 32 }}>
+        <ChartCard title="Phân bổ Lead & Booking" sub="Thống kê gộp theo kênh tiếp cận">
+          <BarChart bars={channels.map(c => ({
+            label: c.name.split(' ')[0],
+            val: c.Lead,
+            color: getChannelColor(c.name)
+          }))} />
+        </ChartCard>
 
-        <div className="dash-chart-card">
-          <div className="dash-chart-title">Tỷ lệ chuyển đổi (%)</div>
-          <div className="dash-chart-subtitle">Lead → Booking · theo kênh</div>
-          <div style={{ height: '250px', marginTop: '15px' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chart2Data} margin={{ top: 20, right: 30, left: -20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2a2e39" vertical={false} />
-                <XAxis dataKey="name" stroke="#8b92a5" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="#8b92a5" fontSize={11} tickLine={false} axisLine={false} tickFormatter={tick => `${tick}%`} />
-                <Tooltip cursor={{ fill: '#252932' }} content={<CustomTooltip />} />
-                <Bar dataKey="Tỷ lệ CĐ (%)" radius={[2, 2, 0, 0]} barSize={40}>
-                  {chart2Data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={getChannelColor(entry.name)} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+        <ChartCard title="Tỷ lệ chuyển đổi (%)" sub="Hiệu suất Lead → Booking theo kênh">
+          <BarChart bars={channels.map(c => ({
+            label: c.name.split(' ')[0],
+            val: c.Lead > 0 ? Number(((c.Booking / c.Lead) * 100).toFixed(1)) : 0,
+            color: getChannelColor(c.name)
+          }))} />
+        </ChartCard>
       </div>
 
-      {/* CAMPAIGNS LIST */}
-      <div className="section-title" style={{ marginTop: '30px' }}>▶ Chi tiết từng chiến dịch</div>
-      <div>
+      <SectionHead label="Chi tiết từng chiến dịch" icon="ti-list-details" />
+      
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 12 }}>
         {marketing.map((m, index) => {
           const leads = Number(m['Lead'] || 0);
           const bookings = Number(m['Booking'] || 0);
           const cp = Number(m['CP (tr)'] || 0);
-          const clicks = m['Click'] ? Number(m['Click']).toLocaleString('vi-VN') : '-';
-          
           const rate = leads > 0 ? (bookings / leads) * 100 : 0;
-          const badgeColor = evalColor(rate);
           const barColor = getChannelColor(m['Kênh']);
           
-          // Using random target max CP just for visual bar scale (e.g. 200tr)
-          const barWidth = Math.min((cp / 150) * 100, 100);
-
           return (
-            <div className="mkt-campaign-card" key={index} style={{ borderLeft: `4px solid ${barColor}` }}>
-              <div className="mkt-card-header">
+            <div key={index} style={{ 
+              background: 'var(--bg-secondary)', 
+              border: '1px solid var(--border-color)', 
+              borderRadius: 12, 
+              padding: 16,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 12
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
-                  <div className="mkt-card-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ width: '10px', height: '10px', backgroundColor: barColor }}></div>
-                    {m['Tên chiến dịch']}
-                  </div>
-                  <div className="mkt-card-subtitle">{m['Kênh']} · {m['Tháng'] || 'T4/2026'}</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-main)' }}>{m['Tên chiến dịch']}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{m['Kênh']} · {m['Tháng']}</div>
                 </div>
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                  <button onClick={() => handleOpenEditModal(m)} className="btn-edit" style={{ padding: '4px 12px' }}>Sửa</button>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button onClick={() => handleOpenEditModal(m)} className="btn-edit" style={{ padding: '4px 8px', fontSize: 11 }}>Sửa</button>
                   <button 
-                    onClick={() => {
-                      if(window.confirm(`Xóa chiến dịch ${m['Tên chiến dịch']}?`)) {
-                        deleteMarketing(m['_id']);
-                      }
-                    }} 
+                    onClick={() => window.confirm(`Xóa chiến dịch ${m['Tên chiến dịch']}?`) && deleteMarketing(m['_id'])} 
                     className="btn-cancel" 
-                    style={{ padding: '4px 12px', borderColor: 'var(--danger)', color: 'var(--danger)' }}
+                    style={{ padding: '4px 8px', fontSize: 11, borderColor: 'var(--danger)', color: 'var(--danger)' }}
                   >Xóa</button>
-                  <div className="mkt-card-badge" style={{ color: badgeColor, border: `1px solid ${badgeColor}` }}>
-                    CĐ {rate.toFixed(2)}%
-                  </div>
                 </div>
               </div>
 
-              <div className="mkt-card-body">
-                <div className="mkt-stat-item">
-                  <div className="mkt-stat-value" style={{ color: 'var(--warning)' }}>{formatCompact(cp * 1000000)}</div>
-                  <div className="mkt-stat-label">CHI PHÍ</div>
-                  <div className="mkt-progress-bg">
-                    <div className="mkt-progress-fill" style={{ width: `${barWidth}%`, backgroundColor: barColor }}></div>
-                  </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, padding: '10px 0', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)' }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: '#ffcc00' }}>{fmt(cp * 1000000)}</div>
+                  <div style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Chi phí</div>
                 </div>
-                <div className="mkt-stat-item">
-                  <div className="mkt-stat-value">{leads}</div>
-                  <div className="mkt-stat-label">LEAD</div>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 800 }}>{leads}</div>
+                  <div style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Lead</div>
                 </div>
-                <div className="mkt-stat-item">
-                  <div className="mkt-stat-value" style={{ color: 'var(--cyan)' }}>{bookings}</div>
-                  <div className="mkt-stat-label">BOOKING</div>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: '#00e5ff' }}>{bookings}</div>
+                  <div style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Booking</div>
                 </div>
-                <div className="mkt-stat-item">
-                  <div className="mkt-stat-value">{clicks}</div>
-                  <div className="mkt-stat-label">CLICK</div>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: evalColor(rate) }}>{rate.toFixed(1)}%</div>
+                  <div style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Tỉ lệ CĐ</div>
                 </div>
               </div>
 
-              {m['Ghi chú'] && (
-                <div className="mkt-card-footer">
-                  {m['Ghi chú']} {m['CPL (tr)'] ? `· CPL: ${Math.round(Number(m['CPL (tr)'])*1000)}k` : ''} {m['CP/Book (tr)'] ? `· CP/Booking: ${Number(m['CP/Book (tr)']).toFixed(1)}tr` : ''}
-                </div>
-              )}
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                {m['Ghi chú'] || 'Không có ghi chú'} 
+                {m['CPL (tr)'] ? ` · CPL: ${Math.round(Number(m['CPL (tr)'])*1000)}k` : ''}
+              </div>
             </div>
           );
         })}
       </div>
 
-      {/* PAGINATION */}
       {marketingTotal > itemsPerPage && (
-        <div className="pagination" style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '30px', marginBottom: '20px' }}>
+        <div className="pagination-container" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '32px' }}>
           <button 
             onClick={() => setMarketingPage(prev => Math.max(prev - 1, 1))} 
             disabled={marketingPage === 1}
             className="btn-cancel"
-            style={{ padding: '6px 15px', opacity: marketingPage === 1 ? 0.5 : 1 }}
-          >Trước</button>
+            style={{ padding: '6px 12px', opacity: marketingPage === 1 ? 0.5 : 1 }}
+          >Trái</button>
           
-          {Array.from({ length: Math.ceil(marketingTotal / itemsPerPage) }).map((_, idx) => {
-            const pageNum = idx + 1;
-            const totalPages = Math.ceil(marketingTotal / itemsPerPage);
-            if (totalPages > 7) {
-              if (pageNum !== 1 && pageNum !== totalPages && (pageNum < marketingPage - 1 || pageNum > marketingPage + 1)) {
-                if (pageNum === 2 && marketingPage > 3) return <span key="dots1" style={{ color: 'var(--text-muted)' }}>...</span>;
-                if (pageNum === totalPages - 1 && marketingPage < totalPages - 2) return <span key="dots2" style={{ color: 'var(--text-muted)' }}>...</span>;
-                return null;
-              }
-            }
-            return (
-              <button 
-                key={pageNum} 
-                onClick={() => setMarketingPage(pageNum)}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '4px',
-                  border: '1px solid',
-                  borderColor: marketingPage === pageNum ? 'var(--accent)' : 'var(--border-color)',
-                  background: marketingPage === pageNum ? 'var(--accent)' : 'var(--bg-secondary)',
-                  color: marketingPage === pageNum ? '#000' : 'var(--text-main)',
-                  fontWeight: 'bold',
-                  cursor: 'pointer'
-                }}
-              >{pageNum}</button>
-            );
-          })}
-
+          <button className="btn-submit" style={{ padding: '6px 12px', background: 'var(--accent)', color: '#000' }}>{marketingPage}</button>
+          
           <button 
             onClick={() => setMarketingPage(prev => Math.min(prev + 1, Math.ceil(marketingTotal / itemsPerPage)))} 
             disabled={marketingPage >= Math.ceil(marketingTotal / itemsPerPage)}
             className="btn-cancel"
-            style={{ padding: '6px 15px', opacity: marketingPage >= Math.ceil(marketingTotal / itemsPerPage) ? 0.5 : 1 }}
-          >Sau</button>
+            style={{ padding: '6px 12px', opacity: marketingPage >= Math.ceil(marketingTotal / itemsPerPage) ? 0.5 : 1 }}
+          >Phải</button>
         </div>
       )}
 
-      {/* MODAL */}
       {isModalOpen && (
         <div className="modal-overlay">
-          <div className="modal-content">
-            <h2 className="modal-title">Thêm Chiến dịch mới</h2>
+          <div className="modal-content" style={{ maxWidth: 600 }}>
+            <h2 className="modal-title">{isEditMode ? 'Cập nhật' : 'Thêm'} Chiến dịch</h2>
             <form onSubmit={handleSubmit}>
               <div className="form-grid">
                 <div className="form-group">
-                  <label>Tháng (YYYY-MM)</label>
+                  <label>Tháng</label>
                   <input required type="month" className="input-field" value={formData['Tháng']} onChange={e => setFormData({...formData, 'Tháng': e.target.value})} />
                 </div>
                 <div className="form-group">
                   <label>Tên chiến dịch</label>
-                  <input required className="input-field" value={formData['Tên chiến dịch']} onChange={e => setFormData({...formData, 'Tên chiến dịch': e.target.value})} placeholder="Chiến dịch 1" />
+                  <input required className="input-field" value={formData['Tên chiến dịch']} onChange={e => setFormData({...formData, 'Tên chiến dịch': e.target.value})} />
                 </div>
                 <div className="form-group">
                   <label>Kênh</label>
-                  <input 
-                    required 
-                    className="input-field" 
-                    value={formData['Kênh']} 
-                    onChange={e => setFormData({...formData, 'Kênh': e.target.value})} 
-                    placeholder="Nhập hoặc chọn kênh..." 
-                    list="channel-options" 
-                  />
+                  <input required className="input-field" value={formData['Kênh']} onChange={e => setFormData({...formData, 'Kênh': e.target.value})} list="channel-options" />
                   <datalist id="channel-options">
-                    <option value="Facebook Ads" />
-                    <option value="Google Ads" />
-                    <option value="TikTok" />
-                    <option value="Sự kiện Offline" />
-                    <option value="Zalo Ads" />
+                    <option value="Facebook Ads" /><option value="Google Ads" /><option value="TikTok" /><option value="Sự kiện Offline" />
                   </datalist>
                 </div>
                 <div className="form-group">
                   <label>Chi phí (VNĐ)</label>
-                  <input required type="text" className="input-field" value={displayNumber(formData['CP (VNĐ)'])} onChange={e => handleNumberChange('CP (VNĐ)', e.target.value)} placeholder="50.000.000" />
+                  <input required type="text" className="input-field" value={displayNumber(formData['CP (VNĐ)'])} onChange={e => handleNumberChange('CP (VNĐ)', e.target.value)} />
                 </div>
                 <div className="form-group">
-                  <label>Số lượng Click</label>
-                  <input type="number" className="input-field" value={formData['Click']} onChange={e => handleNumberChange('Click', e.target.value)} placeholder="1000" />
+                  <label>Click</label>
+                  <input type="number" className="input-field" value={formData['Click']} onChange={e => setFormData({...formData, 'Click': e.target.value})} />
                 </div>
                 <div className="form-group">
-                  <label>Số lượng Lead</label>
-                  <input required type="number" className="input-field" value={formData['Lead']} onChange={e => handleNumberChange('Lead', e.target.value)} placeholder="100" />
+                  <label>Lead</label>
+                  <input required type="number" className="input-field" value={formData['Lead']} onChange={e => setFormData({...formData, 'Lead': e.target.value})} />
                 </div>
                 <div className="form-group">
-                  <label>Số lượng Booking</label>
-                  <input required type="number" className="input-field" value={formData['Booking']} onChange={e => handleNumberChange('Booking', e.target.value)} placeholder="10" />
+                  <label>Booking</label>
+                  <input required type="number" className="input-field" value={formData['Booking']} onChange={e => setFormData({...formData, 'Booking': e.target.value})} />
                 </div>
                 <div className="form-group" style={{ gridColumn: '1 / -1' }}>
                   <label>Ghi chú</label>
-                  <input className="input-field" value={formData['Ghi chú']} onChange={e => setFormData({...formData, 'Ghi chú': e.target.value})} placeholder="Ghi chú thêm..." />
+                  <input className="input-field" value={formData['Ghi chú']} onChange={e => setFormData({...formData, 'Ghi chú': e.target.value})} />
                 </div>
               </div>
-              <div className="modal-actions">
+              <div className="modal-actions" style={{ marginTop: 24 }}>
                 <button type="button" onClick={() => setIsModalOpen(false)} className="btn-cancel">Hủy</button>
-                <button type="submit" className="btn-submit">Lưu Chiến dịch</button>
+                <button type="submit" className="btn-submit">Lưu dữ liệu</button>
               </div>
             </form>
           </div>

@@ -1,42 +1,11 @@
-import React from 'react';
-import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, 
-  PieChart, Pie, Cell 
-} from 'recharts';
+import React, { useMemo } from 'react';
 import { useData } from '../context/DataContext';
+import { KpiCard, AlertCard, SectionHead, DonutChart, BarChart, ChartCard, fmt } from '../components/VisualLanguage';
 
-const CustomTooltip = ({ active, payload, label }) => {
-  if (active && payload && payload.length) {
-    return (
-      <div style={{ backgroundColor: 'var(--bg-tertiary)', padding: '10px', border: '1px solid var(--border-color)', borderRadius: '4px' }}>
-        <p style={{ margin: 0, fontWeight: 'bold' }}>{label || payload[0].name}</p>
-        {payload.map((p, idx) => (
-          <p key={idx} style={{ margin: 0, color: p.color || p.fill }}>
-            {p.name}: {p.value}
-          </p>
-        ))}
-      </div>
-    );
-  }
-  return null;
-};
-
-const formatCompact = (val) => {
-  if (val === undefined || val === null || val === '') return '-';
-  const num = Math.abs(Number(val));
-  const sign = Number(val) < 0 ? '-' : '';
-  
-  if (num >= 1000000000) return sign + (num / 1000000000).toFixed(2) + ' tỷ';
-  if (num >= 1000000) return sign + (num / 1000000).toFixed(1) + ' tr';
-  if (num >= 1000) return sign + num.toLocaleString('vi-VN');
-  return sign + num.toString();
-};
-
-function Dashboard() {
+export default function Dashboard() {
   const { 
-    sales, allSales, transactions, marketing, leads, financials, 
-    dashboardStats, staff, executiveScorecard, trafficLights, 
-    projectPL, cashflowForecast 
+    leads, transactions, marketing, financials, sales, allSales,
+    dashboardStats, trafficLights, projectPL, cashflowForecast 
   } = useData();
 
   // Fallback for when stats are loading
@@ -47,297 +16,197 @@ function Dashboard() {
   };
 
   // --- KPI CALCULATIONS ---
-  
-  // 1. Chỉ số từ Dashboard Stats (Hỗ trợ Filter)
-  const doanhThu = Number(stats.financial_stats?.revenue || 0);
-  const doanhThuKH = Number(stats.financial_stats?.revenue_kh || 0).toFixed(2);
-  const doanhThuPercent = stats.financial_stats?.revenue_kh > 0 
-    ? Math.round((stats.financial_stats?.revenue / stats.financial_stats?.revenue_kh) * 100) 
-    : 0;
+  const kpis = useMemo(() => {
+    const revenue = Number(stats.financial_stats?.revenue || 0) * 1000000000;
+    const revenueKH = Number(stats.financial_stats?.revenue_kh || 0);
+    const revenuePercent = revenueKH > 0 ? Math.round((revenue / (revenueKH * 1000000000)) * 100) : 0;
 
-  // 2. Lợi nhuận & Chi phí (Hỗ trợ Filter)
-  const burnRate = Number(stats.financial_stats?.expense || 0) * 1000000000;
-  const loiNhuan = Number(stats.financial_stats?.revenue || 0) - Number(stats.financial_stats?.expense || 0);
-  const margin = Number(stats.financial_stats?.revenue || 0) > 0 
-    ? (((Number(stats.financial_stats?.revenue || 0) - Number(stats.financial_stats?.expense || 0)) / Number(stats.financial_stats?.revenue || 1)) * 100).toFixed(1)
-    : 0;
+    const expense = Number(stats.financial_stats?.expense || 0) * 1000000000;
+    const profit = revenue - expense;
+    const margin = revenue > 0 ? ((profit / revenue) * 100).toFixed(1) : 0;
 
-  // 3. Giao dịch & Marketing (Giữ logic cũ cho các chỉ số vận hành)
-  const totalGD = stats.transactions.total;
-  const countHDMB = stats.transactions.completed;
-  const countCoc = stats.transactions.deposited;
-  const countGiuCho = stats.transactions.booking;
+    const totalGD = stats.transactions.total;
+    const countHDMB = stats.transactions.completed;
+    const countCoc = stats.transactions.deposited;
 
-  const totalLeads = stats.leads.total;
-  const unassignedLeadsCount = stats.leads.unassigned;
-  const daPhanCong = totalLeads - unassignedLeadsCount;
+    const totalBooking = marketing.reduce((sum, m) => sum + Number(m['Booking'] || 0), 0);
+    const totalChiPhiMkt = marketing.reduce((sum, m) => sum + Number(m['CP (tr)'] || 0), 0) * 1000000;
 
-  const totalBooking = marketing.reduce((sum, m) => sum + Number(m['Booking'] || 0), 0);
-  const totalLeadMkt = marketing.reduce((sum, m) => sum + Number(m['Lead'] || 0), 0);
-  const totalChiPhiMktRaw = marketing.reduce((sum, m) => sum + Number(m['CP (tr)'] || 0), 0);
-  const totalChiPhiMkt = Number(totalChiPhiMktRaw.toFixed(1));
+    return {
+      revenue: fmt(revenue),
+      revenueSub: `${revenuePercent}% KH · KH: ${revenueKH} tỷ`,
+      profit: fmt(profit),
+      profitSub: `${margin}% biên LN`,
+      burn: fmt(expense),
+      burnSub: 'Định phí & Biến phí vận hành',
+      deals: totalGD,
+      dealsSub: `${countHDMB} HĐMB · ${countCoc} Cọc`,
+      leadCount: stats.leads.total,
+      leadSub: `${stats.leads.unassigned} chưa phân công`,
+      booking: totalBooking,
+      bookingSub: `Chi phí: ${fmt(totalChiPhiMkt)}`,
+    };
+  }, [stats, marketing]);
 
-  // --- INSIGHTS GENERATION ---
-  const insights = [];
-
-  // Traffic Light Insights từ SQL
-  trafficLights.forEach(t => {
-    insights.push({
-      type: t.status.includes('Nguy cấp') ? 'danger' : t.status.includes('Cảnh báo') ? 'warning' : 'success',
-      title: `${t.indicator}: ${t.status}`,
-      desc: t.note
+  // --- INSIGHTS ---
+  const alerts = useMemo(() => {
+    const items = [];
+    
+    // Traffic Lights
+    trafficLights.forEach(t => {
+      items.push({
+        type: t.status.includes('Nguy cấp') ? 'danger' : t.status.includes('Cảnh báo') ? 'warning' : 'success',
+        title: `${t.indicator}: ${t.status}`,
+        sub: t.note,
+        badge: t.status.includes('Nguy cấp') ? 'Nguy cấp' : 'Theo dõi'
+      });
     });
-  });
 
-  // Unassigned leads insight
-  if (unassignedLeadsCount > 0) {
-    insights.push({
-      type: 'danger',
-      title: `${unassignedLeadsCount} lead chưa phân công`,
-      desc: 'Phân công sales ngay trong ngày để không bỏ lỡ cơ hội tiếp cận.'
-    });
-  }
-
-  // Sales KPI insights
-  sales.forEach(s => {
-    const thucTe = Number(s['Doanh số (tỷ)'] || 0);
-    const kpi = Number(s['KH DS (tỷ)'] || 1);
-    const percent = Math.round((thucTe / kpi) * 100);
-    if (percent < 70) {
-      insights.push({
+    // Unassigned leads
+    if (stats.leads.unassigned > 0) {
+      items.push({
         type: 'danger',
-        title: `${s['Tên NV']} (${s['Mã NV']}) chỉ đạt ${percent}% KPI`,
-        desc: `DS ${thucTe} tỷ / KH ${kpi} tỷ · ⚠ Dưới KPI - cần coaching`
+        title: `${stats.leads.unassigned} lead chưa phân công`,
+        sub: 'Phân công sales ngay trong ngày để không bỏ lỡ cơ hội tiếp cận.',
+        badge: 'Cần xử lý'
       });
     }
-  });
 
-  // Marketing insights
-  let bestMkt = null;
-  let bestMktRate = 0;
-  marketing.forEach(m => {
-    const cp = Number(m['CP (tr)']);
-    const bk = Number(m['Booking']);
-    if (cp > 0 && bk > 0) {
-      const rate = bk / cp;
-      if (rate > bestMktRate) {
-        bestMktRate = rate;
-        bestMkt = m;
+    // Sales KPI
+    sales.forEach(s => {
+      const percent = Math.round(Number(s['% KPI']) * 100);
+      if (percent < 70) {
+        items.push({
+          type: 'danger',
+          title: `${s['Tên NV']} chỉ đạt ${percent}% KPI`,
+          sub: `DS ${s['Doanh số (tỷ)']} tỷ / KH ${s['KH DS (tỷ)']} tỷ · Dưới KPI — cần coaching`,
+          badge: 'Cảnh báo'
+        });
       }
-    }
-  });
-
-  if (bestMkt) {
-    const leadCount = bestMkt['Lead'];
-    const bookCount = bestMkt['Booking'];
-    const cp = Number(bestMkt['CP (tr)']);
-    const conversion = ((bookCount / leadCount) * 100).toFixed(1);
-    insights.push({
-      type: 'success',
-      title: `${bestMkt['Kênh']} hiệu quả nhất: CĐ ${conversion}%`,
-      desc: `Chi ${cp}tr · ${leadCount} lead · ${bookCount} booking`
     });
-  }
 
-  // --- CHARTS DATA ---
-  
-  // 1. Lead Status (from RPC stats)
-  const leadStatusData = Object.keys(stats.leads.status_counts).map(k => ({ 
-    name: k, 
-    value: stats.leads.status_counts[k] 
-  }));
-  const PIE_COLORS = ['#b366ff', '#ccff00', '#00cc66', '#00e5ff', '#ff4d94', '#ffcc00'];
+    // Marketing ROI
+    let bestMkt = null;
+    let bestMktRate = 0;
+    marketing.forEach(m => {
+      const cp = Number(m['CP (tr)']);
+      const bk = Number(m['Booking']);
+      if (cp > 0 && bk > 0) {
+        const rate = bk / cp;
+        if (rate > bestMktRate) {
+          bestMktRate = rate;
+          bestMkt = m;
+        }
+      }
+    });
 
-  // 2. Booking by Channel
-  const mktChannelData = marketing.map(m => ({
-    name: m['Kênh'],
-    Booking: Number(m['Booking'] || 0)
-  }));
+    if (bestMkt) {
+      items.push({
+        type: 'info',
+        title: `${bestMkt['Kênh']} hiệu quả nhất: CĐ ${((bestMkt['Booking'] / bestMkt['Lead']) * 100).toFixed(1)}%`,
+        sub: `Chi ${bestMkt['CP (tr)']}tr · ${bestMkt['Lead']} lead · ${bestMkt['Booking']} booking`,
+        badge: 'Top kênh'
+      });
+    }
 
-  // 3. Transactions by Zone (from RPC stats)
-  const zoneData = Object.keys(stats.transactions.zone_counts).map(k => ({ 
-    name: k, 
-    value: stats.transactions.zone_counts[k] 
-  }));
-  const ZONE_COLORS = ['#ff4d94', '#4da6ff', '#00e5ff'];
+    return items;
+  }, [trafficLights, stats, sales, marketing]);
 
-  // 4. Funnel
-  const funnelData = [
-    { name: 'Lead Marketing', value: totalLeadMkt, fill: '#ccff00' },
-    { name: 'Lead CRM', value: totalLeads, fill: '#b366ff' },
-    { name: 'Booking MKT', value: totalBooking, fill: '#4da6ff' },
-    { name: 'Giao dịch', value: totalGD, fill: '#ffcc00' },
-    { name: 'Đã ký HĐMB', value: countHDMB, fill: '#ff4d94' }
-  ].reverse();
-
-  // 5. Sales Performance - TOP 5 by KPI %
-  const top5KpiData = [...allSales]
-    .filter(s => Number(s['DS thực (tỷ)']) > 0 || Number(s['KH DS (tỷ)']) > 0)
-    .sort((a, b) => Number(b['% KPI']) - Number(a['% KPI']))
-    .slice(0, 5)
-    .map(s => ({
-      name: s['Tên NV'].split(' ').pop(), 
-      'Thực tế (tỷ)': Number(s['DS thực (tỷ)'] || 0),
-      'KPI (tỷ)': Number(s['KH DS (tỷ)'] || 0)
+  // --- CHART DATA ---
+  const leadStatusSegments = useMemo(() => {
+    const COLORS = ['#ccff00', '#00e5ff', '#ff4d94', '#a78bfa', '#4ade80', '#ffcc00'];
+    const total = stats.leads.total || 1;
+    return Object.entries(stats.leads.status_counts).map(([label, count], i) => ({
+      label, count,
+      pct: Math.round((count / total) * 100),
+      color: COLORS[i % COLORS.length]
     }));
+  }, [stats.leads]);
 
-  // 6. Revenue by Department (Hỗ trợ Filter từ RPC)
-  const deptRevenueData = stats.dept_revenue || [];
+  const bookingBars = useMemo(() => {
+    const COLORS = ['#00e5ff', '#a78bfa', '#ccff00', '#ff4d94', '#ffcc00', '#4ade80'];
+    return marketing.slice(0, 6).map((m, i) => ({
+      label: m['Kênh'].replace(' Ads', '').slice(0, 8),
+      val: Number(m['Booking'] || 0),
+      color: COLORS[i % COLORS.length]
+    }));
+  }, [marketing]);
 
-  const DEPT_COLORS = ['#00e5ff', '#ccff00', '#ff4d94', '#b366ff', '#00cc66', '#ffcc00'];
+  const zoneSegments = useMemo(() => {
+    const COLORS = ['#ff4d94', '#60a5fa', '#00e5ff', '#ccff00'];
+    const total = stats.transactions.total || 1;
+    return Object.entries(stats.transactions.zone_counts).map(([label, count], i) => ({
+      label, count,
+      pct: Math.round((count / total) * 100),
+      color: COLORS[i % COLORS.length]
+    }));
+  }, [stats.transactions]);
+
+  const deptSegments = useMemo(() => {
+    const COLORS = ['#00e5ff', '#ccff00', '#ff4d94', '#a78bfa', '#4ade80', '#ffcc00'];
+    const data = stats.dept_revenue || [];
+    const total = data.reduce((s, d) => s + d.value, 0) || 1;
+    return data.map((d, i) => ({
+      label: d.name,
+      count: d.value,
+      pct: Math.round((d.value / total) * 100),
+      color: COLORS[i % COLORS.length]
+    }));
+  }, [stats.dept_revenue]);
 
   return (
-    <div>
-      {/* KPI GRID */}
-      <div className="dash-kpi-grid">
-        <div className="dash-kpi-card card-revenue">
-          <div className="dash-kpi-title">Doanh thu thực thu</div>
-          <div className="dash-kpi-value">{formatCompact(doanhThu * 1000000000)}</div>
-          <div className="dash-kpi-subtext">{doanhThuPercent}% KH · KH: {doanhThuKH} tỷ</div>
-        </div>
-        
-        <div className="dash-kpi-card card-profit">
-          <div className="dash-kpi-title">Lợi nhuận gộp</div>
-          <div className="dash-kpi-value">{formatCompact(loiNhuan * 1000000000)}</div>
-          <div className="dash-kpi-subtext">{margin}% biên LN</div>
-        </div>
-
-        <div className="dash-kpi-card card-burn">
-          <div className="dash-kpi-title">Burn Rate (Tháng)</div>
-          <div className="dash-kpi-value">{formatCompact(burnRate)}</div>
-          <div className="dash-kpi-subtext">Định phí & Biến phí vận hành</div>
-        </div>
-
-        <div className="dash-kpi-card card-deals">
-          <div className="dash-kpi-title">Giao dịch</div>
-          <div className="dash-kpi-value">{totalGD}</div>
-          <div className="dash-kpi-subtext">{countHDMB} HĐMB · {countCoc} Cọc</div>
-        </div>
-
-        <div className="dash-kpi-card card-leads">
-          <div className="dash-kpi-title">Lead CRM</div>
-          <div className="dash-kpi-value">{totalLeads}</div>
-          <div className="dash-kpi-subtext">{unassignedLeadsCount} chưa phân công</div>
-        </div>
-
-        <div className="dash-kpi-card card-mkt">
-          <div className="dash-kpi-title">MKT Booking</div>
-          <div className="dash-kpi-value">{totalBooking}</div>
-          <div className="dash-kpi-subtext">Chi phí: {formatCompact(totalChiPhiMkt * 1000000)}</div>
-        </div>
+    <div style={{ fontFamily: 'var(--font-family, system-ui, sans-serif)' }}>
+      {/* KPI row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 10, marginBottom: 20 }}>
+        <KpiCard colorClass="lime"   label="Doanh thu thực thu" value={kpis.revenue}  sub={kpis.revenueSub} />
+        <KpiCard colorClass="cyan"   label="Lợi nhuận gộp"      value={kpis.profit}   sub={kpis.profitSub} />
+        <KpiCard colorClass="pink"   label="Burn rate (tháng)"  value={kpis.burn}     sub={kpis.burnSub} />
+        <KpiCard colorClass="amber"  label="Giao dịch"          value={kpis.deals}    sub={kpis.dealsSub} />
+        <KpiCard colorClass="blue"   label="Lead CRM"           value={kpis.leadCount} sub={kpis.leadSub} />
+        <KpiCard colorClass="purple" label="MKT Booking"        value={kpis.booking}  sub={kpis.bookingSub} />
       </div>
 
-      {/* INSIGHTS */}
-      <div className="section-title">▶ Cảnh báo & Insights tự động</div>
-      <div className="insight-list">
-        {insights.map((insight, idx) => (
-          <div key={idx} className={`insight-item alert-${insight.type}`}>
-            <div className="insight-icon"></div>
-            <div className="insight-content">
-              <div className="insight-title">{insight.title}</div>
-              <div className="insight-desc">{insight.desc}</div>
-            </div>
-          </div>
+      {/* alerts */}
+      <SectionHead icon="ti-bolt" label="Cảnh báo & Insights tự động" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
+        {alerts.map((a, i) => (
+          <AlertCard key={i} type={a.type} title={a.title} sub={a.sub} badge={a.badge} />
         ))}
       </div>
 
-      {/* CHARTS ROW 1 */}
-      <div className="dash-charts-grid">
-        <div className="dash-chart-card">
-          <div className="dash-chart-title">Trạng thái Lead CRM</div>
-          <div className="dash-chart-subtitle">Tổng {totalLeads} leads</div>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie data={leadStatusData} cx="40%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={5} dataKey="value">
-                {leadStatusData.map((entry, index) => <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />)}
-              </Pie>
-              <Tooltip content={<CustomTooltip />} />
-              <Legend layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{ fontSize: '11px', color: 'var(--text-muted)' }} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
+      {/* charts */}
+      <SectionHead icon="ti-chart-bar" label="Phân tích chi tiết" />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 12, marginBottom: 24 }}>
+        <ChartCard title="Trạng thái Lead CRM" sub={`Tổng ${stats.leads.total} leads`}>
+          <DonutChart segments={leadStatusSegments} total={stats.leads.total} />
+        </ChartCard>
 
-        <div className="dash-chart-card">
-          <div className="dash-chart-title">Booking theo kênh</div>
-          <div className="dash-chart-subtitle">Tổng {totalBooking} booking</div>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={mktChannelData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a2e39" vertical={false} />
-              <XAxis dataKey="name" stroke="#8b92a5" fontSize={11} tickLine={false} axisLine={false} />
-              <YAxis stroke="#8b92a5" fontSize={11} tickLine={false} axisLine={false} />
-              <Tooltip cursor={{ fill: '#252932' }} content={<CustomTooltip />} />
-              <Bar dataKey="Booking" radius={[4, 4, 0, 0]}>
-                {mktChannelData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={['#4da6ff', '#00e5ff', '#ff4d94', '#00cc66'][index % 4]} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        <ChartCard title="Booking theo kênh" sub={`Tổng ${kpis.booking} booking`}>
+          <BarChart bars={bookingBars} />
+        </ChartCard>
 
-        <div className="dash-chart-card">
-          <div className="dash-chart-title">Giao dịch theo phân khu</div>
-          <div className="dash-chart-subtitle">Tổng {totalGD} giao dịch</div>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie data={zoneData} cx="40%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={5} dataKey="value">
-                {zoneData.map((entry, index) => <Cell key={`cell-${index}`} fill={ZONE_COLORS[index % ZONE_COLORS.length]} />)}
-              </Pie>
-              <Tooltip content={<CustomTooltip />} />
-              <Legend layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{ fontSize: '11px', color: 'var(--text-muted)' }} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="dash-chart-card">
-          <div className="dash-chart-title">Doanh thu theo bộ phận</div>
-          <div className="dash-chart-subtitle">Đơn vị: Tỷ VNĐ</div>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie data={deptRevenueData} cx="40%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={5} dataKey="value">
-                {deptRevenueData.map((entry, index) => <Cell key={`cell-${index}`} fill={DEPT_COLORS[index % DEPT_COLORS.length]} />)}
-              </Pie>
-              <Tooltip content={<CustomTooltip />} />
-              <Legend layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{ fontSize: '11px', color: 'var(--text-muted)' }} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
+        <ChartCard title="Giao dịch theo phân khu" sub={`Tổng ${stats.transactions.total} giao dịch`}>
+          <DonutChart segments={zoneSegments} total={stats.transactions.total} />
+        </ChartCard>
+
+        <ChartCard title="Doanh thu theo bộ phận" sub="Đơn vị: Tỷ VNĐ">
+          <DonutChart segments={deptSegments} total={stats.financial_stats?.revenue || 0} label="tỷ" />
+        </ChartCard>
       </div>
 
-      {/* CHARTS ROW 2: BOD ANALYSIS */}
-      <div className="section-title">▶ Phân tích chuyên sâu cho BOD</div>
-      <div className="dash-charts-wide-grid">
-        <div className="dash-chart-card">
-          <div className="dash-chart-title">Lãi lỗ (P&L) theo dự án</div>
-          <div className="dash-chart-subtitle">Đơn vị: VNĐ</div>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={projectPL} margin={{ top: 10, right: 30, left: 30, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a2e39" vertical={false} />
-              <XAxis dataKey="ten_du_an" stroke="#8b92a5" fontSize={11} axisLine={false} tickLine={false} />
-              <YAxis stroke="#8b92a5" fontSize={11} axisLine={false} tickLine={false} />
-              <Tooltip cursor={{ fill: '#252932' }} content={<CustomTooltip />} />
-              <Legend wrapperStyle={{ fontSize: '11px' }} />
-              <Bar dataKey="total_revenue" name="Doanh thu" fill="#00e5ff" radius={[2, 2, 0, 0]} />
-              <Bar dataKey="net_profit" name="Lợi nhuận ròng" fill="#ccff00" radius={[2, 2, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="dash-chart-card">
-          <div className="dash-chart-title">Dự báo dòng tiền (90 ngày)</div>
-          <div className="dash-chart-subtitle">Kế hoạch thu tiền từ khách hàng</div>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={cashflowForecast} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a2e39" vertical={false} />
-              <XAxis dataKey="period" stroke="#8b92a5" fontSize={11} tickLine={false} axisLine={false} />
-              <YAxis stroke="#8b92a5" fontSize={11} tickLine={false} axisLine={false} />
-              <Tooltip cursor={{ fill: '#252932' }} content={<CustomTooltip />} />
-              <Bar dataKey="expected_amount" name="Tiền dự kiến về" fill="#ff4d94" radius={[2, 2, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+      {/* BOD Analysis */}
+      <SectionHead icon="ti-presentation" label="Phân tích chuyên sâu cho BOD" />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <ChartCard title="Lãi lỗ (P&L) theo dự án" sub="Đơn vị: Tỷ VNĐ">
+          <BarChart bars={projectPL.map(p => ({ label: p.ten_du_an, val: p.net_profit, color: '#ccff00' }))} />
+        </ChartCard>
+        <ChartCard title="Dự báo dòng tiền (90 ngày)" sub="Kế hoạch thu tiền dự kiến">
+          <BarChart bars={cashflowForecast.map(c => ({ label: c.period, val: c.expected_amount, color: '#ff4d94' }))} />
+        </ChartCard>
       </div>
     </div>
   );
 }
+
 
 export default Dashboard;
