@@ -12,15 +12,14 @@ serve(async (req) => {
 
   try {
     const { prompt, context } = await req.json()
-    // Hỗ trợ cả hai cách đặt tên: GEMINI_API_KEY hoặc Gemini API Key
     const apiKey = Deno.env.get('GEMINI_API_KEY') || Deno.env.get('Gemini API Key');
     
-    // Cho phép Sếp tự chọn model qua Secret GEMINI_MODEL, mặc định là gemini-1.5-flash
-    const modelName = Deno.env.get('GEMINI_MODEL') || 'gemini-1.5-flash';
+    // Đã nâng cấp mặc định lên mô hình gemini-3.1-flash mới nhất của năm 2026
+    const modelName = Deno.env.get('GEMINI_MODEL') || 'gemini-3.1-flash';
 
     if (!apiKey) {
       return new Response(
-        JSON.stringify({ reply: 'Hệ thống AI chưa tìm thấy API Key. Vui lòng đảm bảo Sếp đã đặt tên Secret là GEMINI_API_KEY trong Supabase.' }),
+        JSON.stringify({ reply: 'Hệ thống AI chưa tìm thấy API Key. Vui lòng kiểm tra lại Supabase Secrets.' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
