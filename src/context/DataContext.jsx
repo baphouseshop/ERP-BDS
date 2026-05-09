@@ -25,6 +25,7 @@ export const DataProvider = ({ children }) => {
   const [projectPL, setProjectPL] = useState([]);
   const [cashflowForecast, setCashflowForecast] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [session, setSession] = useState(null);
@@ -389,6 +390,7 @@ export const DataProvider = ({ children }) => {
     } finally {
       setIsFetching(false);
       setLoadingData(false);
+      setInitialLoadDone(true);
     }
   }, [
     globalFilter, 
@@ -453,7 +455,7 @@ export const DataProvider = ({ children }) => {
 
   useEffect(() => {
     const handleAuth = async (currentSession) => {
-      setAuthLoading(true);
+      if (!currentUserRef.current) setAuthLoading(true);
       try {
         setSession(currentSession);
         if (currentSession) {
@@ -620,19 +622,19 @@ export const DataProvider = ({ children }) => {
       if (newLeadsArray.length > 5000) throw new Error("Chỉ có thể import tối đa 5000 lead mỗi lần.");
 
       const dbLeads = newLeadsArray.map(l => ({
-        ma_lead: sanitizeString(l["Mã lead"]),
-        ngay_nhan: l["Ngày nhận"] || new Date().toISOString(),
-        ho_ten: sanitizeString(l["Họ tên"]),
-        sdt: sanitizeString(l["SĐT (đầy đủ)"]),
-        nguon: sanitizeString(l["Nguồn"]),
-        chien_dich_id: l["_campaign_id"] || null,
-        nhu_cau: sanitizeString(l["Nhu cầu"]),
-        trang_thai: l["Trạng thái"] || "MỚI TIẾP NHẬN",
-        nhan_vien_id: l["Mã NV"] || null,
-        ten_san: sanitizeString(l["Tên sàn"]),
-        ngay_hen: l["Ngày hẹn"] || null,
-        ngay_fu: l["Ngày FU"] || null,
-        ghi_chu: sanitizeString(l["Ghi chú"])
+        ma_lead: sanitizeString(l["ma_lead"] || l["Mã lead"] || l["Mã Lead"]),
+        ngay_nhan: l["ngay_nhan"] || l["Ngày nhận"] || new Date().toISOString(),
+        ho_ten: sanitizeString(l["ho_ten"] || l["Họ tên"]),
+        sdt: sanitizeString(l["sdt"] || l["SĐT (đầy đủ)"] || l["Số điện thoại"] || l["SĐT"]),
+        nguon: sanitizeString(l["nguon"] || l["Nguồn"]),
+        chien_dich_id: l["_campaign_id"] || l["Mã chiến dịch"] || null,
+        nhu_cau: sanitizeString(l["nhu_cau"] || l["Nhu cầu"]),
+        trang_thai: l["trang_thai"] || l["Trạng thái"] || "MỚI TIẾP NHẬN",
+        nhan_vien_id: l["nhan_vien_id"] || l["Mã NV"] || l["Mã NV phụ trách"] || null,
+        ten_san: sanitizeString(l["ten_san"] || l["Tên sàn"]),
+        ngay_hen: l["ngay_hen"] || l["Ngày hẹn"] || null,
+        ngay_fu: l["ngay_fu"] || l["Ngày FU"] || null,
+        ghi_chu: sanitizeString(l["ghi_chu"] || l["Ghi chú"])
       }));
 
       // Optimistic Update
@@ -751,6 +753,30 @@ export const DataProvider = ({ children }) => {
     }
   }, []);
 
+  const addMultipleTransactions = useCallback(async (data) => {
+    try {
+      const dbTrans = data.map(t => ({
+        ma_gd: sanitizeString(t["ma_gd"] || t["Mã GD"] || t["Mã Giao Dịch"]),
+        ngay_gd: t["ngay_gd"] || t["Ngày GD"] || t["Ngày Giao Dịch"] || new Date().toISOString(),
+        khach_hang_id: t["khach_hang_id"] || t["Mã Lead"] || t["Mã Khách Hàng"],
+        nhan_vien_id: t["nhan_vien_id"] || t["Mã nhân viên"] || t["Mã Nhân Viên"],
+        ma_sp: sanitizeString(t["ma_sp"] || t["Mã SP"] || t["Mã Sản Phẩm"]),
+        phan_khu: sanitizeString(t["phan_khu"] || t["Phân khu"]),
+        gia: Number(t["gia"] || t["Giá (VNĐ)"] || t["Giá trị (Tỷ)"] || 0),
+        tien_coc: Number(t["tien_coc"] || t["Tiền cọc"] || t["Tiền cọc (Tỷ)"] || 0),
+        hoa_hong: Number(t["hoa_hong"] || t["Hoa hồng"] || t["Hoa hồng (Tỷ)"] || 0),
+        trang_thai: t["trang_thai"] || t["Trạng thái"],
+        ghi_chu: sanitizeString(t["ghi_chu"] || t["Ghi chú"])
+      }));
+      const { error } = await supabase.from('transactions').upsert(dbTrans);
+      if (error) throw error;
+      fetchData();
+      toast.success(`Đã import ${data.length} giao dịch thành công`);
+    } catch (error) {
+      toast.error("Lỗi import giao dịch: " + error.message);
+    }
+  }, [fetchData]);
+
   const addMarketing = useCallback(async (newMarketing) => {
     try {
       if (!['Admin', 'BOD', 'Marketing'].includes(currentUser?.role)) {
@@ -810,6 +836,28 @@ export const DataProvider = ({ children }) => {
     }
   }, []);
 
+  const addMultipleMarketing = useCallback(async (data) => {
+    try {
+      const dbMkt = data.map(m => ({
+        ma_chien_dich: sanitizeString(m["ma_chien_dich"] || m["Mã chiến dịch"] || `MKT-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`),
+        thang: m["thang"] || m["Tháng"],
+        kenh: sanitizeString(m["kenh"] || m["Kênh"]),
+        ten_chien_dich: sanitizeString(m["ten_chien_dich"] || m["Tên chiến dịch"]),
+        chi_phi: Number(m["chi_phi"] || m["CP (tr)"] || 0) * 1000000,
+        so_lead: Number(m["so_lead"] || m["Lead"] || 0),
+        so_booking: Number(m["so_booking"] || m["Booking"] || 0),
+        luot_click: Number(m["luot_click"] || m["Click"] || 0),
+        ghi_chu: sanitizeString(m["ghi_chu"] || m["Ghi chú"])
+      }));
+      const { error } = await supabase.from('marketing_campaigns').upsert(dbMkt);
+      if (error) throw error;
+      fetchData();
+      toast.success(`Đã import ${data.length} chiến dịch thành công`);
+    } catch (error) {
+      toast.error("Lỗi import marketing: " + error.message);
+    }
+  }, [fetchData]);
+
   const addFinancial = useCallback(async (newFinancial) => {
     const dbFin = {
       thang: newFinancial["Tháng"],
@@ -844,6 +892,27 @@ export const DataProvider = ({ children }) => {
     }
   }, []);
 
+  const addMultipleFinancials = useCallback(async (data) => {
+    try {
+      const dbFin = data.map(f => ({
+        ma_tc: sanitizeString(f["ma_tc"] || f["Mã TC"] || `FIN-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`),
+        thang: f["thang"] || f["Tháng"],
+        hang_muc: sanitizeString(f["hang_muc"] || f["Hạng mục"]),
+        loai: f["loai"] || f["Loại"],
+        thuc_te: Number(f["thuc_te"] || f["Thực tế (tỷ)"] || 0) * 1000000000,
+        ke_hoach: Number(f["ke_hoach"] || f["KH (tỷ)"] || 0) * 1000000000,
+        ghi_chu: sanitizeString(f["ghi_chu"] || f["Ghi chú"]),
+        nguoi_duyet_id: f["nguoi_duyet_id"] || f["_approver_id"]
+      }));
+      const { error } = await supabase.from('financial_records').upsert(dbFin);
+      if (error) throw error;
+      fetchData();
+      toast.success(`Đã import ${data.length} bản ghi tài chính thành công`);
+    } catch (error) {
+      toast.error("Lỗi import tài chính: " + error.message);
+    }
+  }, [fetchData]);
+
   const addStaff = useCallback(async (newStaff) => {
     const dbStaff = {
       ma_nv: newStaff["Mã NV"],
@@ -865,6 +934,30 @@ export const DataProvider = ({ children }) => {
       setStaff(prev => [newStaff, ...prev]);
     }
   }, []);
+
+  const addMultipleStaff = useCallback(async (data) => {
+    try {
+      const dbStaff = data.map(s => ({
+        ma_nv: sanitizeString(s["ma_nv"] || s["Mã NV"]),
+        ho_ten: sanitizeString(s["ho_ten"] || s["Tên NV"]),
+        phong_ban: sanitizeString(s["phong_ban"] || s["Sàn"]),
+        chuc_vu: sanitizeString(s["chuc_vu"] || s["Chức vụ"]),
+        sdt: sanitizeString(s["sdt"] || s["SĐT"]),
+        email: sanitizeString(s["email"] || s["Email"]),
+        ngay_vao_lam: s["ngay_vao_lam"] || s["Ngày vào làm"] || null,
+        trang_thai: s["trang_thai"] || s["Trạng thái"],
+        luong: Number(s["luong"] || s["Lương (VNĐ)"] || 0),
+        quan_ly_id: s["quan_ly_id"] || s["Quản lý (Mã NV)"],
+        quyen: s["quyen"] || s["Quyền"]
+      }));
+      const { error } = await supabase.from('employees').upsert(dbStaff);
+      if (error) throw error;
+      fetchData();
+      toast.success(`Đã import ${data.length} nhân sự thành công`);
+    } catch (error) {
+      toast.error("Lỗi import nhân sự: " + error.message);
+    }
+  }, [fetchData]);
 
   const editStaff = useCallback(async (updatedStaff) => {
     const dbStaff = {
@@ -996,10 +1089,10 @@ export const DataProvider = ({ children }) => {
     dashboardStats, itemsPerPage,
     executiveScorecard, trafficLights, projectPL, cashflowForecast,
     addLead, editLead, deleteLead, addMultipleLeads, updateLeads,
-    addTransaction, editTransaction, deleteTransaction,
-    addMarketing, editMarketing, deleteMarketing,
-    addFinancial, editFinancial, deleteFinancial,
-    addStaff, editStaff, deleteStaff,
+    addTransaction, editTransaction, deleteTransaction, addMultipleTransactions,
+    addMarketing, editMarketing, deleteMarketing, addMultipleMarketing,
+    addFinancial, editFinancial, deleteFinancial, addMultipleFinancials,
+    addStaff, editStaff, deleteStaff, addMultipleStaff,
     refreshData: () => fetchData()
   }), [
     globalFilter, allLeads, allTransactions, allMarketing, allFinancials, sales, allSales, staff,
@@ -1010,10 +1103,10 @@ export const DataProvider = ({ children }) => {
     financialsPage, financialsTotal, financialsSearch, financialsSort,
     dashboardStats, executiveScorecard, trafficLights, projectPL, cashflowForecast,
     addLead, editLead, deleteLead, addMultipleLeads, updateLeads,
-    addTransaction, editTransaction, deleteTransaction,
-    addMarketing, editMarketing, deleteMarketing,
-    addFinancial, editFinancial, deleteFinancial,
-    addStaff, editStaff, deleteStaff, fetchData
+    addTransaction, editTransaction, deleteTransaction, addMultipleTransactions,
+    addMarketing, editMarketing, deleteMarketing, addMultipleMarketing,
+    addFinancial, editFinancial, deleteFinancial, addMultipleFinancials,
+    addStaff, editStaff, deleteStaff, addMultipleStaff, fetchData
   ]);
 
   return (

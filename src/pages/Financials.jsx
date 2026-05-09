@@ -1,17 +1,41 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useData } from '../context/DataContext';
 import { KpiCard, SectionHead, DonutChart, BarChart, ChartCard, fmt } from '../components/VisualLanguage';
+import { downloadTemplate } from '../utils/templateGenerator';
+import * as XLSX from 'xlsx';
+import toast from 'react-hot-toast';
 
 function Financials() {
   const { 
     financials, financialsTotal, financialsPage, setFinancialsPage,
     financialsSearch, setFinancialsSearch, financialsSort, setFinancialsSort,
-    staff, addFinancial, editFinancial, deleteFinancial,
+    staff, addFinancial, editFinancial, deleteFinancial, addMultipleFinancials,
     itemsPerPage, dashboardStats
   } = useData();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const bstr = evt.target.result;
+        const wb = XLSX.read(bstr, { type: 'binary' });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const data = XLSX.utils.sheet_to_json(ws);
+        addMultipleFinancials(data);
+      } catch (err) {
+        toast.error("Lỗi đọc file: " + err.message);
+      }
+    };
+    reader.readAsBinaryString(file);
+    e.target.value = null;
+  };
   const [filterType, setFilterType] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   
@@ -128,7 +152,7 @@ function Financials() {
               fontSize: 13
             }} onClick={() => {
               toast.success("Đang chuẩn bị mẫu nhập liệu...");
-              setTimeout(() => toast.success("Đã tải xuống mẫu nhập liệu"), 1000);
+              downloadTemplate('financials');
             }}>
               <i className="ti ti-download" style={{ marginRight: 6 }}></i> Tải mẫu nhập liệu
             </button>
@@ -139,9 +163,16 @@ function Financials() {
               display: 'flex',
               alignItems: 'center',
               fontSize: 13
-            }} onClick={() => toast.success("Vui lòng chọn file mẫu để upload")}>
+            }} onClick={() => fileInputRef.current.click()}>
               <i className="ti ti-upload" style={{ marginRight: 6 }}></i> Up file hàng loạt
             </button>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              style={{ display: 'none' }} 
+              accept=".csv, .xlsx, .xls"
+              onChange={handleFileUpload}
+            />
             <select className="filter-select" style={{ width: 180, margin: 0 }} value={`${financialsSort.column}-${financialsSort.ascending ? 'asc' : 'desc'}`} onChange={e => { const [column, dir] = e.target.value.split('-'); setFinancialsSort({ column, ascending: dir === 'asc' }); }}>
               <option value="thang-desc">Mới nhất lên đầu</option>
               <option value="thang-asc">Cũ nhất lên đầu</option>

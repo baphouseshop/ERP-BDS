@@ -176,7 +176,7 @@ function Dashboard() {
   // --- TABLE DATA ---
   const tableData = useMemo(() => ({
     topSales: sales.slice(0, 5).map(s => [s['Tên NV'], fmt(Number(s['Doanh số (tỷ)']) * 1_000_000_000), (Number(s['% KPI']) * 100).toFixed(0) + '%']),
-    recentTx: transactions.slice(0, 5).map(t => [t['Tên KH'], t['Phân khu'], fmt(t['Giá trị HĐ (tr)'] * 1_000_000), t['Trạng thái']]),
+    recentTx: transactions.slice(0, 5).map(t => [t['Ngày GD'] || '-', t['Khách hàng'] || '-', t['Phân khu'] || '-', fmt(Number(t['Giá (VNĐ)'] || 0) * 1_000_000_000), t['Trạng thái'] || '-']),
     mktROI: marketing.slice(0, 5).map(m => [m['Kênh'], m['Lead'], m['Booking'], m['CP (tr)'] + 'tr']),
     finStats: financials.slice(0, 5).map(f => [f['Hạng mục'], f['Loại'], fmt(Number(f['Thực tế (tỷ)']) * 1_000_000_000)])
   }), [sales, transactions, marketing, financials]);
@@ -228,7 +228,7 @@ function Dashboard() {
           <Table headers={['Nhân viên', 'Doanh số', 'KPI']} rows={tableData.topSales} />
         </ChartCard>
         <ChartCard title="Giao dịch mới nhất" sub="Theo dõi tiến độ hợp đồng">
-          <Table headers={['Khách hàng', 'Khu', 'Giá trị', 'Trạng thái']} rows={tableData.recentTx} />
+          <Table headers={['Ngày GD', 'Khách hàng', 'Khu', 'Giá trị', 'Trạng thái']} rows={tableData.recentTx} />
         </ChartCard>
         <ChartCard title="Hiệu suất Marketing" sub="Lead & Booking theo kênh">
           <Table headers={['Kênh', 'Lead', 'Book', 'Chi phí']} rows={tableData.mktROI} />

@@ -3,6 +3,7 @@ import { useData } from '../context/DataContext';
 import { 
   KpiCard, ChartCard, SectionHead, BarChart, fmt 
 } from '../components/VisualLanguage';
+import { downloadTemplate } from '../utils/templateGenerator';
 
 function Sales() {
   const { sales, staff } = useData();
@@ -62,7 +63,7 @@ function Sales() {
               fontSize: 13
             }} onClick={() => {
               toast.success("Đang chuẩn bị mẫu nhập liệu...");
-              setTimeout(() => toast.success("Đã tải xuống mẫu nhập liệu"), 1000);
+              downloadTemplate('staff');
             }}>
               <i className="ti ti-download" style={{ marginRight: 6 }}></i> Tải mẫu nhập liệu
             </button>

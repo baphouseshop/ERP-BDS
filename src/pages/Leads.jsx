@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { 
   KpiCard, SectionHead, fmt 
 } from '../components/VisualLanguage';
+import { downloadTemplate } from '../utils/templateGenerator';
 
 function Leads() {
   const {
@@ -163,9 +164,8 @@ function Leads() {
               alignItems: 'center',
               fontSize: 13
             }} onClick={() => {
-              // Dummy download function
               toast.success("Đang chuẩn bị mẫu nhập liệu...");
-              setTimeout(() => toast.success("Đã tải xuống mẫu nhập liệu"), 1000);
+              downloadTemplate('leads');
             }}>
               <i className="ti ti-download" style={{ marginRight: 6 }}></i> Tải mẫu nhập liệu
             </button>

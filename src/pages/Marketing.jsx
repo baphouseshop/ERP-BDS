@@ -1,19 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useData } from '../context/DataContext';
 import { 
   KpiCard, ChartCard, SectionHead, BarChart, fmt 
 } from '../components/VisualLanguage';
+import { downloadTemplate } from '../utils/templateGenerator';
+import * as XLSX from 'xlsx';
+import toast from 'react-hot-toast';
 
 function Marketing() {
   const { 
     marketing, marketingTotal, marketingPage, setMarketingPage, 
     marketingSearch, setMarketingSearch, marketingSort, setMarketingSort,
-    itemsPerPage, addMarketing, editMarketing, deleteMarketing,
+    itemsPerPage, addMarketing, editMarketing, deleteMarketing, addMultipleMarketing,
     dashboardStats
   } = useData();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const bstr = evt.target.result;
+        const wb = XLSX.read(bstr, { type: 'binary' });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const data = XLSX.utils.sheet_to_json(ws);
+        addMultipleMarketing(data);
+      } catch (err) {
+        toast.error("Lỗi đọc file: " + err.message);
+      }
+    };
+    reader.readAsBinaryString(file);
+    e.target.value = null;
+  };
 
   // Debounced Search Logic
   const [localSearch, setLocalSearch] = useState(marketingSearch);
@@ -175,7 +199,7 @@ function Marketing() {
               fontSize: 13
             }} onClick={() => {
               toast.success("Đang chuẩn bị mẫu nhập liệu...");
-              setTimeout(() => toast.success("Đã tải xuống mẫu nhập liệu"), 1000);
+              downloadTemplate('marketing');
             }}>
               <i className="ti ti-download" style={{ marginRight: 6 }}></i> Tải mẫu nhập liệu
             </button>
@@ -186,9 +210,16 @@ function Marketing() {
               display: 'flex',
               alignItems: 'center',
               fontSize: 13
-            }} onClick={() => toast.success("Vui lòng chọn file mẫu để upload")}>
+            }} onClick={() => fileInputRef.current.click()}>
               <i className="ti ti-upload" style={{ marginRight: 6 }}></i> Up file hàng loạt
             </button>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              style={{ display: 'none' }} 
+              accept=".csv, .xlsx, .xls"
+              onChange={handleFileUpload}
+            />
             <select 
               className="filter-select" 
               style={{ width: 180, margin: 0 }}
