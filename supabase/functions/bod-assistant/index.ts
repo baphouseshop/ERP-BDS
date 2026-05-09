@@ -1,5 +1,4 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { GoogleGenerativeAI } from 'https://esm.sh/@google/generative-ai'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,7 +14,8 @@ serve(async (req) => {
     const { prompt, context } = await req.json()
     const apiKey = Deno.env.get('GEMINI_API_KEY') || Deno.env.get('Gemini API Key');
     
-    // Ép buộc sử dụng gemini-1.5-flash để dứt điểm lỗi 404 Not Found của các model preview
+    // Sử dụng v1 (ổn định nhất) và gemini-1.5-flash
+    const apiVersion = 'v1';
     const modelName = 'gemini-1.5-flash';
 
     if (!apiKey) {
@@ -24,9 +24,6 @@ serve(async (req) => {
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: modelName });
 
     const systemPrompt = `
       Bạn là Trợ lý Trí tuệ BOD (BOD Intelligence Assistant) cho Blanca CRM. 
@@ -44,9 +41,29 @@ serve(async (req) => {
       4. NGÔN NGỮ: Tiếng Việt.
     `;
 
-    const result = await model.generateContent(systemPrompt + '\n\nUser: ' + prompt);
-    const response = await result.response;
-    const reply = response.text();
+    // Gọi API trực tiếp qua fetch để kiểm soát hoàn toàn URL, dùng v1 thay vì v1beta
+    const url = `https://generativelanguage.googleapis.com/${apiVersion}/models/${modelName}:generateContent?key=${apiKey}`;
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: systemPrompt + '\n\nUser: ' + prompt }]
+        }]
+      })
+    });
+
+    const data = await response.json();
+    
+    if (data.error) {
+      return new Response(
+        JSON.stringify({ reply: `Lỗi Gemini (${apiVersion}/${modelName}): ` + (data.error.message || 'Không rõ lỗi') }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'AI không trả về kết quả.';
 
     return new Response(
       JSON.stringify({ reply }),
@@ -56,7 +73,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Function Error:', error);
     return new Response(
-      JSON.stringify({ reply: `Lỗi hệ thống (gemini-1.5-flash): ` + error.message }),
+      JSON.stringify({ reply: 'Lỗi kết nối: ' + error.message }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
