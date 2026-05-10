@@ -35,7 +35,7 @@ export function ProjectsClient({ initialDevelopers, initialProjects }: ProjectsC
 
   // Form states
   const [devForm, setDevForm] = useState({ name: "", code: "", contact_email: "", contact_phone: "" });
-  const [projForm, setProjForm] = useState({ name: "", code: "", developer_id: "", default_commission_rate: "3", address: "" });
+  const [projForm, setProjForm] = useState({ name: "", code: "", developer_id: "", default_commission_rate: "3", address: "", image_url: "" });
 
   const handleAddDeveloper = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,7 +60,7 @@ export function ProjectsClient({ initialDevelopers, initialProjects }: ProjectsC
     }]);
     if (!error) {
       setIsModalOpen(false);
-      setProjForm({ name: "", code: "", developer_id: "", default_commission_rate: "3", address: "" });
+      setProjForm({ name: "", code: "", developer_id: "", default_commission_rate: "3", address: "", image_url: "" });
       router.refresh();
     } else {
       alert(error.message);
@@ -168,6 +168,15 @@ export function ProjectsClient({ initialDevelopers, initialProjects }: ProjectsC
                 className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20"
                 value={projForm.name}
                 onChange={e => setProjForm({...projForm, name: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-muted-foreground uppercase">Ảnh bìa (URL)</label>
+              <input 
+                placeholder="https://images.unsplash.com/..."
+                className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20"
+                value={projForm.image_url}
+                onChange={e => setProjForm({...projForm, image_url: e.target.value})}
               />
             </div>
             <div className="space-y-2">
