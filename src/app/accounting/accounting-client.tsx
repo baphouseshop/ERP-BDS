@@ -192,7 +192,7 @@ export function AccountingClient({
 
               <button 
                 onClick={() => handleOpenPayment(schedule)}
-                className="w-full py-2.5 bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-500/20 hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                className="w-full py-2.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl text-xs font-bold hover:bg-emerald-500 hover:text-white transition-all duration-300 flex items-center justify-center gap-2"
               >
                 <CheckCircle2 size={14} />
                 Xác nhận thu tiền
@@ -351,7 +351,7 @@ export function AccountingClient({
 
           <button 
             disabled={isLoading}
-            className="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-emerald-500/20"
+            className="w-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 py-3 rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 hover:bg-emerald-500 hover:text-white transition-all duration-300"
           >
             {isLoading ? <Loader2 className="animate-spin" size={18} /> : <CheckCircle2 size={18} />}
             Xác nhận giao dịch
