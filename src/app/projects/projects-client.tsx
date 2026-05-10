@@ -261,7 +261,18 @@ export function ProjectsClient({ initialDevelopers, initialProjects }: ProjectsC
           {filteredProjects.map((project) => (
             <div key={project.id} className="glass-card rounded-2xl overflow-hidden group hover:border-primary/30 transition-all duration-300">
               <div className="h-48 bg-secondary/50 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+                {project.image_url ? (
+                  <img 
+                    src={project.image_url} 
+                    alt={project.name}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center text-muted-foreground/20">
+                    <Building2 size={48} />
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
                 <div className="absolute top-4 right-4">
                   <Badge variant={project.is_active ? "success" : "secondary"}>
                     {project.is_active ? "Đang bán" : "Tạm ngưng"}
@@ -287,7 +298,7 @@ export function ProjectsClient({ initialDevelopers, initialProjects }: ProjectsC
                   </div>
                   <div>
                     <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Hoa hồng</p>
-                    <p className="text-sm font-semibold mt-0.5 text-primary">{project.default_commission_rate}%</p>
+                    <p className="text-sm font-semibold mt-0.5 text-primary">{(project.default_commission_rate || 0).toFixed(1)}%</p>
                   </div>
                 </div>
                 <div className="flex items-center justify-between pt-4">

@@ -9,7 +9,7 @@ export default async function ProjectsPage() {
     { data: projects }
   ] = await Promise.all([
     supabase.from("developers").select("*").order("name"),
-    supabase.from("projects").select("*, developers(name)").order("created_at", { ascending: false })
+    supabase.from("projects").select("*, developers(name), image_url").order("created_at", { ascending: false })
   ]);
 
   return (
