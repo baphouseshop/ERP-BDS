@@ -44,6 +44,9 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
   const router = useRouter();
   const supabase = createClient();
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedPeriod, setSelectedPeriod] = useState("all");
+  const [selectedProject, setSelectedProject] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
@@ -91,20 +94,38 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
   const currentMonth = new Date().getMonth() + 1;
   const currentMonthAnalysis = analysis.find(a => parseInt(a.month) === currentMonth) || analysis[0];
 
+  const filteredExpenses = initialExpenses.filter(expense => {
+    const matchesSearch = expense.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         expense.projects?.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesProject = selectedProject === "all" || expense.project_id === selectedProject;
+    const matchesCategory = selectedCategory === "all" || expense.category === selectedCategory;
+    
+    // Simple period filtering logic
+    let matchesPeriod = true;
+    if (selectedPeriod === "this-month") {
+      const expenseDate = new Date(expense.expense_date);
+      matchesPeriod = expenseDate.getMonth() + 1 === currentMonth && expenseDate.getFullYear() === new Date().getFullYear();
+    }
+    
+    return matchesSearch && matchesProject && matchesCategory && matchesPeriod;
+  });
+
+  const totalFilteredAmount = filteredExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+
   const stats = [
     {
-      title: "Tổng chi phí tháng",
-      value: fmt(currentMonthAnalysis ? parseFloat(currentMonthAnalysis.total_amount) : 0),
+      title: "Tổng chi phí lọc",
+      value: fmt(totalFilteredAmount),
       change: "+12%",
       trend: "up",
-      subtext: "so với tháng trước",
+      subtext: "Theo bộ lọc hiện tại",
       icon: BadgeDollarSign,
       color: "text-blue-500",
       bg: "bg-blue-500/10",
     },
     {
       title: "Chi phí Marketing",
-      value: fmt(currentMonthAnalysis ? parseFloat(currentMonthAnalysis.total_amount) : 0),
+      value: fmt(filteredExpenses.filter(e => e.category === 'marketing').reduce((sum, e) => sum + e.amount, 0)),
       change: "-5%",
       trend: "down",
       subtext: "quảng cáo + sự kiện",
@@ -113,26 +134,43 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
       bg: "bg-purple-500/10",
     },
     {
-      title: "CPA (chi phí/HĐMB)",
-      value: "25.000.000 đ",
+      title: "Số lượng khoản chi",
+      value: `${filteredExpenses.length} mục`,
       change: "-8%",
       trend: "down",
-      subtext: "Dựa trên data thật",
+      subtext: "Trong kỳ báo cáo",
       icon: TrendingUp,
       color: "text-emerald-500",
       bg: "bg-emerald-500/10",
     },
     {
-      title: "ROAS",
-      value: "4.9×",
+      title: "Dự án đang xem",
+      value: selectedProject === 'all' ? "Tất cả" : projects.find(p => p.id === selectedProject)?.name || "N/A",
       change: "+0.6",
       trend: "up",
-      subtext: "đồng doanh thu/đồng MKT",
+      subtext: "Dữ liệu lọc theo dự án",
       icon: PieChart,
       color: "text-orange-500",
       bg: "bg-orange-500/10",
     },
   ];
+
+  // Calculate dynamic breakdown
+  const categories = [
+    { id: 'marketing', label: "Marketing & Quảng cáo", color: "bg-blue-500" },
+    { id: 'event', label: "Sự kiện mở bán", color: "bg-purple-500" },
+    { id: 'office', label: "Văn phòng & Nhà mẫu", color: "bg-orange-500" },
+    { id: 'salary', label: "Lương & Thưởng", color: "bg-emerald-500" },
+    { id: 'other', label: "Khác", color: "bg-slate-500" },
+  ];
+
+  const breakdown = categories.map(cat => {
+    const amount = filteredExpenses
+      .filter(e => e.category === cat.id)
+      .reduce((sum, e) => sum + e.amount, 0);
+    const percentage = totalFilteredAmount > 0 ? (amount / totalFilteredAmount) * 100 : 0;
+    return { ...cat, amount, percentage };
+  });
 
   return (
     <div className="space-y-8 pb-12">
@@ -173,10 +211,14 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
           <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1">Kỳ</label>
           <div className="relative">
             <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-            <select className="w-full bg-secondary border border-white/5 rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary/20 cursor-pointer outline-none">
-              <option>Tháng này</option>
-              <option>Tháng trước</option>
-              <option>Quý này</option>
+            <select 
+              value={selectedPeriod}
+              onChange={(e) => setSelectedPeriod(e.target.value)}
+              className="w-full bg-secondary border border-white/5 rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary/20 cursor-pointer outline-none"
+            >
+              <option value="all">Tất cả thời gian</option>
+              <option value="this-month">Tháng này</option>
+              <option value="last-month">Tháng trước</option>
             </select>
           </div>
         </div>
@@ -184,8 +226,12 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
           <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1">Dự án</label>
           <div className="relative">
             <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-            <select className="w-full bg-secondary border border-white/5 rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary/20 cursor-pointer outline-none">
-              <option>Tất cả dự án</option>
+            <select 
+              value={selectedProject}
+              onChange={(e) => setSelectedProject(e.target.value)}
+              className="w-full bg-secondary border border-white/5 rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary/20 cursor-pointer outline-none"
+            >
+              <option value="all">Tất cả dự án</option>
               {projects.map(p => (
                 <option key={p.id} value={p.id}>{p.name}</option>
               ))}
@@ -196,8 +242,12 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
           <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1">Loại</label>
           <div className="relative">
             <Tag className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-            <select className="w-full bg-secondary border border-white/5 rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary/20 cursor-pointer outline-none">
-              <option>Tất cả loại</option>
+            <select 
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-full bg-secondary border border-white/5 rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary/20 cursor-pointer outline-none"
+            >
+              <option value="all">Tất cả loại</option>
               <option value="marketing">Marketing & Quảng cáo</option>
               <option value="event">Sự kiện mở bán</option>
               <option value="office">Văn phòng & Nhà mẫu</option>
@@ -244,13 +294,7 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
             </div>
             
             <div className="space-y-5">
-              {[
-                { label: "Marketing & Quảng cáo", amount: 120000000, color: "bg-blue-500", percentage: 42 },
-                { label: "Sự kiện mở bán", amount: 85000000, color: "bg-purple-500", percentage: 30 },
-                { label: "Văn phòng & Nhà mẫu", amount: 50000000, color: "bg-orange-500", percentage: 18 },
-                { label: "Lương & BHXH", amount: 18000000, color: "bg-emerald-500", percentage: 6 },
-                { label: "Phần mềm & Khác", amount: 12000000, color: "bg-slate-500", percentage: 4 },
-              ].map((item) => (
+              {breakdown.map((item) => (
                 <div key={item.label} className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-semibold text-muted-foreground">{item.label}</span>
@@ -304,7 +348,7 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
-                  {initialExpenses.map((expense) => (
+                  {filteredExpenses.map((expense) => (
                     <tr key={expense.id} className="hover:bg-white/[0.02] transition-colors group">
                       <td className="py-5 px-6 text-sm font-medium">{new Date(expense.expense_date).toLocaleDateString('vi-VN')}</td>
                       <td className="py-5 px-6">
