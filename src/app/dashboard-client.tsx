@@ -209,9 +209,26 @@ export function DashboardClient({
                   hide={true}
                 />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#111', border: '1px solid #ffffff10', borderRadius: '16px' }}
-                  itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
-                  formatter={(value: number) => [`${value.toFixed(1)}Tr`, 'Doanh thu']}
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-background/95 backdrop-blur-md border border-border p-3 rounded-xl shadow-2xl space-y-2">
+                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest border-b border-border/50 pb-1">
+                            Tháng {label}
+                          </p>
+                          {payload.map((entry: any, index: number) => (
+                            <div key={index} className="flex items-center justify-between gap-4">
+                              <span className="text-[10px] font-medium text-muted-foreground">{entry.name === 'current' ? 'Năm nay' : 'Năm trước'}</span>
+                              <span className="text-xs font-bold" style={{ color: entry.stroke }}>
+                                {entry.value.toFixed(1)}Tr
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
                 />
                 <Area 
                   type="monotone" 
@@ -261,8 +278,21 @@ export function DashboardClient({
                   ))}
                 </Pie>
                 <Tooltip 
-                   contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px' }}
-                   formatter={(value: number) => [formatCompactNumber(value), 'Doanh số']}
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-background/95 backdrop-blur-md border border-border p-3 rounded-xl shadow-2xl">
+                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">
+                            {payload[0].name}
+                          </p>
+                          <p className="text-sm font-bold text-primary">
+                            {formatCompactNumber(payload[0].value as number)}
+                          </p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
                 />
               </PieChart>
             </ResponsiveContainer>
