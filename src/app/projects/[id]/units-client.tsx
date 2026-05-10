@@ -18,7 +18,9 @@ import {
   Loader2,
   Calendar,
   User,
-  CreditCard
+  CreditCard,
+  Download,
+  Upload
 } from "lucide-react";
 
 interface UnitsClientProps {
@@ -158,6 +160,75 @@ export function UnitsClient({ initialUnits, projectId, customers, employees }: U
     }
     setIsLoading(false);
   };
+  const handleDownloadTemplate = () => {
+    const headers = ["Mã căn", "Block", "Tầng", "Số căn", "Loại căn", "Diện tích (m2)", "Số PN", "Giá niêm yết (VND)"];
+    const example = ["P1-2508", "P1", "25", "08", "2BR", "68.5", "2", "3500000000"];
+    const csvContent = [headers, example].map(e => e.join(",")).join("\n");
+    
+    const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `mau_import_${projectId.slice(0,5)}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsLoading(true);
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const text = event.target?.result as string;
+        // Basic CSV parsing (splitting by lines and commas)
+        const lines = text.split(/\r?\n/).filter(line => line.trim() !== "");
+        if (lines.length < 2) {
+          alert("File không có dữ liệu hoặc sai định dạng.");
+          return;
+        }
+
+        const dataToInsert = lines.slice(1).map(line => {
+          // Handle potential quotes in CSV if needed, but keeping it simple for now
+          const values = line.split(",").map(v => v.trim().replace(/^"|"$/g, ''));
+          return {
+            project_id: projectId,
+            code: values[0],
+            block: values[1],
+            floor: values[2],
+            unit_number: values[3],
+            unit_type: values[4],
+            area_usable: parseFloat(values[5]) || 0,
+            bedrooms: parseInt(values[6]) || 0,
+            list_price: parseFloat(values[7]) || 0,
+            status: 'available'
+          };
+        }).filter(item => item.code); // Basic validation
+
+        if (dataToInsert.length === 0) {
+          alert("Không tìm thấy dữ liệu hợp lệ để import.");
+          return;
+        }
+
+        const { error } = await supabase.from("units").insert(dataToInsert);
+        if (error) throw error;
+
+        alert(`Đã import thành công ${dataToInsert.length} sản phẩm!`);
+        router.refresh();
+      } catch (err: any) {
+        console.error("Import error:", err);
+        alert("Lỗi khi import: " + err.message);
+      } finally {
+        setIsLoading(false);
+        e.target.value = ""; // Reset
+      }
+    };
+    reader.readAsText(file);
+  };
 
   return (
     <div className="space-y-6">
@@ -186,6 +257,28 @@ export function UnitsClient({ initialUnits, projectId, customers, employees }: U
         </div>
 
         <div className="flex items-center gap-3">
+          <input 
+            type="file" 
+            id="import-units" 
+            className="hidden" 
+            accept=".csv"
+            onChange={handleImportFile}
+          />
+          <button 
+            onClick={handleDownloadTemplate}
+            className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white rounded-xl text-sm font-bold border border-white/10 hover:bg-slate-700 transition-colors"
+          >
+            <Download size={18} />
+            <span className="hidden sm:inline">Tải mẫu Import</span>
+          </button>
+          <button 
+            onClick={() => document.getElementById('import-units')?.click()}
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/20 hover:opacity-90 transition-opacity"
+          >
+            <Upload size={18} />
+            <span className="hidden sm:inline">Import Giỏ hàng</span>
+          </button>
+          <div className="w-px h-6 bg-border/50 mx-1 hidden sm:block" />
           <button 
             onClick={() => setIsAddUnitModalOpen(true)}
             className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/20 hover:opacity-90 transition-opacity"
@@ -193,7 +286,7 @@ export function UnitsClient({ initialUnits, projectId, customers, employees }: U
             <Plus size={18} />
             <span>Thêm sản phẩm</span>
           </button>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 ml-2">
             <button 
               onClick={() => setViewMode("grid")}
               className={cn(
