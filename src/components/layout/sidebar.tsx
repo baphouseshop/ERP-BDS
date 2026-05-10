@@ -30,6 +30,7 @@ const menuItems = [
   { name: "Hợp đồng", href: "/contracts", icon: FileText },
   { name: "Marketing & Chi phí", href: "/marketing", icon: Target },
   { name: "Kế toán & Hoa hồng", href: "/accounting", icon: Calculator },
+  { name: "Phân tích Tài chính", href: "/finance", icon: PieChart },
   { name: "Báo cáo & KPI", href: "/reports", icon: BarChart3 },
   { name: "Lịch sử & Audit", href: "/audit", icon: History },
 ];

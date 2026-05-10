@@ -45,13 +45,20 @@
 - **Tooltip Escape System:** Vá lỗi hiển thị số liệu khi hover (Tooltip clipping) trên toàn bộ Dashboard, đảm bảo trải nghiệm phân tích dữ liệu mượt mà và chuyên nghiệp.
 - **Unified Action Menus:** Triển khai hệ thống Menu thao tác (MoreVertical) đồng nhất trên module Marketing và Kế toán, hỗ trợ Sửa/Xóa nhanh bản ghi để tối ưu hóa thời gian vận hành.
 
-## 8. Kết luận & Hướng phát triển
-Hệ thống hiện đã đạt trạng thái **Production Stability**. Toàn bộ luồng dữ liệu từ lúc ký hợp đồng đến khi thu tiền CĐT và chi hoa hồng nội bộ đã được khép kín, chính xác và có giao diện trực quan cao cấp.
+## 8. Mô-đun Phân tích Tài chính chuyên sâu (Advanced Finance Module)
+- **Finance Central:** Triển khai trang `/finance` chuyên biệt để phân tích các chỉ số tài chính vĩ mô: ROS (Return on Sales), Burn Rate và Tỷ suất sinh lời theo dự án.
+- **Advanced Expense Tracking:** Tích hợp hệ thống quản lý chi phí vận hành (Operational Expenses - OPEX) chi tiết theo 14 hạng mục (Lương, Marketing, Mặt bằng, Công tác phí...).
+- **Profitability Radar:** Hệ thống biểu đồ so sánh Doanh thu (Revenue) vs Chi phí (Expense) theo từng dự án, giúp nhận diện ngay lập tức các dự án đang mang lại lợi nhuận cao nhất hoặc đang bị âm dòng tiền.
+- **AI Financial Advisor:** Tự động hóa nhận định tình hình tài chính bằng AI Agent, đưa ra các đề xuất tối ưu hóa chi phí dựa trên dữ liệu thực tế.
+
+## 9. Kết luận & Hướng phát triển
+Hệ thống hiện đã đạt trạng thái **Full Scale ERP**. Toàn bộ luồng dữ liệu từ lúc ký hợp đồng đến khi phân tích hiệu quả kinh doanh cuối cùng đã được khép kín, chính xác và có giao diện trực quan cao cấp.
 
 ### Bước tiếp theo:
 1.  **Mobile App Integration:** Tối ưu hóa UI cho các thiết bị di động để lãnh đạo theo dõi mọi lúc mọi nơi.
 2.  **Audit History UI:** Xây dựng màn hình xem chi tiết lịch sử thay đổi (Audit Log) cho Admin.
-3.  **Advanced Reports:** Phát triển thêm các biểu đồ phân tích sâu về hiệu quả Marketing (CPA/ROAS).
+3.  **Predictive Analytics:** Phát triển mô hình dự báo dòng tiền (Cashflow Forecasting) cho 3-6 tháng tới dựa trên lịch thanh toán.
+
 
 ---
 *Updated by Antigravity AI Agent - 2026-05-10 21:40 (ICT)*
