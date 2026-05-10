@@ -50,6 +50,7 @@ export function AccountingClient({
   });
 
   const handleReceiveFromDev = async (recordId: string) => {
+    if (!confirm("Bạn có chắc chắn xác nhận đã thu tiền từ Chủ đầu tư cho khoản hoa hồng này?")) return;
     setLoadingId(recordId);
     try {
       const { error } = await supabase
@@ -71,6 +72,7 @@ export function AccountingClient({
   };
 
   const handleApproveInternal = async (recordId: string) => {
+    if (!confirm("Bạn có chắc chắn muốn duyệt chi khoản hoa hồng nội bộ này cho nhân viên?")) return;
     setLoadingId(recordId);
     try {
       const { error } = await supabase

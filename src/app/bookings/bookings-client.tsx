@@ -72,6 +72,7 @@ export function BookingsClient({ initialBookings }: BookingsClientProps) {
   const handleConvertToContract = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedBooking) return;
+    if (!confirm(`Bạn có chắc chắn muốn xác nhận lập Hợp đồng cho mã căn ${selectedBooking.units?.code}? \nThao tác này sẽ chính thức trừ giỏ hàng và tính hoa hồng.`)) return;
     setIsLoading(true);
 
     // Prepare default payment schedule (e.g. 5 installments)

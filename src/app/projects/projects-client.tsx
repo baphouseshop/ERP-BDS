@@ -39,6 +39,7 @@ export function ProjectsClient({ initialDevelopers, initialProjects }: ProjectsC
 
   const handleAddDeveloper = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!confirm(`Xác nhận thêm mới Chủ đầu tư: ${devForm.name}?`)) return;
     setIsLoading(true);
     const { error } = await supabase.from("developers").insert([devForm]);
     if (!error) {
@@ -53,6 +54,7 @@ export function ProjectsClient({ initialDevelopers, initialProjects }: ProjectsC
 
   const handleAddProject = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!confirm(`Xác nhận thêm mới Dự án: ${projForm.name}?`)) return;
     setIsLoading(true);
     const { error } = await supabase.from("projects").insert([{
       ...projForm,

@@ -62,6 +62,7 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
 
   const handleAddExpense = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!confirm(`Bạn có chắc chắn muốn lưu khoản chi phí "${form.description}" với số tiền ${new Intl.NumberFormat("vi-VN").format(parseFloat(form.amount))} đ?`)) return;
     setIsLoading(true);
 
     const { error } = await supabase.from("expenses").insert([{
