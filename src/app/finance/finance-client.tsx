@@ -190,7 +190,7 @@ export function FinanceClient({ initialExpenses, initialRevenue, projects }: Fin
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '12px' }}
                   itemStyle={{ color: '#fff' }}
-                  formatter={(value: number) => formatCurrency(value)}
+                  formatter={(value: any) => formatCurrency(Number(value || 0))}
                 />
               </PieChart>
             </ResponsiveContainer>
