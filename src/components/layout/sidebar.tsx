@@ -16,6 +16,9 @@ import {
   ChevronRight,
   TrendingUp,
   Contact,
+  Target,
+  BarChart3,
+  PieChart
 } from "lucide-react";
 
 const menuItems = [
@@ -25,7 +28,9 @@ const menuItems = [
   { name: "Nhân viên", href: "/employees", icon: Contact },
   { name: "Phiếu đặt chỗ", href: "/bookings", icon: Briefcase },
   { name: "Hợp đồng", href: "/contracts", icon: FileText },
+  { name: "Marketing & Chi phí", href: "/marketing", icon: Target },
   { name: "Kế toán & Hoa hồng", href: "/accounting", icon: Calculator },
+  { name: "Báo cáo & KPI", href: "/reports", icon: BarChart3 },
   { name: "Lịch sử & Audit", href: "/audit", icon: History },
 ];
 
