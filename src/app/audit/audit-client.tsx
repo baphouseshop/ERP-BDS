@@ -395,57 +395,52 @@ export function AuditClient() {
               <div className="p-6 overflow-y-auto space-y-8">
                 {/* Meta info */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <InfoItem icon={User} label="Người sửa" value={selectedLog.profiles?.full_name || selectedLog.user_email || "N/A"} />
-                  <InfoItem icon={Building} label="Phòng ban" value={selectedLog.profiles?.role || "N/A"} />
+                  <InfoItem icon={User} label="Người sửa" value={selectedLog.profiles?.full_name || selectedLog.user_email || "Hệ thống tự động"} />
+                  <InfoItem icon={Building} label="Phòng ban" value={selectedLog.profiles?.role || "Automation"} />
                   <InfoItem icon={Calendar} label="Ngày" value={new Date(selectedLog.created_at).toLocaleDateString('vi-VN')} />
                   <InfoItem icon={Clock} label="Giờ" value={new Date(selectedLog.created_at).toLocaleTimeString('vi-VN')} />
                 </div>
 
-                {/* Data Diff */}
-                <div className="space-y-4">
-                  <h3 className="text-sm font-bold uppercase tracking-widest text-primary/80">So sánh dữ liệu</h3>
+                {/* Analysis is now the main focus */}
+                <div className="p-6 rounded-3xl bg-primary/5 border border-primary/20 space-y-4">
+                  <div className="flex items-center gap-3 text-primary">
+                    <Activity size={22} />
+                    <span className="text-lg font-bold">Mô tả thay đổi thực tế</span>
+                  </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-muted-foreground uppercase px-2">Dữ liệu CŨ (Old Data)</label>
-                      <div className="p-4 rounded-xl bg-muted/40 border border-border font-mono text-xs overflow-auto max-h-60 whitespace-pre-wrap">
-                        {selectedLog.old_data ? JSON.stringify(selectedLog.old_data, null, 2) : "--- Không có dữ liệu ---"}
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-muted-foreground uppercase px-2">Dữ liệu MỚI (New Data)</label>
-                      <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20 font-mono text-xs overflow-auto max-h-60 whitespace-pre-wrap">
-                        {selectedLog.new_data ? JSON.stringify(selectedLog.new_data, null, 2) : "--- Đã bị xóa ---"}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Diff Highlighting Logic (Simplified) */}
-                <div className="p-5 rounded-2xl bg-primary/5 border border-primary/20 space-y-3">
-                  <div className="flex items-center gap-2 text-primary">
-                    <AlertCircle size={18} />
-                    <span className="text-sm font-bold">Phân tích thay đổi</span>
-                  </div>
-                  <div className="text-sm space-y-2">
+                  <div className="space-y-3 bg-black/20 p-4 rounded-2xl border border-white/5">
                     {selectedLog.action === 'UPDATE' && selectedLog.old_data && selectedLog.new_data ? (
                       Object.keys(selectedLog.new_data).map(key => {
-                        if (JSON.stringify(selectedLog.old_data[key]) !== JSON.stringify(selectedLog.new_data[key])) {
+                        // Skip internal tracking fields unless they are the only changes
+                        if (['updated_at', 'created_at', 'id'].includes(key)) return null;
+                        
+                        const oldVal = selectedLog.old_data[key];
+                        const newVal = selectedLog.new_data[key];
+                        
+                        if (JSON.stringify(oldVal) !== JSON.stringify(newVal)) {
                           return (
-                            <div key={key} className="flex items-center gap-2 py-1 border-b border-border/50 last:border-0">
-                              <span className="font-semibold w-32 truncate">{key}:</span>
-                              <span className="text-rose-400 line-through truncate max-w-[150px]">{String(selectedLog.old_data[key])}</span>
-                              <ArrowRight size={14} className="text-muted-foreground shrink-0" />
-                              <span className="text-emerald-400 font-medium truncate max-w-[150px]">{String(selectedLog.new_data[key])}</span>
+                            <div key={key} className="flex flex-col sm:flex-row sm:items-center gap-2 py-3 border-b border-white/5 last:border-0">
+                              <span className="font-bold text-gray-400 min-w-[140px] text-xs uppercase tracking-wider">{key}:</span>
+                              <div className="flex items-center gap-3 overflow-hidden">
+                                <span className="text-rose-400/80 line-through text-sm truncate max-w-[200px]">
+                                  {oldVal === null ? "Trống" : String(oldVal)}
+                                </span>
+                                <ArrowRight size={14} className="text-muted-foreground shrink-0" />
+                                <span className="text-emerald-400 font-bold text-sm">
+                                  {newVal === null ? "Xóa bỏ" : String(newVal)}
+                                </span>
+                              </div>
                             </div>
                           );
                         }
                         return null;
                       })
                     ) : (
-                      <p className="text-muted-foreground italic">
-                        {selectedLog.action === 'INSERT' ? "Bản ghi được khởi tạo mới hoàn toàn." : "Bản ghi đã được gỡ khỏi hệ thống."}
-                      </p>
+                      <div className="py-4 text-center">
+                        <p className="text-primary font-medium">
+                          {selectedLog.action === 'INSERT' ? "Bản ghi mới được khởi tạo với toàn bộ thông tin ban đầu." : "Bản ghi đã được xóa hoàn toàn khỏi hệ thống."}
+                        </p>
+                      </div>
                     )}
                   </div>
                 </div>
