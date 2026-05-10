@@ -137,21 +137,27 @@ export function AccountingClient({
     setIsLoading(false);
   };
 
-  const filteredSchedules = pendingSchedules.filter(s => 
-    s.sale_contracts?.contract_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    s.sale_contracts?.customers?.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    s.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredSchedules = pendingSchedules.filter(s => {
+    const matchesSearch = 
+      s.sale_contracts?.contract_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.sale_contracts?.customers?.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesProject = selectedProject === "all" || s.sale_contracts?.units?.projects?.id === selectedProject;
+    return matchesSearch && matchesProject;
+  });
 
   const filteredEntries = initialEntries.filter(e => 
     e.entry_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
     e.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredCommissions = commissionRecords.filter(c => 
-    c.sale_contracts?.contract_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.projects?.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredCommissions = commissionRecords.filter(c => {
+    const matchesSearch = 
+      c.sale_contracts?.contract_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.projects?.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesProject = selectedProject === "all" || c.project_id === selectedProject;
+    return matchesSearch && matchesProject;
+  });
 
   return (
     <div className="space-y-6">
@@ -181,14 +187,29 @@ export function AccountingClient({
         </div>
 
         <div className="flex items-center gap-2">
+          <div className="relative">
+            <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <select 
+              value={selectedProject}
+              onChange={(e) => setSelectedProject(e.target.value)}
+              className="pl-9 pr-8 py-2 bg-secondary/50 border border-border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none font-bold cursor-pointer min-w-[140px]"
+            >
+              <option value="all">Tất cả dự án</option>
+              {Array.from(new Set(pendingSchedules.map(s => s.sale_contracts?.units?.projects?.id).filter(Boolean))).map(id => {
+                const name = pendingSchedules.find(s => s.sale_contracts?.units?.projects?.id === id)?.sale_contracts?.units?.projects?.name;
+                return <option key={id} value={id}>{name}</option>;
+              })}
+            </select>
+          </div>
+          
           <div className="relative group">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <input 
               type="text" 
-              placeholder="Tìm số HĐ, tên KH..."
+              placeholder="Tìm kiếm..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-4 py-2 bg-secondary/50 border border-border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all w-full md:w-64 font-medium"
+              className="pl-9 pr-4 py-2 bg-secondary/50 border border-border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all w-full md:w-48 font-medium"
             />
           </div>
         </div>
