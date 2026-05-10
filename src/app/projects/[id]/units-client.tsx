@@ -42,8 +42,22 @@ export function UnitsClient({ initialUnits, projectId, customers, employees }: U
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBlock, setSelectedBlock] = useState<string>("all");
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [isAddUnitModalOpen, setIsAddUnitModalOpen] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Add Unit form state
+  const [unitForm, setUnitForm] = useState({
+    code: "",
+    block: "",
+    floor: "",
+    unit_number: "",
+    unit_type: "2BR",
+    area_usable: "",
+    bedrooms: "2",
+    list_price: "",
+    status: "available"
+  });
 
   // Booking form state
   const [bookingForm, setBookingForm] = useState({
@@ -69,13 +83,53 @@ export function UnitsClient({ initialUnits, projectId, customers, employees }: U
   });
 
   const handleOpenBooking = (unit: any) => {
-    if (unit.status !== 'available') return;
+    if (unit.status !== 'available') {
+      alert(`Căn hộ ${unit.code} đang ở trạng thái "${statusConfig[unit.status]?.label}". \n\nMục đích: Ô này để hiển thị những căn đã có khách hàng đặt chỗ hoặc ký hợp đồng, giúp bạn tránh tư vấn trùng căn. \nNếu bạn muốn xử lý giao dịch cho căn này, vui lòng vào mục "Đặt chỗ" hoặc "Hợp đồng" để tra cứu.`);
+      return;
+    }
     setSelectedUnit(unit);
     setBookingForm({
       ...bookingForm,
       agreed_price: unit.list_price.toString()
     });
     setIsBookingModalOpen(true);
+  };
+
+  const handleAddUnit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    const { error } = await supabase.from("units").insert([{
+      project_id: projectId,
+      code: unitForm.code,
+      block: unitForm.block,
+      floor: unitForm.floor,
+      unit_number: unitForm.unit_number,
+      unit_type: unitForm.unit_type,
+      area_usable: parseFloat(unitForm.area_usable),
+      bedrooms: parseInt(unitForm.bedrooms),
+      list_price: parseFloat(unitForm.list_price),
+      status: unitForm.status
+    }]);
+
+    if (!error) {
+      setIsAddUnitModalOpen(false);
+      setUnitForm({
+        code: "",
+        block: "",
+        floor: "",
+        unit_number: "",
+        unit_type: "2BR",
+        area_usable: "",
+        bedrooms: "2",
+        list_price: "",
+        status: "available"
+      });
+      router.refresh();
+    } else {
+      alert(error.message);
+    }
+    setIsLoading(false);
   };
 
   const handleAddBooking = async (e: React.FormEvent) => {
@@ -133,9 +187,7 @@ export function UnitsClient({ initialUnits, projectId, customers, employees }: U
 
         <div className="flex items-center gap-3">
           <button 
-            onClick={() => {
-              alert("Vui lòng sử dụng tính năng 'Import Giỏ hàng' từ trang dự án để thêm sản phẩm hàng loạt. \nTính năng thêm lẻ từng căn đang được phát triển.");
-            }}
+            onClick={() => setIsAddUnitModalOpen(true)}
             className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/20 hover:opacity-90 transition-opacity"
           >
             <Plus size={18} />
@@ -162,6 +214,17 @@ export function UnitsClient({ initialUnits, projectId, customers, employees }: U
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Status Legend */}
+      <div className="flex flex-wrap items-center gap-4 px-2">
+        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Trạng thái:</span>
+        {Object.entries(statusConfig).map(([key, config]) => (
+          <div key={key} className="flex items-center gap-2">
+            <div className={cn("w-3 h-3 rounded-sm", config.color)} />
+            <span className="text-xs font-medium text-muted-foreground">{config.label}</span>
+          </div>
+        ))}
       </div>
 
       {/* Grid View */}
@@ -382,6 +445,122 @@ export function UnitsClient({ initialUnits, projectId, customers, employees }: U
           >
             {isLoading ? <Loader2 className="animate-spin" size={18} /> : <CreditCard size={18} />}
             Xác nhận Đặt chỗ
+          </button>
+        </form>
+      </Modal>
+      
+      {/* Add Unit Modal */}
+      <Modal
+        isOpen={isAddUnitModalOpen}
+        onClose={() => setIsAddUnitModalOpen(false)}
+        title="Thêm sản phẩm mới"
+      >
+        <form onSubmit={handleAddUnit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-muted-foreground uppercase">Mã căn hộ</label>
+              <input 
+                required
+                placeholder="VD: P1-2508"
+                className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20"
+                value={unitForm.code}
+                onChange={e => setUnitForm({...unitForm, code: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-muted-foreground uppercase">Block / Tòa</label>
+              <input 
+                required
+                placeholder="VD: P1"
+                className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20"
+                value={unitForm.block}
+                onChange={e => setUnitForm({...unitForm, block: e.target.value})}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-muted-foreground uppercase">Tầng</label>
+              <input 
+                required
+                placeholder="VD: 25"
+                className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20"
+                value={unitForm.floor}
+                onChange={e => setUnitForm({...unitForm, floor: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-muted-foreground uppercase">Số căn</label>
+              <input 
+                required
+                placeholder="VD: 08"
+                className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20"
+                value={unitForm.unit_number}
+                onChange={e => setUnitForm({...unitForm, unit_number: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-muted-foreground uppercase">Loại căn</label>
+              <select 
+                className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20"
+                value={unitForm.unit_type}
+                onChange={e => setUnitForm({...unitForm, unit_type: e.target.value})}
+              >
+                <option value="Studio">Studio</option>
+                <option value="1BR">1 PN</option>
+                <option value="1BR+">1 PN+</option>
+                <option value="2BR">2 PN</option>
+                <option value="2BR+">2 PN+</option>
+                <option value="3BR">3 PN</option>
+                <option value="Penthouse">Penthouse</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-muted-foreground uppercase">Diện tích (m²)</label>
+              <input 
+                required
+                type="number"
+                step="0.01"
+                placeholder="0.00"
+                className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20"
+                value={unitForm.area_usable}
+                onChange={e => setUnitForm({...unitForm, area_usable: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-muted-foreground uppercase">Số phòng ngủ</label>
+              <input 
+                required
+                type="number"
+                className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20"
+                value={unitForm.bedrooms}
+                onChange={e => setUnitForm({...unitForm, bedrooms: e.target.value})}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-muted-foreground uppercase">Giá niêm yết (VND)</label>
+            <input 
+              required
+              type="number"
+              placeholder="0"
+              className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm font-bold focus:ring-2 focus:ring-primary/20"
+              value={unitForm.list_price}
+              onChange={e => setUnitForm({...unitForm, list_price: e.target.value})}
+            />
+          </div>
+
+          <button 
+            disabled={isLoading}
+            className="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-emerald-500/20"
+          >
+            {isLoading ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} />}
+            Lưu sản phẩm
           </button>
         </form>
       </Modal>
