@@ -42,7 +42,7 @@ export function EmployeesClient({ initialEmployees, managers }: EmployeesClientP
     phone: "",
     role: "sales",
     manager_id: "",
-    base_commission_rate: "0.01",
+    base_commission_rate: "1", // Default to 1%
     is_active: true
   });
 
@@ -224,7 +224,7 @@ export function EmployeesClient({ initialEmployees, managers }: EmployeesClientP
               </div>
               <div className="flex items-center gap-3 text-sm font-medium text-muted-foreground">
                 <Briefcase size={16} className="text-primary/60" />
-                <span>Hoa hồng: {emp.base_commission_rate * 100}%</span>
+                <span>Hoa hồng: {emp.base_commission_rate}%</span>
               </div>
             </div>
 
@@ -241,42 +241,45 @@ export function EmployeesClient({ initialEmployees, managers }: EmployeesClientP
         title="Thêm nhân viên mới"
       >
         <form onSubmit={handleCreate} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-muted-foreground uppercase">Họ và tên</label>
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-2.5">
+              <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Họ và tên</label>
               <input 
                 required
-                className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                placeholder="VD: Nguyễn Văn A"
+                className="w-full bg-secondary/30 border border-border/50 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all"
                 value={formData.full_name}
                 onChange={e => setFormData({...formData, full_name: e.target.value})}
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-muted-foreground uppercase">Email</label>
+            <div className="space-y-2.5">
+              <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Email công ty</label>
               <input 
                 required
                 type="email"
-                className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                placeholder="email@erp.com"
+                className="w-full bg-secondary/30 border border-border/50 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all"
                 value={formData.email}
                 onChange={e => setFormData({...formData, email: e.target.value})}
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-muted-foreground uppercase">Số điện thoại</label>
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-2.5">
+              <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Số điện thoại</label>
               <input 
                 required
-                className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                placeholder="09xx xxx xxx"
+                className="w-full bg-secondary/30 border border-border/50 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all"
                 value={formData.phone}
                 onChange={e => setFormData({...formData, phone: e.target.value})}
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-muted-foreground uppercase">Chức vụ</label>
+            <div className="space-y-2.5">
+              <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Chức vụ</label>
               <select 
-                className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                className="w-full bg-secondary/30 border border-border/50 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all appearance-none"
                 value={formData.role}
                 onChange={e => setFormData({...formData, role: e.target.value})}
               >
@@ -288,11 +291,11 @@ export function EmployeesClient({ initialEmployees, managers }: EmployeesClientP
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-muted-foreground uppercase">Người quản lý</label>
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-2.5">
+              <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Người quản lý trực tiếp</label>
               <select 
-                className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                className="w-full bg-secondary/30 border border-border/50 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all appearance-none"
                 value={formData.manager_id}
                 onChange={e => setFormData({...formData, manager_id: e.target.value})}
               >
@@ -302,15 +305,19 @@ export function EmployeesClient({ initialEmployees, managers }: EmployeesClientP
                 ))}
               </select>
             </div>
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-muted-foreground uppercase">Hoa hồng cơ bản (%)</label>
-              <input 
-                type="number"
-                step="0.01"
-                className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
-                value={formData.base_commission_rate}
-                onChange={e => setFormData({...formData, base_commission_rate: e.target.value})}
-              />
+            <div className="space-y-2.5">
+              <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Tỷ lệ Hoa hồng (%)</label>
+              <div className="relative">
+                <input 
+                  type="number"
+                  step="0.1"
+                  placeholder="VD: 1.5"
+                  className="w-full bg-secondary/30 border border-border/50 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all"
+                  value={formData.base_commission_rate}
+                  onChange={e => setFormData({...formData, base_commission_rate: e.target.value})}
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">%</span>
+              </div>
             </div>
           </div>
 
