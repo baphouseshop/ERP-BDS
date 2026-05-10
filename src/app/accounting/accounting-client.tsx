@@ -131,7 +131,7 @@ export function AccountingClient({
                   <span className="font-bold text-emerald-500">{fmt(record.commission_amount)}</span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-muted-foreground italic text-[10px]">Tỷ lệ: {record.commission_rate * 100}%</span>
+                  <span className="text-muted-foreground italic text-[10px]">Tỷ lệ: {parseFloat(((record.commission_rate || 0) * 100).toFixed(4))}%</span>
                   <span className="text-muted-foreground italic text-[10px]">VAT: {fmt(record.vat_amount)}</span>
                 </div>
               </div>

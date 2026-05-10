@@ -64,7 +64,7 @@ export function BookingsClient({ initialBookings }: BookingsClientProps) {
     setContractForm({
       signed_date: new Date().toISOString().split('T')[0],
       total_value: booking.agreed_price?.toString() || "",
-      agreed_commission_rate: (rate * 100).toString()
+      agreed_commission_rate: parseFloat((rate * 100).toFixed(4)).toString()
     });
     setIsContractModalOpen(true);
   };

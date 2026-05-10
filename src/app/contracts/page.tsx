@@ -24,7 +24,7 @@ export default async function ContractsPage() {
 
       <ContractsClient initialContracts={contracts?.map(c => ({
         ...c,
-        agreed_commission_rate: (c.agreed_commission_rate || 0) * 100
+        agreed_commission_rate: parseFloat(((c.agreed_commission_rate || 0) * 100).toFixed(4))
       })) || []} />
     </div>
   );

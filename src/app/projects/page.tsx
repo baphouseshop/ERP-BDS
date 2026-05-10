@@ -23,7 +23,7 @@ export default async function ProjectsPage() {
         initialDevelopers={developers || []} 
         initialProjects={projects?.map(p => ({
           ...p,
-          default_commission_rate: (p.default_commission_rate || 0) * 100
+          default_commission_rate: parseFloat(((p.default_commission_rate || 0) * 100).toFixed(4))
         })) || []} 
       />
     </div>
