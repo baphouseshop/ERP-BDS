@@ -141,6 +141,12 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
     },
     {
       title: "Chi phí Marketing",
+      value: fmt(filteredExpenses.filter(e => e.category === 'MARKETING').reduce((sum, e) => sum + e.amount, 0)),
+      change: "-5%",
+      trend: "down",
+      subtext: "quảng cáo + sự kiện",
+      icon: Target,
+      color: "text-purple-500",
       bg: "bg-purple-500/10",
     },
     {
