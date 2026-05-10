@@ -91,6 +91,7 @@ export function AuditClient() {
   const [search, setSearch] = useState("");
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
   const [stats, setStats] = useState({ total: 0, inserts: 0, updates: 0, deletes: 0 });
+  const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
 
   const fetchLogs = useCallback(async () => {
@@ -108,8 +109,12 @@ export function AuditClient() {
         .order('created_at', { ascending: false })
         .limit(100);
 
-      if (error) throw error;
+      if (error) {
+        setError(error.message);
+        throw error;
+      }
       setLogs(data || []);
+      setError(null);
       
       // Basic Stats
       if (data) {
@@ -120,8 +125,9 @@ export function AuditClient() {
           deletes: data.filter(l => l.action === 'DELETE').length,
         });
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error fetching audit logs:", err);
+      setError(err?.message || String(err));
     } finally {
       setLoading(false);
     }
@@ -254,6 +260,15 @@ export function AuditClient() {
                     <td colSpan={6} className="px-6 py-4"><div className="h-6 bg-muted rounded w-full" /></td>
                   </tr>
                 ))
+              ) : error ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-20 text-center">
+                    <AlertCircle size={48} className="mx-auto text-rose-500 mb-4 opacity-50" />
+                    <p className="text-rose-500 font-bold">Lỗi truy vấn dữ liệu</p>
+                    <p className="text-xs text-muted-foreground mt-2">{error}</p>
+                    <button onClick={fetchLogs} className="mt-4 px-4 py-2 bg-rose-500/10 text-rose-500 rounded-lg text-xs font-bold border border-rose-500/20">Thử lại</button>
+                  </td>
+                </tr>
               ) : filteredLogs.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-20 text-center text-muted-foreground">
