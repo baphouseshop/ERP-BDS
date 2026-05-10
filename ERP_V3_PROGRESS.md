@@ -33,7 +33,13 @@
 - **Operational Automation:** Kích hoạt toàn bộ luồng nghiệp vụ Kế toán (Xác nhận thu tiền CĐT, Duyệt chi hoa hồng nội bộ, Xử lý hủy giao dịch) với logic cập nhật dữ liệu tài chính thời gian thực.
 - **Robust Data Fetching:** Tối ưu hóa câu lệnh truy vấn và logic lọc dữ liệu an toàn (Safe Filtering), đảm bảo danh sách hợp đồng luôn hiển thị chính xác kể cả khi thiếu thông tin liên kết.
 
-## 6. Kết luận & Hướng phát triển
+## 6. Độ chính xác KPI & Bảo mật thao tác (Financial Accuracy & Safety)
+- **Financial KPI Engine:** Tái cấu trúc toàn bộ hệ thống View (`v_pnl_by_project`, `v_aging_receivable`) và Function (`fn_company_pnl`) trên database để đảm bảo số liệu Lợi nhuận gộp, Doanh thu thuần và Tỷ lệ chuyển đổi luôn hiển thị chính xác theo thời gian thực.
+- **Data Integrity Fixes:** Xử lý triệt để lỗi `NaN%` và các sai sót hiển thị "0 tỷ" do thiếu ánh xạ dữ liệu hoặc lỗi logic tổng hợp (Aggregation) từ các cấp nhân viên lên cấp công ty.
+- **Confirmation Safeguards:** Tích hợp popup xác nhận (`confirm()`) cho 100% các thao tác thay đổi dữ liệu quan trọng: duyệt chi, xác nhận thu tiền, chuyển đổi hợp đồng, lưu chi phí marketing, đảm bảo người dùng không vô tình thực hiện các thao tác sai lầm không thể hoàn tác.
+- **Funnel Analytics:** Nâng cấp biểu đồ phễu bán hàng (Booking -> Contract) giúp phản ánh chính xác hiệu suất chuyển đổi thực tế của toàn hệ thống thay vì liệt kê dữ liệu rời rạc.
+
+## 7. Kết luận & Hướng phát triển
 Hệ thống hiện đã đạt trạng thái **Operational Excellence**. Không chỉ đẹp về mặt thị giác, hệ thống đã thực sự "thông minh" và an toàn trong các thao tác nghiệp vụ tài chính thực tế.
 
 ### Bước tiếp theo:
@@ -42,4 +48,4 @@ Hệ thống hiện đã đạt trạng thái **Operational Excellence**. Không
 3.  **Advanced Reports:** Phát triển thêm các biểu đồ phân tích sâu về hiệu quả Marketing (CPA/ROAS).
 
 ---
-*Updated by Antigravity AI Agent - 2026-05-10*
+*Updated by Antigravity AI Agent - 2026-05-10 17:38 (ICT)*
