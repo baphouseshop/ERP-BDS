@@ -32,10 +32,15 @@ interface ReportsClientProps {
 }
 
 export function ReportsClient({ pnlData, funnelData, agingData, companyStats }: ReportsClientProps) {
+  // Aggregate funnel data for company-wide stats
+  const totalBookings = funnelData.reduce((acc, curr) => acc + (curr.bookings_count || 0), 0);
+  const totalContracts = funnelData.reduce((acc, curr) => acc + (curr.contracts_count || 0), 0);
+  const conversionRate = totalBookings > 0 ? ((totalContracts / totalBookings) * 100).toFixed(1) : "0.0";
+
   const stats = [
     {
       title: "Lợi nhuận gộp",
-      value: companyStats ? fmtTỷ(companyStats.gross_revenue) : "0 tỷ",
+      value: companyStats ? fmtTỷ(companyStats.gross_profit || 0) : "0 tỷ",
       change: "+15.2%",
       trend: "up",
       subtext: "Toàn công ty YTD",
@@ -65,7 +70,7 @@ export function ReportsClient({ pnlData, funnelData, agingData, companyStats }: 
     },
     {
       title: "Tỷ lệ chuyển đổi",
-      value: funnelData.length > 0 ? ((funnelData.find(f => f.stage === 'Contract')?.count / funnelData.find(f => f.stage === 'Booking')?.count) * 100).toFixed(1) + "%" : "0%",
+      value: conversionRate + "%",
       change: "+2.1%",
       trend: "up",
       subtext: "Booking → Hợp đồng",
@@ -142,9 +147,9 @@ export function ReportsClient({ pnlData, funnelData, agingData, companyStats }: 
           
           <div className="space-y-4">
             {pnlData.length > 0 ? pnlData.map((project) => {
-              const revenue = parseFloat(project.gross_revenue);
-              const cost = parseFloat(project.sales_commissions) + parseFloat(project.operational_expenses);
-              const profit = parseFloat(project.net_profit);
+              const revenue = parseFloat(project.net_revenue);
+              const cost = parseFloat(project.net_commission_cost) + parseFloat(project.direct_project_expense);
+              const profit = parseFloat(project.gross_profit);
               const margin = revenue > 0 ? ((profit / revenue) * 100).toFixed(1) : "0";
 
               return (
@@ -188,9 +193,11 @@ export function ReportsClient({ pnlData, funnelData, agingData, companyStats }: 
           </div>
           
           <div className="relative space-y-6">
-            {funnelData.length > 0 ? funnelData.map((step, index) => {
-              const colors = ["bg-blue-500", "bg-purple-500", "bg-emerald-500", "bg-orange-500"];
-              const maxVal = Math.max(...funnelData.map(f => f.count));
+            {[
+              { stage: "Giữ chỗ (Booking)", count: totalBookings, color: "bg-blue-500" },
+              { stage: "Hợp đồng (Contract)", count: totalContracts, color: "bg-purple-500" }
+            ].map((step, index) => {
+              const maxVal = Math.max(totalBookings, 1);
               const percentage = (step.count / maxVal) * 100;
 
               return (
@@ -201,15 +208,13 @@ export function ReportsClient({ pnlData, funnelData, agingData, companyStats }: 
                   </div>
                   <div className="h-4 w-full bg-secondary rounded-full overflow-hidden">
                     <div 
-                      className={cn("h-full rounded-full transition-all duration-1000", colors[index % colors.length])}
+                      className={cn("h-full rounded-full transition-all duration-1000", step.color)}
                       style={{ width: `${percentage}%` }}
                     />
                   </div>
                 </div>
               );
-            }) : (
-              <div className="text-center py-8 text-muted-foreground italic">Chưa có dữ liệu phễu</div>
-            )}
+            })}
           </div>
         </div>
 
@@ -224,11 +229,11 @@ export function ReportsClient({ pnlData, funnelData, agingData, companyStats }: 
 
           <div className="grid grid-cols-5 gap-4">
             {[
-              { label: "Trong hạn", amount: agingData.find(a => a.aging_bracket === '0-30 days')?.total_amount || 0, color: "bg-emerald-500" },
-              { label: "31-60 ngày", amount: agingData.find(a => a.aging_bracket === '31-60 days')?.total_amount || 0, color: "bg-orange-500" },
-              { label: "61-90 ngày", amount: agingData.find(a => a.aging_bracket === '61-90 days')?.total_amount || 0, color: "bg-rose-400" },
-              { label: "91-120 ngày", amount: agingData.find(a => a.aging_bracket === '91-120 days')?.total_amount || 0, color: "bg-rose-500" },
-              { label: "> 120 ngày", amount: agingData.find(a => a.aging_bracket === 'Over 120 days')?.total_amount || 0, color: "bg-rose-600 shadow-lg shadow-rose-500/20" },
+              { label: "Trong hạn", amount: agingData.find(a => a.aging_bracket === 'Trong hạn')?.outstanding_amount || 0, color: "bg-emerald-500" },
+              { label: "0-30 ngày", amount: agingData.find(a => a.aging_bracket === '0-30 days')?.outstanding_amount || 0, color: "bg-blue-500" },
+              { label: "31-60 ngày", amount: agingData.find(a => a.aging_bracket === '31-60 days')?.outstanding_amount || 0, color: "bg-orange-500" },
+              { label: "61-90 ngày", amount: agingData.find(a => a.aging_bracket === '61-90 days')?.outstanding_amount || 0, color: "bg-rose-400" },
+              { label: "> 90 ngày", amount: agingData.find(a => a.aging_bracket === 'Over 120 days')?.outstanding_amount || agingData.find(a => a.aging_bracket === '91-120 days')?.outstanding_amount || 0, color: "bg-rose-600 shadow-lg shadow-rose-500/20" },
             ].map((tier) => (
               <div key={tier.label} className="p-6 rounded-[2rem] bg-secondary/20 border border-white/5 space-y-4 text-center">
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{tier.label}</span>

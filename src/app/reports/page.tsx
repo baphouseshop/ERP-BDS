@@ -13,7 +13,10 @@ export default async function ReportsPage() {
     supabase.from("v_pnl_by_project").select("*"),
     supabase.from("v_pipeline_funnel").select("*"),
     supabase.from("v_aging_receivable").select("*"),
-    supabase.rpc("fn_company_pnl")
+    supabase.rpc("fn_company_pnl", { 
+      p_period_start: "2026-01-01", 
+      p_period_end: "2026-12-31" 
+    })
   ]);
 
   return (
