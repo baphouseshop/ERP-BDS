@@ -147,11 +147,14 @@ export function AuditClient() {
     };
   }, [fetchLogs, supabase]);
 
-  const filteredLogs = logs.filter(log => 
-    log.table_name.toLowerCase().includes(search.toLowerCase()) ||
-    (log.user_email || "").toLowerCase().includes(search.toLowerCase()) ||
-    (log.profiles?.full_name || "").toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredLogs = logs.filter(log => {
+    const s = search.toLowerCase();
+    return (
+      (log.table_name || "").toLowerCase().includes(s) ||
+      (log.user_email || "").toLowerCase().includes(s) ||
+      (log.profiles?.full_name || "").toLowerCase().includes(s)
+    );
+  });
 
   return (
     <div className="p-6 space-y-6 max-w-[1600px] mx-auto min-h-screen pb-20">
@@ -279,10 +282,12 @@ export function AuditClient() {
                             <User size={14} />
                           </div>
                           <div className="flex flex-col">
-                            <span className="text-sm font-semibold truncate max-w-[150px]">
-                              {log.profiles?.full_name || log.user_email || "System/Script"}
+                            <span className="font-bold text-white tracking-tight">
+                              {log.profiles?.full_name || log.user_email?.split('@')[0] || "Hệ thống"}
                             </span>
-                            <span className="text-xs text-muted-foreground">{log.user_email || "N/A"}</span>
+                            <span className="text-[10px] text-muted-foreground font-medium truncate max-w-[150px]">
+                              {log.user_email || "system@erp.internal"}
+                            </span>
                           </div>
                         </div>
                       </td>
