@@ -16,50 +16,65 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const stats = [
-  {
-    title: "Lợi nhuận gộp",
-    value: "12.4 tỷ",
-    change: "+15.2%",
-    trend: "up",
-    subtext: "Toàn công ty YTD",
-    icon: TrendingUp,
-    color: "text-emerald-500",
-    bg: "bg-emerald-500/10",
-  },
-  {
-    title: "Dòng tiền dự báo",
-    value: "45.8 tỷ",
-    change: "+5.4%",
-    trend: "up",
-    subtext: "Kỳ hạn 30 ngày tới",
-    icon: Wallet,
-    color: "text-blue-500",
-    bg: "bg-blue-500/10",
-  },
-  {
-    title: "Nợ phải thu quá hạn",
-    value: "2.1 tỷ",
-    change: "-12%",
-    trend: "down",
-    subtext: "Aging > 90 ngày",
-    icon: Calendar,
-    color: "text-rose-500",
-    bg: "bg-rose-500/10",
-  },
-  {
-    title: "Tỷ lệ chuyển đổi",
-    value: "18.5%",
-    change: "+2.1%",
-    trend: "up",
-    subtext: "Booking → Hợp đồng",
-    icon: Users2,
-    color: "text-purple-500",
-    bg: "bg-purple-500/10",
-  },
-];
+const fmt = (num: number) => {
+  return new Intl.NumberFormat("vi-VN").format(num) + " đ";
+};
 
-export function ReportsClient() {
+const fmtTỷ = (num: number) => {
+  return (num / 1e9).toFixed(2) + " tỷ";
+};
+
+interface ReportsClientProps {
+  pnlData: any[];
+  funnelData: any[];
+  agingData: any[];
+  companyStats: any;
+}
+
+export function ReportsClient({ pnlData, funnelData, agingData, companyStats }: ReportsClientProps) {
+  const stats = [
+    {
+      title: "Lợi nhuận gộp",
+      value: companyStats ? fmtTỷ(companyStats.gross_revenue) : "0 tỷ",
+      change: "+15.2%",
+      trend: "up",
+      subtext: "Toàn công ty YTD",
+      icon: TrendingUp,
+      color: "text-emerald-500",
+      bg: "bg-emerald-500/10",
+    },
+    {
+      title: "Dòng tiền dự báo",
+      value: "45.8 tỷ",
+      change: "+5.4%",
+      trend: "up",
+      subtext: "Kỳ hạn 30 ngày tới",
+      icon: Wallet,
+      color: "text-blue-500",
+      bg: "bg-blue-500/10",
+    },
+    {
+      title: "Nợ phải thu quá hạn",
+      value: agingData.length > 0 ? fmtTỷ(agingData.reduce((acc, curr) => acc + (curr.total_amount || 0), 0)) : "0 tỷ",
+      change: "-12%",
+      trend: "down",
+      subtext: "Tổng nợ CĐT",
+      icon: Calendar,
+      color: "text-rose-500",
+      bg: "bg-rose-500/10",
+    },
+    {
+      title: "Tỷ lệ chuyển đổi",
+      value: funnelData.length > 0 ? ((funnelData.find(f => f.stage === 'Contract')?.count / funnelData.find(f => f.stage === 'Booking')?.count) * 100).toFixed(1) + "%" : "0%",
+      change: "+2.1%",
+      trend: "up",
+      subtext: "Booking → Hợp đồng",
+      icon: Users2,
+      color: "text-purple-500",
+      bg: "bg-purple-500/10",
+    },
+  ];
+
   return (
     <div className="space-y-8 pb-12">
       {/* Header */}
@@ -126,32 +141,37 @@ export function ReportsClient() {
           </div>
           
           <div className="space-y-4">
-            {[
-              { name: "Vinhomes Grand Park", revenue: 150000000000, cost: 120000000000, profit: 30000000000, margin: 20 },
-              { name: "Akari City", revenue: 85000000000, cost: 65000000000, profit: 20000000000, margin: 23.5 },
-              { name: "The 9 Stellars", revenue: 42000000000, cost: 35000000000, profit: 70000000000, margin: 16.6 },
-            ].map((project) => (
-              <div key={project.name} className="p-4 rounded-2xl bg-secondary/20 border border-white/5 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold">{project.name}</span>
-                  <span className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-full">+{project.margin}%</span>
+            {pnlData.length > 0 ? pnlData.map((project) => {
+              const revenue = parseFloat(project.gross_revenue);
+              const cost = parseFloat(project.sales_commissions) + parseFloat(project.operational_expenses);
+              const profit = parseFloat(project.net_profit);
+              const margin = revenue > 0 ? ((profit / revenue) * 100).toFixed(1) : "0";
+
+              return (
+                <div key={project.project_id} className="p-4 rounded-2xl bg-secondary/20 border border-white/5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold">{project.project_name}</span>
+                    <span className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-full">+{margin}%</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
+                    <div className="space-y-1">
+                      <span>Doanh thu</span>
+                      <div className="text-sm text-foreground">{fmtTỷ(revenue)}</div>
+                    </div>
+                    <div className="space-y-1">
+                      <span>Chi phí</span>
+                      <div className="text-sm text-foreground">{fmtTỷ(cost)}</div>
+                    </div>
+                    <div className="space-y-1">
+                      <span>Lợi nhuận</span>
+                      <div className="text-sm text-primary">{fmtTỷ(profit)}</div>
+                    </div>
+                  </div>
                 </div>
-                <div className="grid grid-cols-3 gap-2 text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
-                  <div className="space-y-1">
-                    <span>Doanh thu</span>
-                    <div className="text-sm text-foreground">{(project.revenue / 1e9).toFixed(1)} tỷ</div>
-                  </div>
-                  <div className="space-y-1">
-                    <span>Chi phí</span>
-                    <div className="text-sm text-foreground">{(project.cost / 1e9).toFixed(1)} tỷ</div>
-                  </div>
-                  <div className="space-y-1">
-                    <span>Lợi nhuận</span>
-                    <div className="text-sm text-primary">{(project.profit / 1e9).toFixed(1)} tỷ</div>
-                  </div>
-                </div>
-              </div>
-            ))}
+              );
+            }) : (
+              <div className="text-center py-8 text-muted-foreground italic">Chưa có dữ liệu dự án</div>
+            )}
           </div>
         </div>
 
@@ -168,25 +188,28 @@ export function ReportsClient() {
           </div>
           
           <div className="relative space-y-6">
-            {[
-              { label: "Leads / Khách hàng tiềm năng", value: 1240, color: "bg-blue-500", percentage: 100 },
-              { label: "Bookings / Phiếu đặt chỗ", value: 450, color: "bg-purple-500", percentage: 36 },
-              { label: "Contracts / Hợp đồng", value: 185, color: "bg-emerald-500", percentage: 15 },
-              { label: "Commission / Đã thu tiền", value: 120, color: "bg-orange-500", percentage: 10 },
-            ].map((step) => (
-              <div key={step.label} className="space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-semibold text-muted-foreground">{step.label}</span>
-                  <span className="font-bold">{step.value}</span>
+            {funnelData.length > 0 ? funnelData.map((step, index) => {
+              const colors = ["bg-blue-500", "bg-purple-500", "bg-emerald-500", "bg-orange-500"];
+              const maxVal = Math.max(...funnelData.map(f => f.count));
+              const percentage = (step.count / maxVal) * 100;
+
+              return (
+                <div key={step.stage} className="space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-muted-foreground">{step.stage}</span>
+                    <span className="font-bold">{step.count}</span>
+                  </div>
+                  <div className="h-4 w-full bg-secondary rounded-full overflow-hidden">
+                    <div 
+                      className={cn("h-full rounded-full transition-all duration-1000", colors[index % colors.length])}
+                      style={{ width: `${percentage}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="h-4 w-full bg-secondary rounded-full overflow-hidden">
-                  <div 
-                    className={cn("h-full rounded-full transition-all duration-1000", step.color)}
-                    style={{ width: `${step.percentage}%` }}
-                  />
-                </div>
-              </div>
-            ))}
+              );
+            }) : (
+              <div className="text-center py-8 text-muted-foreground italic">Chưa có dữ liệu phễu</div>
+            )}
           </div>
         </div>
 
@@ -197,33 +220,19 @@ export function ReportsClient() {
               <h3 className="text-xl font-bold">Tuổi nợ phải thu (Aging Receivable)</h3>
               <p className="text-xs text-muted-foreground font-medium">Phân loại nợ từ Chủ đầu tư theo thời gian</p>
             </div>
-            <div className="flex gap-4">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-emerald-500" />
-                <span className="text-[10px] font-bold text-muted-foreground uppercase">Trong hạn</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-orange-500" />
-                <span className="text-[10px] font-bold text-muted-foreground uppercase">Quá hạn 1-30 ngày</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-rose-500" />
-                <span className="text-[10px] font-bold text-muted-foreground uppercase">Quá hạn > 90 ngày</span>
-              </div>
-            </div>
           </div>
 
           <div className="grid grid-cols-5 gap-4">
             {[
-              { label: "Trong hạn", amount: 25.4, color: "bg-emerald-500" },
-              { label: "1-30 ngày", amount: 8.2, color: "bg-orange-500" },
-              { label: "31-60 ngày", amount: 4.5, color: "bg-rose-400" },
-              { label: "61-90 ngày", amount: 3.1, color: "bg-rose-500" },
-              { label: "> 90 ngày", amount: 2.1, color: "bg-rose-600 shadow-lg shadow-rose-500/20" },
+              { label: "Trong hạn", amount: agingData.find(a => a.aging_bracket === '0-30 days')?.total_amount || 0, color: "bg-emerald-500" },
+              { label: "31-60 ngày", amount: agingData.find(a => a.aging_bracket === '31-60 days')?.total_amount || 0, color: "bg-orange-500" },
+              { label: "61-90 ngày", amount: agingData.find(a => a.aging_bracket === '61-90 days')?.total_amount || 0, color: "bg-rose-400" },
+              { label: "91-120 ngày", amount: agingData.find(a => a.aging_bracket === '91-120 days')?.total_amount || 0, color: "bg-rose-500" },
+              { label: "> 120 ngày", amount: agingData.find(a => a.aging_bracket === 'Over 120 days')?.total_amount || 0, color: "bg-rose-600 shadow-lg shadow-rose-500/20" },
             ].map((tier) => (
               <div key={tier.label} className="p-6 rounded-[2rem] bg-secondary/20 border border-white/5 space-y-4 text-center">
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{tier.label}</span>
-                <div className="text-2xl font-bold">{tier.amount} tỷ</div>
+                <div className="text-2xl font-bold">{fmtTỷ(tier.amount)}</div>
                 <div className={cn("h-1.5 w-full rounded-full", tier.color)} />
               </div>
             ))}

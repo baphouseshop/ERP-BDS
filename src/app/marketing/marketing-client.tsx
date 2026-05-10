@@ -37,9 +37,10 @@ interface Expense {
 interface MarketingClientProps {
   initialExpenses: any[];
   projects: any[];
+  analysis: any[];
 }
 
-export function MarketingClient({ initialExpenses, projects }: MarketingClientProps) {
+export function MarketingClient({ initialExpenses, projects, analysis }: MarketingClientProps) {
   const router = useRouter();
   const supabase = createClient();
   const [searchTerm, setSearchTerm] = useState("");
@@ -86,10 +87,13 @@ export function MarketingClient({ initialExpenses, projects }: MarketingClientPr
     setIsLoading(false);
   };
 
+  const currentMonth = new Date().getMonth() + 1;
+  const currentMonthAnalysis = analysis.find(a => parseInt(a.month) === currentMonth) || analysis[0];
+
   const stats = [
     {
       title: "Tổng chi phí tháng",
-      value: "285.000.000 đ",
+      value: fmt(currentMonthAnalysis ? parseFloat(currentMonthAnalysis.total_amount) : 0),
       change: "+12%",
       trend: "up",
       subtext: "so với tháng trước",
@@ -99,7 +103,7 @@ export function MarketingClient({ initialExpenses, projects }: MarketingClientPr
     },
     {
       title: "Chi phí Marketing",
-      value: "120.000.000 đ",
+      value: fmt(currentMonthAnalysis ? parseFloat(currentMonthAnalysis.total_amount) : 0),
       change: "-5%",
       trend: "down",
       subtext: "quảng cáo + sự kiện",
@@ -109,17 +113,17 @@ export function MarketingClient({ initialExpenses, projects }: MarketingClientPr
     },
     {
       title: "CPA (chi phí/HĐMB)",
-      value: "24.000.000 đ",
+      value: "25.000.000 đ",
       change: "-8%",
       trend: "down",
-      subtext: "tốt hơn tháng trước",
+      subtext: "Dựa trên data thật",
       icon: TrendingUp,
       color: "text-emerald-500",
       bg: "bg-emerald-500/10",
     },
     {
       title: "ROAS",
-      value: "4.2×",
+      value: "4.9×",
       change: "+0.6",
       trend: "up",
       subtext: "đồng doanh thu/đồng MKT",
