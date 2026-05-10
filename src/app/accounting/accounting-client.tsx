@@ -22,7 +22,8 @@ import {
   Loader2,
   MoreVertical,
   ChevronRight,
-  Plus
+  Plus,
+  User
 } from "lucide-react";
 
 interface AccountingClientProps {
