@@ -7,7 +7,8 @@ export default async function AccountingPage() {
   const [
     { data: commissionRecords },
     { data: internalCommissions },
-    { data: cancellations }
+    { data: cancellations },
+    { data: projects }
   ] = await Promise.all([
     supabase.from("commission_records").select(`
       *,
@@ -22,7 +23,8 @@ export default async function AccountingPage() {
     supabase.from("cancellations").select(`
       *,
       sale_contracts(contract_number)
-    `).order("created_at", { ascending: false })
+    `).order("created_at", { ascending: false }),
+    supabase.from("projects").select("*").order("name")
   ]);
 
   return (
@@ -31,6 +33,7 @@ export default async function AccountingPage() {
         commissionRecords={commissionRecords || []}
         internalCommissions={internalCommissions || []}
         cancellations={cancellations || []}
+        projects={projects || []}
       />
     </div>
   );

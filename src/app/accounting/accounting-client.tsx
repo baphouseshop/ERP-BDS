@@ -24,7 +24,8 @@ import {
   AlertCircle,
   FileText,
   CreditCard,
-  UserPlus
+  UserPlus,
+  FileDown
 } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 
@@ -32,12 +33,14 @@ interface AccountingClientProps {
   commissionRecords: any[];
   internalCommissions: any[];
   cancellations: any[];
+  projects: any[];
 }
 
 export function AccountingClient({ 
   commissionRecords,
   internalCommissions,
-  cancellations
+  cancellations,
+  projects
 }: AccountingClientProps) {
   const router = useRouter();
   const supabase = createClient();
