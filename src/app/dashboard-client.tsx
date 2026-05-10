@@ -57,7 +57,9 @@ export function DashboardClient({
   revenueOverview,
   revenueGrowth 
 }: DashboardClientProps) {
-  const soldPercentage = (stats.soldUnits / (stats.availableUnits + stats.soldUnits || 1)) * 100;
+  const occupancyRate = (stats.soldUnits / (stats.availableUnits + stats.soldUnits || 1)) * 100;
+  const [selectedProject, setSelectedProject] = useState("all");
+  const [timeRange, setTimeRange] = useState("this_month");
 
   // Prepare chart data
   const chartData = revenueGrowth.map(item => ({
@@ -75,13 +77,51 @@ export function DashboardClient({
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
+      {/* Header & Filters */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-1">
+          <h1 className="text-4xl font-bold tracking-tight text-white">Hệ thống Quản trị ERP BĐS</h1>
+          <p className="text-white/60 font-medium text-lg">Chào mừng quay trở lại. Dưới đây là tổng quan tình hình kinh doanh hôm nay.</p>
+        </div>
+        
+        <div className="flex items-center gap-3 bg-white/5 p-2 rounded-[1.5rem] border border-white/10 shadow-xl">
+          <div className="relative group">
+            <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-primary transition-colors" />
+            <select 
+              value={selectedProject}
+              onChange={(e) => setSelectedProject(e.target.value)}
+              className="pl-9 pr-4 py-2 bg-transparent border-none text-xs font-bold text-white focus:ring-0 cursor-pointer appearance-none min-w-[140px]"
+            >
+              <option value="all" className="bg-[#111]">Tất cả dự án</option>
+              {projects.map(p => (
+                <option key={p.id} value={p.id} className="bg-[#111]">{p.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="w-px h-6 bg-white/10" />
+          <div className="relative group">
+            <Clock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-primary transition-colors" />
+            <select 
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value)}
+              className="pl-9 pr-4 py-2 bg-transparent border-none text-xs font-bold text-white focus:ring-0 cursor-pointer appearance-none min-w-[120px]"
+            >
+              <option value="today" className="bg-[#111]">Hôm nay</option>
+              <option value="this_month" className="bg-[#111]">Tháng này</option>
+              <option value="this_quarter" className="bg-[#111]">Quý này</option>
+              <option value="year" className="bg-[#111]">Năm nay</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       {/* Quick Stats Header */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
           { label: "Kho hàng khả dụng", value: stats.availableUnits, icon: Building2, color: "blue", trend: "+2.5%", isUp: true },
-          { label: "Tỷ lệ lấp đầy", value: `${soldPercentage.toFixed(1)}%`, icon: Target, color: "emerald", trend: "+4.2%", isUp: true },
+          { label: "Tỷ lệ lấp đầy giỏ hàng", value: `${occupancyRate.toFixed(1)}%`, icon: Target, color: "emerald", trend: "+4.2%", isUp: true, sublabel: "(Cọc/Bán/Khóa)" },
           { label: "Doanh số hệ thống", value: `${(stats.totalSalesValue / 1000000000).toFixed(2)}B`, icon: Briefcase, color: "purple", trend: "+12%", isUp: true },
-          { label: "Lợi nhuận ròng", value: `${(stats.totalReceivedRevenue / 1000000000).toFixed(2)}B`, icon: TrendingUp, color: "orange", trend: "+8.1%", isUp: true },
+          { label: "Doanh thu thực nhận", value: `${(stats.totalReceivedRevenue / 1000000000).toFixed(2)}B`, icon: TrendingUp, color: "orange", trend: "+8.1%", isUp: true },
         ].map((stat, i) => (
           <div key={i} className="glass-card rounded-[2rem] p-7 border border-white/10 relative overflow-hidden group hover:border-primary/50 transition-all duration-500 shadow-2xl">
             <div className={cn(
@@ -111,8 +151,10 @@ export function DashboardClient({
                 </div>
               </div>
               <div className="flex flex-col">
-                <span className="text-xs font-semibold text-white/50 uppercase tracking-[0.2em] mb-1">{stat.label}</span>
-                <span className="text-4xl font-bold tracking-tighter text-white drop-shadow-sm">{stat.value}</span>
+                <span className="text-[10px] font-bold text-white/60 uppercase tracking-[0.2em] mb-1">
+                  {stat.label} {stat.sublabel && <span className="lowercase text-white/30 font-medium">{stat.sublabel}</span>}
+                </span>
+                <span className="text-4xl font-bold tracking-tighter text-white drop-shadow-md">{stat.value}</span>
               </div>
             </div>
           </div>

@@ -45,6 +45,8 @@ export function AccountingClient({
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedProject, setSelectedProject] = useState("all");
 
   const [paymentForm, setPaymentForm] = useState({
     amount: "",
@@ -135,35 +137,66 @@ export function AccountingClient({
     setIsLoading(false);
   };
 
+  const filteredSchedules = pendingSchedules.filter(s => 
+    s.sale_contracts?.contract_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    s.sale_contracts?.customers?.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    s.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredEntries = initialEntries.filter(e => 
+    e.entry_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    e.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredCommissions = commissionRecords.filter(c => 
+    c.sale_contracts?.contract_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    c.projects?.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="space-y-6">
       {/* Tabs */}
-      <div className="flex gap-2 p-1 bg-secondary/50 rounded-2xl w-fit border border-border">
-        {[
-          { id: "collections", label: "Thu tiền", icon: ArrowDownLeft },
-          { id: "ledger", label: "Sổ cái", icon: FileText },
-          { id: "commissions", label: "Hoa hồng", icon: Briefcase },
-          { id: "coa", label: "Hệ thống tài khoản", icon: Calculator },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
-            className={cn(
-              "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all",
-              activeTab === tab.id 
-                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" 
-                : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-            )}
-          >
-            <tab.icon size={16} />
-            <span>{tab.label}</span>
-          </button>
-        ))}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex gap-2 p-1 bg-secondary/50 rounded-2xl w-fit border border-border">
+          {[
+            { id: "collections", label: "Thu tiền", icon: ArrowDownLeft },
+            { id: "ledger", label: "Sổ cái", icon: FileText },
+            { id: "commissions", label: "Hoa hồng", icon: Briefcase },
+            { id: "coa", label: "Hệ thống tài khoản", icon: Calculator },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all",
+                activeTab === tab.id 
+                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" 
+                  : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+              )}
+            >
+              <tab.icon size={16} />
+              <span>{tab.label}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <div className="relative group">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
+            <input 
+              type="text" 
+              placeholder="Tìm số HĐ, tên KH..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 pr-4 py-2 bg-secondary/50 border border-border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all w-full md:w-64 font-medium"
+            />
+          </div>
+        </div>
       </div>
 
       {activeTab === "collections" && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {pendingSchedules.map((schedule) => (
+          {filteredSchedules.map((schedule) => (
             <div key={schedule.id} className="glass-card rounded-2xl border border-border/50 p-6 space-y-4 hover:border-primary/50 transition-all group">
               <div className="flex items-start justify-between">
                 <div className="flex flex-col">
@@ -199,7 +232,7 @@ export function AccountingClient({
               </button>
             </div>
           ))}
-          {pendingSchedules.length === 0 && (
+          {filteredSchedules.length === 0 && (
             <div className="col-span-full py-20 text-center glass-card rounded-2xl border border-border/50">
               <Clock size={48} className="mx-auto text-muted-foreground mb-4 opacity-50" />
               <h3 className="text-lg font-bold">Không có khoản thu nào chờ xử lý</h3>
@@ -221,7 +254,7 @@ export function AccountingClient({
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">
-              {initialEntries.map((entry) => (
+              {filteredEntries.map((entry) => (
                 <tr key={entry.id} className="hover:bg-white/[0.02] transition-colors group cursor-pointer">
                   <td className="px-6 py-4">
                     <span className="font-bold text-sm group-hover:text-primary transition-colors">{entry.entry_number}</span>
@@ -244,7 +277,7 @@ export function AccountingClient({
 
       {activeTab === "commissions" && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {commissionRecords.map((record) => (
+          {filteredCommissions.map((record) => (
             <div key={record.id} className="glass-card rounded-2xl border border-border/50 p-6 space-y-4 hover:border-primary/50 transition-all group">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-all">

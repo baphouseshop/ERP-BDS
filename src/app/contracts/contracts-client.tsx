@@ -34,14 +34,18 @@ const statusConfig: Record<string, { label: string, variant: any }> = {
 export function ContractsClient({ initialContracts }: ContractsClientProps) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedContract, setSelectedContract] = useState<any>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
-  const filteredContracts = initialContracts.filter(c => 
-    c.contract_number.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    c.customers?.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.units?.code.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredContracts = initialContracts.filter(c => {
+    const matchesSearch = 
+      c.contract_number.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      c.customers?.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.units?.code.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = selectedStatus === "all" || c.status === selectedStatus;
+    return matchesSearch && matchesStatus;
+  });
 
   const openDetail = (contract: any) => {
     setSelectedContract(contract);
@@ -52,21 +56,33 @@ export function ContractsClient({ initialContracts }: ContractsClientProps) {
     <div className="space-y-6">
       {/* Controls */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="relative group">
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
-            <input 
-              type="text" 
-              placeholder="Tìm số HĐ, tên KH, mã căn..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-secondary/50 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all w-full md:w-80"
-            />
+          <div className="flex items-center gap-2">
+            <div className="relative group">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              <input 
+                type="text" 
+                placeholder="Tìm kiếm..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 pr-4 py-2 bg-secondary/50 border border-border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all w-full md:w-64 font-medium"
+              />
+            </div>
+            
+            <div className="relative">
+              <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+              <select 
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                className="pl-9 pr-8 py-2 bg-secondary/50 border border-border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none font-bold cursor-pointer min-w-[140px]"
+              >
+                <option value="all">Tất cả trạng thái</option>
+                <option value="draft">Bản thảo</option>
+                <option value="signed">Đã ký</option>
+                <option value="completed">Hoàn tất</option>
+                <option value="cancelled">Đã hủy</option>
+              </select>
+            </div>
           </div>
-          <button className="p-2 hover:bg-secondary rounded-xl transition-colors text-muted-foreground">
-            <Filter size={18} />
-          </button>
-        </div>
       </div>
 
       {/* Table */}

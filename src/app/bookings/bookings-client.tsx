@@ -36,6 +36,7 @@ export function BookingsClient({ initialBookings }: BookingsClientProps) {
   const router = useRouter();
   const supabase = createClient();
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [isContractModalOpen, setIsContractModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -47,11 +48,14 @@ export function BookingsClient({ initialBookings }: BookingsClientProps) {
     agreed_commission_rate: ""
   });
 
-  const filteredBookings = initialBookings.filter(b => 
-    b.booking_number.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    b.customers?.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    b.units?.code.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredBookings = initialBookings.filter(b => {
+    const matchesSearch = 
+      b.booking_number.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      b.customers?.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      b.units?.code.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = selectedStatus === "all" || b.status === selectedStatus;
+    return matchesSearch && matchesStatus;
+  });
 
   const openContractModal = (booking: any) => {
     setSelectedBooking(booking);
@@ -103,18 +107,33 @@ export function BookingsClient({ initialBookings }: BookingsClientProps) {
     <div className="space-y-6">
       {/* Controls */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="relative group">
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
-            <input 
-              type="text" 
-              placeholder="Tìm số phiếu, khách hàng..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-secondary/50 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all w-full md:w-80"
-            />
+          <div className="flex items-center gap-2">
+            <div className="relative group">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              <input 
+                type="text" 
+                placeholder="Tìm kiếm..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 pr-4 py-2 bg-secondary/50 border border-border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all w-full md:w-64 font-medium"
+              />
+            </div>
+            
+            <div className="relative">
+              <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+              <select 
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                className="pl-9 pr-8 py-2 bg-secondary/50 border border-border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none font-bold cursor-pointer min-w-[140px]"
+              >
+                <option value="all">Tất cả trạng thái</option>
+                <option value="active">Đang hiệu lực</option>
+                <option value="expired">Đã hết hạn</option>
+                <option value="converted">Đã chuyển đổi</option>
+                <option value="cancelled">Đã hủy</option>
+              </select>
+            </div>
           </div>
-        </div>
       </div>
 
       {/* Grid */}

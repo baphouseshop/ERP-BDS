@@ -39,25 +39,25 @@
 
 @layer base {
   :root {
-    --background: hsl(240 10% 2%);
+    --background: hsl(240 10% 4%);
     --foreground: hsl(0 0% 100%);
-    --card: hsl(240 10% 3.9%);
+    --card: hsl(240 10% 6%);
     --card-foreground: hsl(0 0% 100%);
-    --popover: hsl(240 10% 3.9%);
+    --popover: hsl(240 10% 6%);
     --popover-foreground: hsl(0 0% 100%);
-    --primary: hsl(142 76% 45%);
+    --primary: hsl(142 76% 50%);
     --primary-foreground: hsl(240 5.9% 10%);
-    --secondary: hsl(240 3.7% 12%);
+    --secondary: hsl(240 3.7% 15%);
     --secondary-foreground: hsl(0 0% 100%);
-    --muted: hsl(240 3.7% 15.9%);
-    --muted-foreground: hsl(240 5% 75%);
-    --accent: hsl(217 91% 60%);
+    --muted: hsl(240 3.7% 20%);
+    --muted-foreground: hsl(240 5% 85%);
+    --accent: hsl(217 91% 65%);
     --accent-foreground: hsl(0 0% 100%);
     --destructive: hsl(0 84% 60%);
     --destructive-foreground: hsl(0 0% 98%);
-    --border: hsl(240 3.7% 20%);
-    --input: hsl(240 3.7% 15.9%);
-    --ring: hsl(142 76% 45%);
+    --border: hsl(240 3.7% 25%);
+    --input: hsl(240 3.7% 20%);
+    --ring: hsl(142 76% 50%);
     --radius: 1.25rem;
   }
 }
