@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Antigravity ERP - Bất Động Sản",
+  title: "ERP BĐS - Quản trị Bất Động Sản",
   description: "Hệ thống ERP chuyên dụng cho sàn môi giới BĐS",
 };
 

@@ -36,7 +36,7 @@ export default async function DashboardPage() {
     projects.forEach((p: any) => {
       p.units?.forEach((u: any) => {
         if (u.status === 'available') stats.availableUnits++;
-        if (['reserved', 'contracted', 'handed_over'].includes(u.status)) stats.soldUnits++;
+        if (['booked', 'sold', 'locked'].includes(u.status)) stats.soldUnits++;
       });
     });
   }
@@ -44,7 +44,7 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold tracking-tight">Hệ thống Quản trị Antigravity</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Hệ thống Quản trị ERP BĐS</h1>
         <p className="text-muted-foreground font-medium text-lg">Chào mừng quay trở lại. Dưới đây là tổng quan tình hình kinh doanh hôm nay.</p>
       </div>
 

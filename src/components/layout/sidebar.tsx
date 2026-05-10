@@ -39,8 +39,8 @@ export function Sidebar() {
           <TrendingUp size={24} />
         </div>
         <div className="flex flex-col">
-          <span className="font-bold text-lg tracking-tight">Antigravity</span>
-          <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">ERP v3.0</span>
+          <span className="font-bold text-lg tracking-tight">ERP BĐS</span>
+          <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Hệ thống Quản trị v3.0</span>
         </div>
       </div>
 
