@@ -1,16 +1,27 @@
-# React + Vite
+# Antigravity ERP v3
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Hệ thống ERP hiện đại cho quản lý Bất động sản, Sales và Kế toán, xây dựng trên Next.js 14+ và Supabase.
 
-Currently, two official plugins are available:
+## 🚀 Tình trạng dự án
+Vui lòng đọc file [**ERP_V3_PROGRESS.md**](./ERP_V3_PROGRESS.md) để cập nhật tiến độ chi tiết, các module đã hoàn thành và kế hoạch tiếp theo.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🛠 Công nghệ sử dụng
+- **Frontend**: Next.js 14+ (App Router), Tailwind CSS.
+- **Backend**: Supabase (PostgreSQL, Auth, Realtime).
+- **Icons**: Lucide React.
+- **Components**: Radix UI / Shadcn.
 
-## React Compiler
+## 📦 Các Module chính
+- **Dashboard**: Tổng quan kinh doanh.
+- **Dự án**: Quản lý kho hàng & Sơ đồ phân lô.
+- **Sales**: Khách hàng, Đặt chỗ & Hợp đồng.
+- **Tài chính**: Kế toán, Thu tiền & Hoa hồng.
+- **Nhân sự**: Quản lý đội ngũ & Phân quyền.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🏃 Triển khai nhanh
+```bash
+npm install
+npm run dev
+```
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Mọi thay đổi quan trọng về Schema và Logic nghiệp vụ đều được ghi nhận trong nhật ký tiến độ.
