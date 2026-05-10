@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { 
   Building2, 
   Briefcase, 
@@ -14,7 +16,9 @@ import {
   Users,
   Target,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  Filter,
+  Search
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
