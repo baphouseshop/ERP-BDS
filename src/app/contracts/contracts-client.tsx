@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn, formatVND, formatBillion } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Modal } from "@/components/ui/modal";
 import { 
@@ -130,7 +130,7 @@ export function ContractsClient({ initialContracts }: ContractsClientProps) {
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex flex-col gap-0.5">
-                    <span className="text-sm font-semibold text-foreground">{(contract.total_value / 1000000000).toFixed(2)}B</span>
+                    <span className="text-sm font-semibold text-foreground">{formatBillion(contract.total_value)}</span>
                     <span className="text-[10px] text-muted-foreground font-medium">Hồng: {contract.agreed_commission_rate}%</span>
                   </div>
                 </td>
@@ -191,7 +191,7 @@ export function ContractsClient({ initialContracts }: ContractsClientProps) {
               <div className="glass-card p-5 rounded-2xl border border-border/50 space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Tổng giá trị HĐ</span>
-                  <span className="text-lg font-bold text-primary">{(selectedContract.total_value).toLocaleString('vi-VN')} VND</span>
+                  <span className="text-lg font-bold text-primary">{formatVND(selectedContract.total_value)}</span>
                 </div>
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-muted-foreground">Tỷ lệ hoa hồng</span>
@@ -199,7 +199,7 @@ export function ContractsClient({ initialContracts }: ContractsClientProps) {
                 </div>
                 <div className="flex justify-between items-center text-sm pt-2 border-t border-border/50">
                   <span className="text-muted-foreground">Hoa hồng dự kiến</span>
-                  <span className="font-bold text-emerald-500">{(selectedContract.expected_commission_amount).toLocaleString('vi-VN')} VND</span>
+                  <span className="font-bold text-emerald-500">{formatVND(selectedContract.expected_commission_amount)}</span>
                 </div>
               </div>
             </div>

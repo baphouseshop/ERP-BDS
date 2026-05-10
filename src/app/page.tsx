@@ -38,7 +38,7 @@ export default async function DashboardPage() {
     projects.forEach((p: any) => {
       p.units?.forEach((u: any) => {
         if (u.status === 'available') stats.availableUnits++;
-        if (['booked', 'sold', 'locked'].includes(u.status)) stats.soldUnits++;
+        if (['reserved', 'contracted', 'handed_over'].includes(u.status)) stats.soldUnits++;
       });
     });
   }

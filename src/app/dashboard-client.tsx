@@ -21,7 +21,7 @@ import {
   Search
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { cn, formatVND, formatCompactNumber, formatBillion } from "@/lib/utils";
 import { 
   AreaChart, 
   Area, 
@@ -79,6 +79,10 @@ export function DashboardClient({
     color: [`#10b981`, `#3b82f6`, `#f59e0b`, `#8b5cf6`, `#ec4899`][index % 5]
   }));
 
+  const latestGrowth = revenueGrowth.length > 0 
+    ? (revenueGrowth[revenueGrowth.length - 1].yoy_growth_rate * 100).toFixed(1) 
+    : "0";
+
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
       {/* Header & Filters */}
@@ -124,10 +128,10 @@ export function DashboardClient({
       {/* Quick Stats Header */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: "Kho hàng khả dụng", value: stats.availableUnits, icon: Building2, color: "blue", trend: "+2.5%", isUp: true },
-          { label: "Tỷ lệ lấp đầy", value: `${occupancyRate.toFixed(1)}%`, icon: Target, color: "emerald", trend: "+4.2%", isUp: true, sublabel: "(Giỏ hàng)" },
-          { label: "Doanh số hệ thống", value: `${(stats.totalSalesValue / 1000000000).toFixed(2)}B`, icon: Briefcase, color: "purple", trend: "+12%", isUp: true },
-          { label: "Doanh thu thực nhận", value: `${(stats.totalReceivedRevenue / 1000000000).toFixed(2)}B`, icon: TrendingUp, color: "orange", trend: "+8.1%", isUp: true },
+          { label: "Kho hàng khả dụng", value: stats.availableUnits, icon: Building2, color: "blue", trend: "Ổn định", isUp: true },
+          { label: "Tỷ lệ lấp đầy", value: `${occupancyRate.toFixed(1)}%`, icon: Target, color: "emerald", trend: "Realtime", isUp: true, sublabel: "(Giỏ hàng)" },
+          { label: "Doanh số hệ thống", value: formatBillion(stats.totalSalesValue), icon: Briefcase, color: "purple", trend: `+${latestGrowth}%`, isUp: Number(latestGrowth) >= 0 },
+          { label: "Doanh thu thực nhận", value: formatBillion(stats.totalReceivedRevenue), icon: TrendingUp, color: "orange", trend: "0%", isUp: true },
         ].map((stat, i) => (
           <div key={i} className="glass-card rounded-[1.5rem] p-6 border border-border/50 relative overflow-hidden group hover:border-primary/40 transition-all duration-300 shadow-sm">
             <div className="flex flex-col gap-4 relative z-10">
@@ -170,7 +174,7 @@ export function DashboardClient({
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <h2 className="text-2xl font-semibold tracking-tight text-foreground">Xu hướng Doanh thu</h2>
-              <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest italic">Phân tích tăng trưởng theo tháng (MoM)</p>
+              <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest italic">Phân tích tăng trưởng so với cùng kỳ (YoY)</p>
             </div>
             <div className="flex gap-4">
               <div className="flex items-center gap-2">
@@ -207,6 +211,7 @@ export function DashboardClient({
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#111', border: '1px solid #ffffff10', borderRadius: '16px' }}
                   itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
+                  formatter={(value: number) => [`${value.toFixed(1)}Tr`, 'Doanh thu']}
                 />
                 <Area 
                   type="monotone" 
@@ -257,6 +262,7 @@ export function DashboardClient({
                 </Pie>
                 <Tooltip 
                    contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px' }}
+                   formatter={(value: number) => [formatCompactNumber(value), 'Doanh số']}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -273,7 +279,7 @@ export function DashboardClient({
                   <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
                   <span className="text-xs font-medium text-muted-foreground truncate max-w-[140px]">{item.name}</span>
                 </div>
-                <span className="text-xs font-semibold text-foreground">{(item.value / 1000000000).toFixed(1)}B</span>
+                <span className="text-xs font-semibold text-foreground">{formatBillion(item.value)}</span>
               </div>
             ))}
           </div>
@@ -294,7 +300,7 @@ export function DashboardClient({
             {revenueOverview.slice(0, 4).map((project) => {
               const projData = projects.find(p => p.id === project.project_id);
               const total = projData?.units?.length || 0;
-              const sold = projData?.units?.filter((u: any) => u.status !== 'available').length || 0;
+              const sold = projData?.units?.filter((u: any) => ['reserved', 'contracted', 'handed_over'].includes(u.status)).length || 0;
               const percent = total > 0 ? (sold / total) * 100 : 0;
               
               return (
@@ -319,7 +325,7 @@ export function DashboardClient({
                     <div className="flex justify-between items-end">
                       <div className="flex flex-col gap-0.5">
                         <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-tight">Thực thu</span>
-                        <span className="text-sm font-semibold text-foreground">{(project.total_received_revenue / 1000000).toLocaleString('vi-VN')}Tr</span>
+                        <span className="text-sm font-semibold text-foreground">{formatCompactNumber(project.total_received_revenue)}</span>
                       </div>
                       <div className="flex flex-col gap-0.5 text-right">
                         <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-tight">Hợp đồng</span>
@@ -353,7 +359,7 @@ export function DashboardClient({
                   </span>
                   <span className="text-sm font-medium text-foreground/90 line-clamp-1">{expense.description}</span>
                   <span className="text-[11px] font-semibold text-red-400">
-                    - {(expense.total_amount).toLocaleString('vi-VN')} VND
+                    - {formatVND(expense.total_amount)}
                   </span>
                 </div>
               </div>

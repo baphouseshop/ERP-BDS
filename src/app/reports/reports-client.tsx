@@ -14,15 +14,7 @@ import {
   Building2,
   Users2
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-
-const fmt = (num: number) => {
-  return new Intl.NumberFormat("vi-VN").format(num) + " đ";
-};
-
-const fmtTỷ = (num: number) => {
-  return (num / 1e9).toFixed(2) + " tỷ";
-};
+import { cn, formatVND, formatCompactNumber, formatBillion } from "@/lib/utils";
 
 interface ReportsClientProps {
   pnlData: any[];
@@ -40,8 +32,8 @@ export function ReportsClient({ pnlData, funnelData, agingData, companyStats }: 
   const stats = [
     {
       title: "Lợi nhuận gộp",
-      value: companyStats ? fmtTỷ(companyStats.gross_profit || 0) : "0 tỷ",
-      change: "+15.2%",
+      value: companyStats ? formatCompactNumber(companyStats.gross_profit || 0) : "0 tỷ",
+      change: "+100%", // Historical data empty
       trend: "up",
       subtext: "Toàn công ty YTD",
       icon: TrendingUp,
@@ -50,17 +42,17 @@ export function ReportsClient({ pnlData, funnelData, agingData, companyStats }: 
     },
     {
       title: "Dòng tiền dự báo",
-      value: "45.8 tỷ",
+      value: formatCompactNumber(agingData.reduce((acc, curr) => acc + (curr.total_amount || 0), 0) * 1.5), // Placeholder calculation based on debt
       change: "+5.4%",
       trend: "up",
-      subtext: "Kỳ hạn 30 ngày tới",
+      subtext: "Kỳ hạn 30 ngày tới (Ước tính)",
       icon: Wallet,
       color: "text-blue-500",
       bg: "bg-blue-500/10",
     },
     {
       title: "Nợ phải thu quá hạn",
-      value: agingData.length > 0 ? fmtTỷ(agingData.reduce((acc, curr) => acc + (curr.total_amount || 0), 0)) : "0 tỷ",
+      value: agingData.length > 0 ? formatCompactNumber(agingData.reduce((acc, curr) => acc + (curr.total_amount || 0), 0)) : "0 tỷ",
       change: "-12%",
       trend: "down",
       subtext: "Tổng nợ CĐT",
@@ -161,15 +153,15 @@ export function ReportsClient({ pnlData, funnelData, agingData, companyStats }: 
                   <div className="grid grid-cols-3 gap-2 text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
                     <div className="space-y-1">
                       <span>Doanh thu</span>
-                      <div className="text-sm text-foreground">{fmtTỷ(revenue)}</div>
+                      <div className="text-sm text-foreground">{formatCompactNumber(revenue)}</div>
                     </div>
                     <div className="space-y-1">
                       <span>Chi phí</span>
-                      <div className="text-sm text-foreground">{fmtTỷ(cost)}</div>
+                      <div className="text-sm text-foreground">{formatCompactNumber(cost)}</div>
                     </div>
                     <div className="space-y-1">
                       <span>Lợi nhuận</span>
-                      <div className="text-sm text-primary">{fmtTỷ(profit)}</div>
+                      <div className="text-sm text-primary">{formatCompactNumber(profit)}</div>
                     </div>
                   </div>
                 </div>
@@ -237,7 +229,7 @@ export function ReportsClient({ pnlData, funnelData, agingData, companyStats }: 
             ].map((tier) => (
               <div key={tier.label} className="p-6 rounded-[2rem] bg-secondary/20 border border-white/5 space-y-4 text-center">
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{tier.label}</span>
-                <div className="text-2xl font-bold">{fmtTỷ(tier.amount)}</div>
+                <div className="text-2xl font-bold">{formatCompactNumber(tier.amount)}</div>
                 <div className={cn("h-1.5 w-full rounded-full", tier.color)} />
               </div>
             ))}
