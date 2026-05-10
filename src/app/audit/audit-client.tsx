@@ -38,6 +38,7 @@ interface AuditLog {
   new_data: any;
   user_id: string | null;
   user_email: string | null;
+  user_role: string | null;
   created_at: string;
   profiles?: {
     full_name: string;
@@ -56,7 +57,14 @@ const tableLabels: Record<string, string> = {
   expenses: "Chi phí",
   bookings: "Phiếu đặt chỗ",
   cancellations: "Yêu cầu hủy",
-  profiles: "Hồ sơ người dùng"
+  profiles: "Hồ sơ người dùng",
+  customers: "Khách hàng",
+  developers: "Chủ đầu tư",
+  f2_agencies: "Đại lý F2",
+  distribution_contracts: "Hợp đồng phân phối",
+  payment_schedules: "Tiến độ thanh toán",
+  accounting_entries: "Bút toán kế toán",
+  accounting_entry_lines: "Chi tiết bút toán"
 };
 
 const actionConfig: Record<string, { label: string; color: string; bg: string; icon: any }> = {
@@ -121,7 +129,23 @@ export function AuditClient() {
 
   useEffect(() => {
     fetchLogs();
-  }, [fetchLogs]);
+    
+    // Set up Realtime subscription
+    const channel = supabase
+      .channel('audit_changes')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'audit_logs' 
+      }, () => {
+        fetchLogs(); // Re-fetch for simplicity, or we could append manually
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchLogs, supabase]);
 
   const filteredLogs = logs.filter(log => 
     log.table_name.toLowerCase().includes(search.toLowerCase()) ||
@@ -152,25 +176,32 @@ export function AuditClient() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Tổng sự kiện", value: stats.total, icon: Activity, color: "text-blue-400" },
-          { label: "Tạo mới (Insert)", value: stats.inserts, icon: CheckCircle2, color: "text-emerald-400" },
-          { label: "Cập nhật (Update)", value: stats.updates, icon: RefreshCcw, color: "text-amber-400" },
-          { label: "Xóa (Delete)", value: stats.deletes, icon: XCircle, color: "text-rose-400" },
+          { label: "Tổng sự kiện", value: stats.total, icon: Activity, color: "from-blue-500/20 to-blue-600/5", iconColor: "text-blue-400", border: "border-blue-500/20" },
+          { label: "Tạo mới (INSERT)", value: stats.inserts, icon: CheckCircle2, color: "from-emerald-500/20 to-emerald-600/5", iconColor: "text-emerald-400", border: "border-emerald-500/20" },
+          { label: "Cập nhật (UPDATE)", value: stats.updates, icon: RefreshCcw, color: "from-amber-500/20 to-amber-600/5", iconColor: "text-amber-400", border: "border-amber-500/20" },
+          { label: "Xóa (DELETE)", value: stats.deletes, icon: XCircle, color: "from-rose-500/20 to-rose-600/5", iconColor: "text-rose-400", border: "border-rose-500/20" },
         ].map((stat, i) => (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
             key={stat.label}
-            className="p-5 rounded-2xl bg-card border border-border shadow-sm hover:shadow-md transition-all group"
+            className={cn(
+              "p-6 rounded-3xl bg-gradient-to-br border shadow-2xl backdrop-blur-md transition-all group hover:-translate-y-1 hover:shadow-primary/5",
+              stat.color,
+              stat.border
+            )}
           >
             <div className="flex items-center justify-between">
-              <div className={cn("p-2 rounded-lg bg-current/10", stat.color)}>
-                <stat.icon size={20} />
+              <div className={cn("p-3 rounded-2xl bg-black/20 backdrop-blur-xl border border-white/5", stat.iconColor)}>
+                <stat.icon size={24} />
               </div>
-              <span className="text-2xl font-bold">{stat.value}</span>
+              <span className="text-4xl font-black tracking-tighter tabular-nums">{stat.value}</span>
             </div>
-            <p className="text-sm text-muted-foreground mt-3 font-medium uppercase tracking-wider">{stat.label}</p>
+            <div className="mt-4 flex items-center justify-between">
+              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.2em]">{stat.label}</p>
+              <div className={cn("h-1 w-12 rounded-full bg-current opacity-30", stat.iconColor)} />
+            </div>
           </motion.div>
         ))}
       </div>
@@ -258,9 +289,9 @@ export function AuditClient() {
                       <td className="px-6 py-4">
                         <span className={cn(
                           "px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tight",
-                          log.profiles?.role === 'Admin' ? "bg-purple-500/10 text-purple-400" : "bg-blue-500/10 text-blue-400"
+                          (log.user_role || log.profiles?.role) === 'Admin' ? "bg-purple-500/10 text-purple-400" : "bg-blue-500/10 text-blue-400"
                         )}>
-                          {log.profiles?.role || "Hệ thống"}
+                          {log.user_role || log.profiles?.role || "Hệ thống"}
                         </span>
                       </td>
                       <td className="px-6 py-4">
