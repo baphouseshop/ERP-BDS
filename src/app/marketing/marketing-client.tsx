@@ -204,12 +204,67 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <div className="flex gap-1 p-1 bg-secondary/50 rounded-xl border border-white/5">
+            <button 
+              onClick={() => {
+                const headers = ["Ngày chi", "Hạng mục", "Mô tả", "Số tiền", "Dự án ID", "Trạng thái"];
+                const rows = [
+                  [new Date().toISOString().split('T')[0], "MARKETING", "Quảng cáo FB Vinhomes", "5000000", projects[0]?.id || "id-du-an", "paid"],
+                  [new Date().toISOString().split('T')[0], "EVENT_OPEN_SALE", "Tiệc trà mở bán", "2000000", projects[0]?.id || "id-du-an", "pending"]
+                ];
+                const csvContent = "data:text/csv;charset=utf-8," 
+                  + headers.join(",") + "\n"
+                  + rows.map(e => e.join(",")).join("\n");
+                const link = document.createElement("a");
+                link.setAttribute("href", encodeURI(csvContent));
+                link.setAttribute("download", "mau_nhap_chi_phi.csv");
+                document.body.appendChild(link);
+                link.click();
+              }}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-secondary transition-all font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+            >
+              <FileDown size={14} />
+              <span>Tải mẫu</span>
+            </button>
+            <label className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-secondary transition-all font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground cursor-pointer">
+              <Plus size={14} />
+              <span>Upload</span>
+              <input 
+                type="file" 
+                accept=".csv" 
+                className="hidden" 
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  alert(`Đang xử lý file ${file.name}... (Tính năng import hàng loạt đang được tối ưu)`);
+                }} 
+              />
+            </label>
+          </div>
           <button 
-            onClick={() => alert("Tính năng 'Xuất báo cáo Marketing' đang được khởi tạo... Vui lòng kiểm tra lại sau.")}
+            onClick={() => {
+              const headers = ["Ngày", "Hạng mục", "Mô tả", "Dự án", "Số tiền", "Trạng thái"];
+              const rows = filteredExpenses.map(e => [
+                e.expense_date,
+                e.category,
+                e.description,
+                e.projects?.name,
+                e.amount,
+                e.payment_status
+              ]);
+              const csvContent = "data:text/csv;charset=utf-8," 
+                + headers.join(",") + "\n"
+                + rows.map(e => e.join(",")).join("\n");
+              const link = document.createElement("a");
+              link.setAttribute("href", encodeURI(csvContent));
+              link.setAttribute("download", `bao_cao_chi_phi_${new Date().toLocaleDateString()}.csv`);
+              document.body.appendChild(link);
+              link.click();
+            }}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-secondary hover:bg-secondary/80 transition-all font-bold text-xs uppercase tracking-wider"
           >
             <FileDown size={18} />
-            <span>Xuất Excel</span>
+            <span>Xuất báo cáo</span>
           </button>
           <button 
             onClick={() => setIsModalOpen(true)}

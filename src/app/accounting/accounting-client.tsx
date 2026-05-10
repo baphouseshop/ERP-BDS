@@ -198,16 +198,58 @@ export function AccountingClient({
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="relative group">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
-            <input 
-              type="text" 
-              placeholder="Tìm kiếm..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-4 py-2 bg-secondary/50 border border-border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all w-full md:w-48 font-medium"
-            />
+          <div className="flex gap-1 p-1 bg-secondary/30 rounded-xl border border-white/5">
+            <button 
+              onClick={() => {
+                const headers = ["Mã Hợp Đồng", "Dự án ID", "Tỷ lệ HH", "Số tiền thu", "Ngày nhận", "VAT Rate"];
+                const rows = [
+                  ["HĐMB-DEMO-001", projects[0]?.id || "id-du-an", "0.035", "3500000000", new Date().toISOString().split('T')[0], "0.1"],
+                ];
+                const csvContent = "data:text/csv;charset=utf-8," 
+                  + headers.join(",") + "\n"
+                  + rows.map(e => e.join(",")).join("\n");
+                const link = document.createElement("a");
+                link.setAttribute("href", encodeURI(csvContent));
+                link.setAttribute("download", "mau_nhap_hoa_hong.csv");
+                document.body.appendChild(link);
+                link.click();
+              }}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-secondary transition-all font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+            >
+              <FileDown size={14} />
+              <span>Tải mẫu</span>
+            </button>
+            <label className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-secondary transition-all font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground cursor-pointer">
+              <Plus size={14} />
+              <span>Upload</span>
+              <input type="file" accept=".csv" className="hidden" onChange={() => alert("Đang tải dữ liệu...")} />
+            </label>
           </div>
+          <button 
+            onClick={() => {
+              const headers = ["Số Hợp Đồng", "Dự án", "Giá trị", "Hoa hồng", "VAT", "Trạng thái"];
+              const rows = filteredRecords.map(r => [
+                r.sale_contracts?.contract_number,
+                r.projects?.name,
+                r.base_amount,
+                r.commission_amount,
+                r.vat_amount,
+                r.status
+              ]);
+              const csvContent = "data:text/csv;charset=utf-8," 
+                + headers.join(",") + "\n"
+                + rows.map(e => e.join(",")).join("\n");
+              const link = document.createElement("a");
+              link.setAttribute("href", encodeURI(csvContent));
+              link.setAttribute("download", `bao_cao_ke_toan_${new Date().toLocaleDateString()}.csv`);
+              document.body.appendChild(link);
+              link.click();
+            }}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-secondary hover:bg-secondary/80 transition-all font-bold text-xs uppercase tracking-wider"
+          >
+            <FileDown size={18} />
+            <span>Xuất Excel</span>
+          </button>
           <button 
             onClick={() => setIsAddModalOpen(true)}
             className="flex items-center gap-2 px-6 py-2.5 bg-[#00FF88] text-black rounded-xl text-sm font-black shadow-lg shadow-[#00FF88]/20 hover:scale-105 active:scale-95 transition-all"
