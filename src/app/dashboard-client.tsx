@@ -111,8 +111,8 @@ export function DashboardClient({
                 </div>
               </div>
               <div className="flex flex-col">
-                <span className="text-xs font-bold text-white/50 uppercase tracking-[0.2em] mb-1">{stat.label}</span>
-                <span className="text-4xl font-black tracking-tighter text-white drop-shadow-sm">{stat.value}</span>
+                <span className="text-xs font-semibold text-white/50 uppercase tracking-[0.2em] mb-1">{stat.label}</span>
+                <span className="text-4xl font-bold tracking-tighter text-white drop-shadow-sm">{stat.value}</span>
               </div>
             </div>
           </div>
@@ -125,8 +125,8 @@ export function DashboardClient({
         <div className="lg:col-span-2 glass-card rounded-[2.5rem] p-8 border border-white/10 shadow-2xl space-y-6">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <h2 className="text-2xl font-black tracking-tight text-white">Xu hướng Doanh thu</h2>
-              <p className="text-xs text-white/40 font-bold uppercase tracking-widest italic">Phân tích tăng trưởng theo tháng (MoM)</p>
+              <h2 className="text-2xl font-bold tracking-tight text-white">Xu hướng Doanh thu</h2>
+              <p className="text-xs text-white/40 font-semibold uppercase tracking-widest italic">Phân tích tăng trưởng theo tháng (MoM)</p>
             </div>
             <div className="flex gap-4">
               <div className="flex items-center gap-2">
@@ -189,8 +189,8 @@ export function DashboardClient({
         {/* Project Mix Chart */}
         <div className="glass-card rounded-[2.5rem] p-8 border border-white/10 shadow-2xl flex flex-col justify-between">
           <div className="space-y-1">
-            <h2 className="text-2xl font-black tracking-tight text-white">Tỷ trọng Dự án</h2>
-            <p className="text-xs text-white/40 font-bold uppercase tracking-widest italic">Cơ cấu doanh thu theo giỏ hàng</p>
+            <h2 className="text-2xl font-bold tracking-tight text-white">Tỷ trọng Dự án</h2>
+            <p className="text-xs text-white/40 font-semibold uppercase tracking-widest italic">Cơ cấu doanh thu theo giỏ hàng</p>
           </div>
 
           <div className="h-[200px] w-full relative flex items-center justify-center">
@@ -239,10 +239,10 @@ export function DashboardClient({
         {/* Project Performance Table */}
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between px-2">
-            <h3 className="text-xl font-black tracking-tight flex items-center gap-2 text-white">
+            <h3 className="text-xl font-bold tracking-tight flex items-center gap-2 text-white">
               <PieChartIcon className="text-primary" /> Hiệu suất từng dự án
             </h3>
-            <button className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline">Xem tất cả</button>
+            <button className="text-[10px] font-bold uppercase tracking-widest text-primary hover:underline">Xem tất cả</button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {revenueOverview.slice(0, 4).map((project) => {
@@ -255,12 +255,12 @@ export function DashboardClient({
                 <div key={project.project_id} className="glass-card rounded-3xl p-6 border border-white/5 space-y-4 hover:border-primary/30 transition-all group relative overflow-hidden bg-white/[0.01]">
                   <div className="flex justify-between items-start relative z-10">
                     <div className="flex flex-col">
-                      <span className="font-black text-lg text-white group-hover:text-primary transition-colors">{project.project_name}</span>
-                      <span className="text-[10px] font-bold text-white/30 uppercase tracking-wider">{project.developer_name}</span>
+                      <span className="font-bold text-lg text-white group-hover:text-primary transition-colors">{project.project_name}</span>
+                      <span className="text-[10px] font-medium text-white/30 uppercase tracking-wider">{project.developer_name}</span>
                     </div>
                     <div className="text-right">
-                      <span className="block font-black text-primary text-lg">{percent.toFixed(0)}%</span>
-                      <span className="text-[8px] font-bold text-white/30 uppercase italic">Lấp đầy</span>
+                      <span className="block font-bold text-primary text-lg">{percent.toFixed(0)}%</span>
+                      <span className="text-[8px] font-medium text-white/30 uppercase italic">Lấp đầy</span>
                     </div>
                   </div>
                   <div className="space-y-3 relative z-10">
@@ -317,9 +317,9 @@ export function DashboardClient({
               <div className="p-5 bg-primary/10 rounded-2xl border border-primary/20 space-y-3">
                 <div className="flex items-center gap-2 text-primary">
                   <AlertCircle size={16} />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Trợ lý AI Phân tích</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest">Trợ lý AI Phân tích</span>
                 </div>
-                <p className="text-[10px] text-white/50 font-bold leading-relaxed italic">
+                <p className="text-[10px] text-white/50 font-medium leading-relaxed italic">
                   "Dòng tiền thu về trong tháng 5 dự kiến đạt 85% kế hoạch. Đề xuất đẩy mạnh thu hồi nợ dự án Grand Park đợt 4."
                 </p>
               </div>
