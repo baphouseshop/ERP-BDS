@@ -232,10 +232,14 @@ export function BookingsClient({ initialBookings }: BookingsClientProps) {
               <label className="text-xs font-bold text-muted-foreground uppercase">Tổng giá trị (VND)</label>
               <input 
                 required
-                type="number"
-                className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20"
-                value={contractForm.total_value}
-                onChange={e => setContractForm({...contractForm, total_value: e.target.value})}
+                type="text"
+                placeholder="0"
+                className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 font-bold"
+                value={contractForm.total_value ? new Intl.NumberFormat("vi-VN").format(parseInt(contractForm.total_value.replace(/\./g, ""))) : ""}
+                onChange={e => {
+                  const raw = e.target.value.replace(/\./g, "").replace(/[^0-9]/g, "");
+                  setContractForm({...contractForm, total_value: raw});
+                }}
               />
             </div>
             <div className="space-y-2">

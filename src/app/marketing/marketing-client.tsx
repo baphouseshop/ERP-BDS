@@ -408,11 +408,14 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
               <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">Số tiền (VND)</label>
               <input 
                 required
-                type="number"
+                type="text"
                 placeholder="0"
                 className="w-full bg-secondary/50 border border-white/5 rounded-xl px-4 py-2.5 text-sm font-bold focus:ring-2 focus:ring-primary/20"
-                value={form.amount}
-                onChange={e => setForm({...form, amount: e.target.value})}
+                value={form.amount ? new Intl.NumberFormat("vi-VN").format(parseInt(form.amount.replace(/\./g, ""))) : ""}
+                onChange={e => {
+                  const raw = e.target.value.replace(/\./g, "").replace(/[^0-9]/g, "");
+                  setForm({...form, amount: raw});
+                }}
               />
             </div>
             <div className="space-y-2">
