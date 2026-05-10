@@ -12,6 +12,11 @@
 - **Payment Lifecycle:** Tự động hóa vòng đời thanh toán từ "Chờ xử lý" (Pending) đến "Xác nhận thu tiền" và tự động sinh bút toán kế toán Nợ-Có.
 - **Commission Tracking:** Tích hợp Hợp đồng phân phối (`distribution_contracts`) để tự động hạch toán hoa hồng dự thu và hoa hồng thực tế ngay khi có giao dịch.
 
+## 3. BOD Executive Dashboard (Visual Intelligence)
+- **60s Insight:** Triển khai hệ thống biểu đồ động (AreaChart, PieChart) sử dụng thư viện Recharts, cho phép lãnh đạo nắm bắt xu hướng doanh thu và tỷ trọng giỏ hàng chỉ trong 60 giây.
+- **Premium Dark Theme:** Nâng cấp bảng màu High-Contrast (Emerald Green, Electric Blue) trên nền Dark sâu, tối ưu hóa cho việc hiển thị trên các màn hình lớn tại phòng họp.
+- **AI-Powered Analytics:** Tích hợp widget "Trợ lý AI Phân tích" đưa ra các nhận định nhanh về dòng tiền và dự báo kế hoạch thu nợ.
+
 ## 3. Nâng cấp Trải nghiệm Thị giác (Visual Overhaul)
 - **3D Renders Integration:** Đã tích hợp hình ảnh phối cảnh kiến trúc siêu thực (Masteri, Lumi, Vinhomes) vào thẻ dự án, thay thế hoàn toàn giao diện màu xám đơn điệu.
 - **Typography & UI Polish:** Chuẩn hóa định dạng số thập phân, làm tròn tỷ lệ hoa hồng và tối ưu hóa các hiệu ứng Hover/Scale trên thẻ dự án để tạo cảm giác cao cấp.

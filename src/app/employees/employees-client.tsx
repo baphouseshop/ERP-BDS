@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Modal } from "@/components/ui/modal";
 import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 import { 
   Plus, 
   Search, 
@@ -29,6 +30,9 @@ export function EmployeesClient({ initialEmployees, managers }: EmployeesClientP
   const router = useRouter();
   const supabase = createClient();
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRole, setSelectedRole] = useState<string>("all");
+  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [showFilters, setShowFilters] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -42,10 +46,15 @@ export function EmployeesClient({ initialEmployees, managers }: EmployeesClientP
     is_active: true
   });
 
-  const filteredEmployees = initialEmployees.filter(emp => 
-    emp.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    emp.code?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredEmployees = initialEmployees.filter(emp => {
+    const matchesSearch = emp.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         emp.code?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRole = selectedRole === "all" || emp.role === selectedRole;
+    const matchesStatus = selectedStatus === "all" || 
+                         (selectedStatus === "active" ? emp.is_active : !emp.is_active);
+    
+    return matchesSearch && matchesRole && matchesStatus;
+  });
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,7 +100,13 @@ export function EmployeesClient({ initialEmployees, managers }: EmployeesClientP
           />
         </div>
         <div className="flex gap-2">
-          <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-card text-sm font-bold hover:bg-secondary transition-all">
+          <button 
+            onClick={() => setShowFilters(!showFilters)}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border transition-all font-bold text-sm",
+              showFilters ? "bg-primary text-primary-foreground border-primary" : "bg-card hover:bg-secondary"
+            )}
+          >
             <Filter size={18} />
             <span>Bộ lọc</span>
           </button>
@@ -104,6 +119,61 @@ export function EmployeesClient({ initialEmployees, managers }: EmployeesClientP
           </button>
         </div>
       </div>
+
+      {/* Extended Filters */}
+      {showFilters && (
+        <div className="flex flex-wrap gap-4 p-6 glass-card rounded-2xl border border-primary/20 animate-in slide-in-from-top duration-300">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Chức vụ</label>
+            <div className="flex gap-2">
+              {[
+                { id: 'all', label: 'TẤT CẢ' },
+                { id: 'admin', label: 'QUẢN TRỊ' },
+                { id: 'sales_manager', label: 'QUẢN LÝ' },
+                { id: 'accountant', label: 'KẾ TOÁN' },
+                { id: 'sales', label: 'KINH DOANH' }
+              ].map(role => (
+                <button
+                  key={role.id}
+                  onClick={() => setSelectedRole(role.id)}
+                  className={cn(
+                    "px-4 py-1.5 rounded-lg text-xs font-bold transition-all border",
+                    selectedRole === role.id 
+                      ? "bg-primary/20 border-primary text-primary" 
+                      : "bg-secondary/50 border-border text-muted-foreground hover:border-primary/50"
+                  )}
+                >
+                  {role.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="w-px bg-border/50 h-10 self-end hidden md:block" />
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Trạng thái</label>
+            <div className="flex gap-2">
+              {[
+                { id: 'all', label: 'TẤT CẢ' },
+                { id: 'active', label: 'ĐANG LÀM VIỆC' },
+                { id: 'inactive', label: 'ĐÃ NGHỈ VIỆC' }
+              ].map(status => (
+                <button
+                  key={status.id}
+                  onClick={() => setSelectedStatus(status.id)}
+                  className={cn(
+                    "px-4 py-1.5 rounded-lg text-xs font-bold transition-all border",
+                    selectedStatus === status.id 
+                      ? "bg-primary/20 border-primary text-primary" 
+                      : "bg-secondary/50 border-border text-muted-foreground hover:border-primary/50"
+                  )}
+                >
+                  {status.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredEmployees.map((emp) => (
@@ -122,8 +192,17 @@ export function EmployeesClient({ initialEmployees, managers }: EmployeesClientP
                 <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{emp.code}</span>
                 <h3 className="font-black text-xl tracking-tight">{emp.full_name}</h3>
                 <div className="flex items-center gap-2 mt-1">
-                  <Badge variant={emp.role === 'admin' ? 'destructive' : emp.role === 'manager' ? 'secondary' : 'outline'}>
-                    {emp.role}
+                  <Badge variant={
+                    emp.role === 'admin' ? 'destructive' : 
+                    emp.role === 'sales_manager' ? 'secondary' : 
+                    emp.role === 'accountant' ? 'default' :
+                    'outline'
+                  }>
+                    {emp.role === 'admin' ? 'Quản trị' : 
+                     emp.role === 'sales_manager' ? 'Quản lý' : 
+                     emp.role === 'accountant' ? 'Kế toán' : 
+                     emp.role === 'sales' ? 'Kinh doanh' : 
+                     emp.role}
                   </Badge>
                   {!emp.is_active && <Badge variant="destructive">Nghỉ việc</Badge>}
                 </div>
@@ -201,9 +280,9 @@ export function EmployeesClient({ initialEmployees, managers }: EmployeesClientP
                 value={formData.role}
                 onChange={e => setFormData({...formData, role: e.target.value})}
               >
-                <option value="sales">Kinh doanh (Sales)</option>
-                <option value="team_leader">Trưởng nhóm (Leader)</option>
-                <option value="manager">Quản lý (Manager)</option>
+                <option value="sales">Kinh doanh (Sale)</option>
+                <option value="sales_manager">Quản lý (Manager)</option>
+                <option value="accountant">Kế toán (Accountant)</option>
                 <option value="admin">Quản trị (Admin)</option>
               </select>
             </div>
