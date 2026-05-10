@@ -39,13 +39,79 @@ export function AccountingClient({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProject, setSelectedProject] = useState("all");
 
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+
   const filteredRecords = commissionRecords.filter(c => {
     const matchesSearch = 
-      c.sale_contracts?.contract_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.projects?.name.toLowerCase().includes(searchQuery.toLowerCase());
+      (c.sale_contracts?.contract_number || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (c.projects?.name || "").toLowerCase().includes(searchQuery.toLowerCase());
     const matchesProject = selectedProject === "all" || c.project_id === selectedProject;
     return matchesSearch && matchesProject;
   });
+
+  const handleReceiveFromDev = async (recordId: string) => {
+    setLoadingId(recordId);
+    try {
+      const { error } = await supabase
+        .from('commission_records')
+        .update({ 
+          status: 'received',
+          received_date: new Date().toISOString()
+        })
+        .eq('id', recordId);
+
+      if (error) throw error;
+      router.refresh();
+    } catch (err) {
+      console.error("Error confirming payment:", err);
+      alert("Lỗi khi xác nhận thu tiền. Vui lòng thử lại.");
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  const handleApproveInternal = async (recordId: string) => {
+    setLoadingId(recordId);
+    try {
+      const { error } = await supabase
+        .from('internal_commissions')
+        .update({ 
+          status: 'paid',
+          paid_date: new Date().toISOString()
+        })
+        .eq('id', recordId);
+
+      if (error) throw error;
+      router.refresh();
+    } catch (err) {
+      console.error("Error approving commission:", err);
+      alert("Lỗi khi duyệt chi. Vui lòng thử lại.");
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  const handleCancelContract = async (recordId: string) => {
+    if (!confirm("Bạn có chắc chắn muốn xác nhận hủy hợp đồng này? Thao tác này sẽ thu hồi hoa hồng đã tính.")) return;
+    setLoadingId(recordId);
+    try {
+      const { error } = await supabase
+        .from('cancellations')
+        .update({ 
+          status: 'processed',
+          processed_date: new Date().toISOString()
+        })
+        .eq('id', recordId);
+
+      if (error) throw error;
+      router.refresh();
+    } catch (err) {
+      console.error("Error processing cancellation:", err);
+      alert("Lỗi khi xử lý hủy. Vui lòng thử lại.");
+    } finally {
+      setLoadingId(null);
+    }
+  };
 
   const filteredInternal = internalCommissions.filter(i => {
     const matchesSearch = 
@@ -136,9 +202,24 @@ export function AccountingClient({
                 </div>
               </div>
 
-              <button className="w-full py-3 bg-primary/10 text-primary rounded-2xl text-xs font-bold hover:bg-primary hover:text-primary-foreground transition-all flex items-center justify-center gap-2 border border-primary/20">
-                <CheckCircle2 size={16} />
-                Xác nhận đã thu tiền CĐT
+              <button 
+                onClick={() => handleReceiveFromDev(record.id)}
+                disabled={record.status === 'received' || loadingId === record.id}
+                className={cn(
+                  "w-full py-3 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-2 border",
+                  record.status === 'received'
+                    ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20 cursor-default"
+                    : "bg-primary/10 text-primary border-primary/20 hover:bg-primary hover:text-primary-foreground"
+                )}
+              >
+                {loadingId === record.id ? (
+                  <Clock size={16} className="animate-spin" />
+                ) : record.status === 'received' ? (
+                  <CheckCircle2 size={16} />
+                ) : (
+                  <DollarSign size={16} />
+                )}
+                {record.status === 'received' ? 'Đã xác nhận thu tiền' : 'Xác nhận đã thu tiền CĐT'}
               </button>
             </div>
           ))}
@@ -191,8 +272,17 @@ export function AccountingClient({
                     </Badge>
                   </td>
                   <td className="px-8 py-6 text-right">
-                    <button className="px-4 py-2 bg-emerald-500/10 text-emerald-500 rounded-xl text-[10px] font-bold hover:bg-emerald-500 hover:text-white transition-all">
-                      Duyệt chi
+                    <button 
+                      onClick={() => handleApproveInternal(item.id)}
+                      disabled={item.status === 'paid' || loadingId === item.id}
+                      className={cn(
+                        "px-4 py-2 rounded-xl text-[10px] font-bold transition-all",
+                        item.status === 'paid'
+                          ? "bg-emerald-500/10 text-emerald-500 cursor-default"
+                          : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"
+                      )}
+                    >
+                      {item.status === 'paid' ? 'Đã duyệt' : 'Duyệt chi'}
                     </button>
                   </td>
                 </tr>
@@ -207,14 +297,22 @@ export function AccountingClient({
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {cancellations.map((item) => (
-              <div key={item.id} className="glass-card rounded-[2rem] border border-white/5 p-8 flex flex-col md:flex-row gap-6 relative overflow-hidden group">
+            <div key={item.id} className="glass-card rounded-[2rem] border border-white/5 p-8 flex flex-col md:flex-row gap-6 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 p-4">
-                  <XCircle size={48} className="text-rose-500/10 group-hover:text-rose-500/20 transition-colors" />
+                  <XCircle size={48} className={cn(
+                    "transition-colors",
+                    item.status === 'processed' ? "text-emerald-500/20" : "text-rose-500/10 group-hover:text-rose-500/20"
+                  )} />
                 </div>
                 <div className="space-y-4 flex-1">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold text-rose-500 bg-rose-500/10 px-2 py-0.5 rounded-full uppercase">Hủy giao dịch</span>
+                      <span className={cn(
+                        "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase",
+                        item.status === 'processed' ? "text-emerald-500 bg-emerald-500/10" : "text-rose-500 bg-rose-500/10"
+                      )}>
+                        {item.status === 'processed' ? 'Đã xử lý hủy' : 'Hủy giao dịch'}
+                      </span>
                       <span className="text-xs text-muted-foreground font-bold">{item.cancellation_number}</span>
                     </div>
                     <h3 className="text-xl font-bold">HĐ: {item.sale_contracts?.contract_number}</h3>
@@ -233,8 +331,17 @@ export function AccountingClient({
                   </div>
                 </div>
                 <div className="flex flex-col justify-end gap-2 min-w-[140px]">
-                  <button className="w-full py-2.5 bg-rose-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-rose-500/20 hover:opacity-90 transition-all">
-                    Xác nhận hủy
+                  <button 
+                    onClick={() => handleCancelContract(item.id)}
+                    disabled={item.status === 'processed' || loadingId === item.id}
+                    className={cn(
+                      "w-full py-2.5 rounded-xl text-xs font-bold transition-all shadow-lg",
+                      item.status === 'processed'
+                        ? "bg-emerald-500/10 text-emerald-500 cursor-default shadow-none"
+                        : "bg-rose-500 text-white shadow-rose-500/20 hover:opacity-90"
+                    )}
+                  >
+                    {loadingId === item.id ? <Clock size={16} className="animate-spin mx-auto" /> : item.status === 'processed' ? 'Đã xác nhận' : 'Xác nhận hủy'}
                   </button>
                   <button className="w-full py-2.5 bg-secondary text-muted-foreground rounded-xl text-xs font-bold hover:text-foreground transition-all">
                     Xem hồ sơ
