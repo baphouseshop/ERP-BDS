@@ -9,9 +9,9 @@ export default async function ContractsPage() {
     .from("sale_contracts")
     .select(`
       *,
-      units(code, unit_number, block, floor, projects(name)),
+      units(code, unit_number, block, floor, projects!project_id(name)),
       customers(full_name, phone),
-      employees(full_name)
+      employees!sales_id(full_name)
     `)
     .order("created_at", { ascending: false });
 

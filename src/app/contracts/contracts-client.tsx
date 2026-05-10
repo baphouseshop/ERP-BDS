@@ -40,9 +40,9 @@ export function ContractsClient({ initialContracts }: ContractsClientProps) {
 
   const filteredContracts = initialContracts.filter(c => {
     const matchesSearch = 
-      c.contract_number.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      c.customers?.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.units?.code.toLowerCase().includes(searchQuery.toLowerCase());
+      (c.contract_number || "").toLowerCase().includes(searchQuery.toLowerCase()) || 
+      (c.customers?.full_name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (c.units?.code || "").toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = selectedStatus === "all" || c.status === selectedStatus;
     return matchesSearch && matchesStatus;
   });
