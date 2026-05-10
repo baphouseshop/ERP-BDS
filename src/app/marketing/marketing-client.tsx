@@ -141,12 +141,6 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
     },
     {
       title: "Chi phí Marketing",
-      value: fmt(filteredExpenses.filter(e => e.category === 'marketing').reduce((sum, e) => sum + e.amount, 0)),
-      change: "-5%",
-      trend: "down",
-      subtext: "quảng cáo + sự kiện",
-      icon: Target,
-      color: "text-purple-500",
       bg: "bg-purple-500/10",
     },
     {
@@ -171,13 +165,13 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
     },
   ];
 
-  // Calculate dynamic breakdown
+  // Database Categories Mapping
   const categories = [
-    { id: 'marketing', label: "Marketing & Quảng cáo", color: "bg-blue-500" },
-    { id: 'event', label: "Sự kiện mở bán", color: "bg-purple-500" },
-    { id: 'office', label: "Văn phòng & Nhà mẫu", color: "bg-orange-500" },
-    { id: 'salary', label: "Lương & Thưởng", color: "bg-emerald-500" },
-    { id: 'other', label: "Khác", color: "bg-slate-500" },
+    { id: 'MARKETING', label: "Marketing & Quảng cáo", color: "bg-blue-500" },
+    { id: 'EVENT_OPEN_SALE', label: "Sự kiện mở bán", color: "bg-purple-500" },
+    { id: 'OFFICE_RENT', label: "Văn phòng & Nhà mẫu", color: "bg-orange-500" },
+    { id: 'SALARY_BONUS', label: "Lương & Thưởng", color: "bg-emerald-500" },
+    { id: 'OTHER', label: "Khác", color: "bg-slate-500" },
   ];
 
   const breakdown = categories.map(cat => {
@@ -370,11 +364,13 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
                       <td className="py-5 px-6">
                         <span className={cn(
                           "px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
-                          expense.category === "marketing" ? "bg-emerald-500/10 text-emerald-500" :
-                          expense.category === "event" ? "bg-purple-500/10 text-purple-500" :
-                          "bg-orange-500/10 text-orange-500"
+                          expense.category === "MARKETING" ? "bg-blue-500/10 text-blue-500" :
+                          expense.category === "EVENT_OPEN_SALE" ? "bg-purple-500/10 text-purple-500" :
+                          expense.category === "OFFICE_RENT" ? "bg-orange-500/10 text-orange-500" :
+                          expense.category === "SALARY_BONUS" ? "bg-emerald-500/10 text-emerald-500" :
+                          "bg-slate-500/10 text-slate-500"
                         )}>
-                          {expense.category}
+                          {expense.category?.replace(/_/g, ' ')}
                         </span>
                       </td>
                       <td className="py-5 px-6">
@@ -479,11 +475,11 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
                 value={form.category}
                 onChange={e => setForm({...form, category: e.target.value})}
               >
-                <option value="marketing">Marketing & Quảng cáo</option>
-                <option value="event">Sự kiện mở bán</option>
-                <option value="office">Thuê nhà mẫu/VP</option>
-                <option value="salary">Lương & Thưởng</option>
-                <option value="other">Khác</option>
+                <option value="MARKETING">Marketing & Quảng cáo</option>
+                <option value="EVENT_OPEN_SALE">Sự kiện mở bán</option>
+                <option value="OFFICE_RENT">Thuê nhà mẫu/VP</option>
+                <option value="SALARY_BONUS">Lương & Thưởng</option>
+                <option value="OTHER">Khác</option>
               </select>
             </div>
           </div>
