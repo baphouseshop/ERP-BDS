@@ -83,37 +83,39 @@ export function DashboardClient({
     <div className="space-y-8 animate-in fade-in duration-700">
       {/* Header & Filters */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="space-y-1">
-          <h1 className="text-4xl font-bold tracking-tight text-white">Hệ thống Quản trị ERP BĐS</h1>
-          <p className="text-white/60 font-medium text-lg">Chào mừng quay trở lại. Dưới đây là tổng quan tình hình kinh doanh hôm nay.</p>
+        <div className="space-y-1.5">
+          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground">Hệ thống Quản trị ERP</h1>
+          <p className="text-muted-foreground text-sm md:text-base max-w-2xl font-medium">
+            Chào mừng quay trở lại. Dưới đây là tổng quan tình hình kinh doanh hôm nay.
+          </p>
         </div>
         
-        <div className="flex items-center gap-3 bg-white/5 p-2 rounded-[1.5rem] border border-white/10 shadow-xl">
+        <div className="flex items-center gap-3 bg-muted/50 p-1.5 rounded-2xl border border-border shadow-sm">
           <div className="relative group">
-            <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-primary transition-colors" />
+            <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 group-focus-within:text-primary transition-colors" />
             <select 
               value={selectedProject}
               onChange={(e) => setSelectedProject(e.target.value)}
-              className="pl-9 pr-4 py-2 bg-transparent border-none text-xs font-bold text-white focus:ring-0 cursor-pointer appearance-none min-w-[140px]"
+              className="pl-9 pr-4 py-1.5 bg-transparent border-none text-xs font-semibold text-foreground/90 focus:ring-0 cursor-pointer appearance-none min-w-[150px]"
             >
-              <option value="all" className="bg-[#111]">Tất cả dự án</option>
+              <option value="all" className="bg-card">Tất cả dự án</option>
               {projects.map(p => (
-                <option key={p.id} value={p.id} className="bg-[#111]">{p.name}</option>
+                <option key={p.id} value={p.id} className="bg-card">{p.name}</option>
               ))}
             </select>
           </div>
-          <div className="w-px h-6 bg-white/10" />
+          <div className="w-px h-5 bg-border/50" />
           <div className="relative group">
-            <Clock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-primary transition-colors" />
+            <Clock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 group-focus-within:text-primary transition-colors" />
             <select 
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value)}
-              className="pl-9 pr-4 py-2 bg-transparent border-none text-xs font-bold text-white focus:ring-0 cursor-pointer appearance-none min-w-[120px]"
+              className="pl-9 pr-4 py-1.5 bg-transparent border-none text-xs font-semibold text-foreground/90 focus:ring-0 cursor-pointer appearance-none min-w-[130px]"
             >
-              <option value="today" className="bg-[#111]">Hôm nay</option>
-              <option value="this_month" className="bg-[#111]">Tháng này</option>
-              <option value="this_quarter" className="bg-[#111]">Quý này</option>
-              <option value="year" className="bg-[#111]">Năm nay</option>
+              <option value="today" className="bg-card">Hôm nay</option>
+              <option value="this_month" className="bg-card">Tháng này</option>
+              <option value="this_quarter" className="bg-card">Quý này</option>
+              <option value="year" className="bg-card">Năm nay</option>
             </select>
           </div>
         </div>
@@ -123,31 +125,24 @@ export function DashboardClient({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
           { label: "Kho hàng khả dụng", value: stats.availableUnits, icon: Building2, color: "blue", trend: "+2.5%", isUp: true },
-          { label: "Tỷ lệ lấp đầy giỏ hàng", value: `${occupancyRate.toFixed(1)}%`, icon: Target, color: "emerald", trend: "+4.2%", isUp: true, sublabel: "(Cọc/Bán/Khóa)" },
+          { label: "Tỷ lệ lấp đầy", value: `${occupancyRate.toFixed(1)}%`, icon: Target, color: "emerald", trend: "+4.2%", isUp: true, sublabel: "(Giỏ hàng)" },
           { label: "Doanh số hệ thống", value: `${(stats.totalSalesValue / 1000000000).toFixed(2)}B`, icon: Briefcase, color: "purple", trend: "+12%", isUp: true },
           { label: "Doanh thu thực nhận", value: `${(stats.totalReceivedRevenue / 1000000000).toFixed(2)}B`, icon: TrendingUp, color: "orange", trend: "+8.1%", isUp: true },
         ].map((stat, i) => (
-          <div key={i} className="glass-card rounded-[2rem] p-7 border border-white/10 relative overflow-hidden group hover:border-primary/50 transition-all duration-500 shadow-2xl">
-            <div className={cn(
-              "absolute -right-6 -top-6 w-32 h-32 rounded-full opacity-[0.03] transition-transform duration-700 group-hover:scale-150 blur-2xl",
-              stat.color === "blue" ? "bg-blue-400" :
-              stat.color === "emerald" ? "bg-emerald-400" :
-              stat.color === "purple" ? "bg-purple-400" :
-              "bg-orange-400"
-            )} />
-            <div className="flex flex-col gap-5 relative z-10">
+          <div key={i} className="glass-card rounded-[1.5rem] p-6 border border-border/50 relative overflow-hidden group hover:border-primary/40 transition-all duration-300 shadow-sm">
+            <div className="flex flex-col gap-4 relative z-10">
               <div className="flex justify-between items-center">
                 <div className={cn(
-                  "w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300",
-                  stat.color === "blue" ? "bg-blue-500/10 text-blue-400 group-hover:bg-blue-500 group-hover:text-white" :
-                  stat.color === "emerald" ? "bg-emerald-500/10 text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white" :
-                  stat.color === "purple" ? "bg-purple-500/10 text-purple-400 group-hover:bg-purple-500 group-hover:text-white" :
-                  "bg-orange-500/10 text-orange-400 group-hover:bg-orange-500 group-hover:text-white"
+                  "w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300",
+                  stat.color === "blue" ? "bg-blue-500/10 text-blue-400" :
+                  stat.color === "emerald" ? "bg-emerald-500/10 text-emerald-400" :
+                  stat.color === "purple" ? "bg-purple-500/10 text-purple-400" :
+                  "bg-orange-500/10 text-orange-400"
                 )}>
-                  <stat.icon size={28} />
+                  <stat.icon size={24} />
                 </div>
                 <div className={cn(
-                  "flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider",
+                  "flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wide",
                   stat.isUp ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"
                 )}>
                   {stat.isUp ? <ArrowUp size={10} /> : <ArrowDown size={10} />}
@@ -155,10 +150,13 @@ export function DashboardClient({
                 </div>
               </div>
               <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-white/60 uppercase tracking-[0.2em] mb-1">
-                  {stat.label} {stat.sublabel && <span className="lowercase text-white/30 font-medium">{stat.sublabel}</span>}
+                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                  {stat.label}
                 </span>
-                <span className="text-4xl font-bold tracking-tighter text-white drop-shadow-md">{stat.value}</span>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-bold tracking-tight text-foreground">{stat.value}</span>
+                  {stat.sublabel && <span className="text-[10px] font-medium text-muted-foreground/60">{stat.sublabel}</span>}
+                </div>
               </div>
             </div>
           </div>
@@ -233,13 +231,13 @@ export function DashboardClient({
         </div>
 
         {/* Project Mix Chart */}
-        <div className="glass-card rounded-[2.5rem] p-8 border border-white/10 shadow-2xl flex flex-col justify-between">
+        <div className="glass-card rounded-[2rem] p-8 border border-border shadow-sm flex flex-col justify-between">
           <div className="space-y-1">
-            <h2 className="text-2xl font-bold tracking-tight text-white">Tỷ trọng Dự án</h2>
-            <p className="text-xs text-white/40 font-semibold uppercase tracking-widest italic">Cơ cấu doanh thu theo giỏ hàng</p>
+            <h2 className="text-xl font-bold tracking-tight text-foreground">Tỷ trọng Dự án</h2>
+            <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest">Cơ cấu doanh thu hệ thống</p>
           </div>
 
-          <div className="h-[200px] w-full relative flex items-center justify-center">
+          <div className="h-[180px] w-full relative flex items-center justify-center mt-4">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -247,7 +245,7 @@ export function DashboardClient({
                   cx="50%"
                   cy="50%"
                   innerRadius={60}
-                  outerRadius={80}
+                  outerRadius={75}
                   paddingAngle={8}
                   dataKey="value"
                   animationBegin={500}
@@ -257,23 +255,25 @@ export function DashboardClient({
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip 
+                   contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px' }}
+                />
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-2xl font-black text-white">100%</span>
-              <span className="text-[8px] font-black uppercase text-white/30 tracking-[0.2em]">Hệ thống</span>
+              <span className="text-xl font-bold text-foreground">Doanh số</span>
+              <span className="text-[8px] font-semibold uppercase text-muted-foreground tracking-[0.1em]">Toàn hệ thống</span>
             </div>
           </div>
 
-          <div className="space-y-2 mt-4">
+          <div className="space-y-2 mt-6">
             {projectDistributionData.slice(0, 3).map((item, i) => (
               <div key={i} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-[10px] font-bold text-white/70 truncate max-w-[120px]">{item.name}</span>
+                  <span className="text-xs font-medium text-muted-foreground truncate max-w-[140px]">{item.name}</span>
                 </div>
-                <span className="text-[10px] font-black text-white">{(item.value / 1000000000).toFixed(1)}B</span>
+                <span className="text-xs font-semibold text-foreground">{(item.value / 1000000000).toFixed(1)}B</span>
               </div>
             ))}
           </div>
@@ -285,10 +285,10 @@ export function DashboardClient({
         {/* Project Performance Table */}
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between px-2">
-            <h3 className="text-xl font-bold tracking-tight flex items-center gap-2 text-white">
-              <PieChartIcon className="text-primary" /> Hiệu suất từng dự án
+            <h3 className="text-xl font-semibold tracking-tight flex items-center gap-2 text-foreground">
+              <PieChartIcon className="text-primary" size={20} /> Hiệu suất từng dự án
             </h3>
-            <button className="text-[10px] font-bold uppercase tracking-widest text-primary hover:underline">Xem tất cả</button>
+            <button className="text-[10px] font-bold uppercase tracking-widest text-primary hover:text-primary/80 transition-colors">Xem tất cả</button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {revenueOverview.slice(0, 4).map((project) => {
@@ -298,32 +298,32 @@ export function DashboardClient({
               const percent = total > 0 ? (sold / total) * 100 : 0;
               
               return (
-                <div key={project.project_id} className="glass-card rounded-3xl p-6 border border-white/5 space-y-4 hover:border-primary/30 transition-all group relative overflow-hidden bg-white/[0.01]">
+                <div key={project.project_id} className="glass-card rounded-2xl p-6 border border-border/40 space-y-4 hover:border-primary/30 transition-all group relative overflow-hidden bg-white/[0.01]">
                   <div className="flex justify-between items-start relative z-10">
-                    <div className="flex flex-col">
-                      <span className="font-bold text-lg text-white group-hover:text-primary transition-colors">{project.project_name}</span>
-                      <span className="text-[10px] font-medium text-white/30 uppercase tracking-wider">{project.developer_name}</span>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="font-semibold text-base text-foreground group-hover:text-primary transition-colors">{project.project_name}</span>
+                      <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{project.developer_name}</span>
                     </div>
                     <div className="text-right">
-                      <span className="block font-bold text-primary text-lg">{percent.toFixed(0)}%</span>
-                      <span className="text-[8px] font-medium text-white/30 uppercase italic">Lấp đầy</span>
+                      <span className="block font-bold text-primary text-base">{percent.toFixed(0)}%</span>
+                      <span className="text-[8px] font-semibold text-muted-foreground uppercase tracking-tight">Lấp đầy</span>
                     </div>
                   </div>
                   <div className="space-y-3 relative z-10">
-                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                    <div className="h-1.5 w-full bg-muted/30 rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-gradient-to-r from-primary to-blue-500 transition-all duration-1000" 
+                        className="h-full bg-gradient-to-r from-primary to-emerald-400 transition-all duration-1000" 
                         style={{ width: `${percent}%` }}
                       />
                     </div>
                     <div className="flex justify-between items-end">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-[8px] font-bold text-white/30 uppercase">Giá trị thực thu</span>
-                        <span className="text-sm font-black text-white">{(project.total_received_revenue / 1000000).toFixed(0)}Tr VND</span>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-tight">Thực thu</span>
+                        <span className="text-sm font-semibold text-foreground">{(project.total_received_revenue / 1000000).toLocaleString('vi-VN')}Tr</span>
                       </div>
-                      <div className="flex flex-col gap-1 text-right">
-                        <span className="text-[8px] font-bold text-white/30 uppercase">Hợp đồng</span>
-                        <span className="text-sm font-black text-white">{project.total_contracts}</span>
+                      <div className="flex flex-col gap-0.5 text-right">
+                        <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-tight">Hợp đồng</span>
+                        <span className="text-sm font-semibold text-foreground">{project.total_contracts}</span>
                       </div>
                     </div>
                   </div>
@@ -335,38 +335,42 @@ export function DashboardClient({
 
         {/* Recent Activity Log */}
         <div className="space-y-6">
-          <h3 className="text-xl font-black tracking-tight flex items-center gap-2 text-white px-2">
-            <Clock className="text-primary" /> Dòng tiền & Biến động
+          <h3 className="text-xl font-semibold tracking-tight flex items-center gap-2 text-foreground px-2">
+            <Clock className="text-primary" size={20} /> Biến động dòng tiền
           </h3>
-          <div className="glass-card rounded-[2.5rem] p-8 border border-white/5 bg-white/[0.01] space-y-6">
+          <div className="glass-card rounded-[2rem] p-6 border border-border/40 bg-white/[0.01] space-y-5">
             {recentExpenses.length > 0 ? recentExpenses.map((expense, i) => (
               <div key={expense.id} className="flex gap-4 group">
                 <div className="flex flex-col items-center">
-                  <div className="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center text-white/30 group-hover:bg-primary/20 group-hover:text-primary transition-all duration-300">
-                    <ArrowRightLeft size={18} />
+                  <div className="w-9 h-9 rounded-xl bg-muted/50 flex items-center justify-center text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary transition-all duration-300">
+                    <ArrowRightLeft size={16} />
                   </div>
-                  {i !== recentExpenses.length - 1 && <div className="w-px flex-1 bg-white/5 my-2" />}
+                  {i !== recentExpenses.length - 1 && <div className="w-px flex-1 bg-border/40 my-2" />}
                 </div>
-                <div className="flex flex-col gap-1 pb-4">
-                  <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{new Date(expense.expense_date).toLocaleDateString('vi-VN')}</span>
-                  <span className="text-sm font-bold text-white/80 line-clamp-1">{expense.description}</span>
-                  <span className="text-[11px] font-black text-red-400 italic">- {(expense.total_amount).toLocaleString('vi-VN')} VND</span>
+                <div className="flex flex-col gap-0.5 pb-4">
+                  <span className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-widest">
+                    {new Date(expense.expense_date).toLocaleDateString('vi-VN')}
+                  </span>
+                  <span className="text-sm font-medium text-foreground/90 line-clamp-1">{expense.description}</span>
+                  <span className="text-[11px] font-semibold text-red-400">
+                    - {(expense.total_amount).toLocaleString('vi-VN')} VND
+                  </span>
                 </div>
               </div>
             )) : (
-              <div className="flex flex-col items-center justify-center py-10 text-white/20 italic text-xs">
+              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground/40 italic text-xs">
                 Chưa có dữ liệu biến động mới.
               </div>
             )}
             
-            <div className="pt-4 border-t border-white/5">
-              <div className="p-5 bg-primary/10 rounded-2xl border border-primary/20 space-y-3">
+            <div className="pt-4 border-t border-border/50">
+              <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 space-y-2">
                 <div className="flex items-center gap-2 text-primary">
-                  <AlertCircle size={16} />
-                  <span className="text-[10px] font-bold uppercase tracking-widest">Trợ lý AI Phân tích</span>
+                  <AlertCircle size={14} />
+                  <span className="text-[10px] font-bold uppercase tracking-widest">Phân tích dòng tiền</span>
                 </div>
-                <p className="text-[10px] text-white/50 font-medium leading-relaxed italic">
-                  "Dòng tiền thu về trong tháng 5 dự kiến đạt 85% kế hoạch. Đề xuất đẩy mạnh thu hồi nợ dự án Grand Park đợt 4."
+                <p className="text-[11px] text-muted-foreground leading-relaxed italic">
+                  "Dòng tiền dự kiến đạt 85% kế hoạch. Đề xuất đẩy mạnh thu hồi nợ dự án Grand Park đợt 4."
                 </p>
               </div>
             </div>

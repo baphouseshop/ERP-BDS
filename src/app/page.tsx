@@ -44,20 +44,13 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold tracking-tight">Hệ thống Quản trị ERP BĐS</h1>
-        <p className="text-muted-foreground font-medium text-lg">Chào mừng quay trở lại. Dưới đây là tổng quan tình hình kinh doanh hôm nay.</p>
-      </div>
-
-      <DashboardClient 
-        stats={stats} 
-        recentContracts={recentContracts || []}
-        recentExpenses={recentExpenses || []}
-        projects={projects || []}
-        revenueOverview={revenueOverview || []}
-        revenueGrowth={revenueGrowth || []}
-      />
-    </div>
+    <DashboardClient 
+      stats={stats} 
+      recentContracts={recentContracts || []}
+      recentExpenses={recentExpenses || []}
+      projects={projects || []}
+      revenueOverview={revenueOverview || []}
+      revenueGrowth={revenueGrowth || []}
+    />
   );
 }

@@ -73,7 +73,7 @@ export function ContractsClient({ initialContracts }: ContractsClientProps) {
               <select 
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
-                className="pl-9 pr-8 py-2 bg-secondary/50 border border-border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none font-bold cursor-pointer min-w-[140px]"
+                className="pl-9 pr-8 py-2 bg-secondary/50 border border-border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none font-semibold cursor-pointer min-w-[150px]"
               >
                 <option value="all">Tất cả trạng thái</option>
                 <option value="draft">Bản thảo</option>
@@ -90,12 +90,12 @@ export function ContractsClient({ initialContracts }: ContractsClientProps) {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-border bg-secondary/30">
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Số Hợp đồng</th>
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Khách hàng</th>
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Sản phẩm</th>
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Giá trị</th>
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Trạng thái</th>
-              <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground text-right"></th>
+              <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Số Hợp đồng</th>
+              <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Khách hàng</th>
+              <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Sản phẩm</th>
+              <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Giá trị</th>
+              <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Trạng thái</th>
+              <th className="px-6 py-4 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground text-right"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border/50">
@@ -110,9 +110,9 @@ export function ContractsClient({ initialContracts }: ContractsClientProps) {
                     <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                       <FileText size={20} />
                     </div>
-                    <div className="flex flex-col">
-                      <span className="font-bold text-sm group-hover:text-primary transition-colors">{contract.contract_number}</span>
-                      <span className="text-[10px] text-muted-foreground">Ngày ký: {new Date(contract.signed_date).toLocaleDateString('vi-VN')}</span>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="font-semibold text-sm group-hover:text-primary transition-colors">{contract.contract_number}</span>
+                      <span className="text-[10px] text-muted-foreground/70 font-medium">Ký: {new Date(contract.signed_date).toLocaleDateString('vi-VN')}</span>
                     </div>
                   </div>
                 </td>
@@ -129,9 +129,9 @@ export function ContractsClient({ initialContracts }: ContractsClientProps) {
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="flex flex-col">
-                    <span className="text-sm font-bold">{(contract.total_value / 1000000000).toFixed(2)} Tỷ</span>
-                    <span className="text-[10px] text-muted-foreground font-medium">Hoa hồng: {contract.agreed_commission_rate}%</span>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-sm font-semibold text-foreground">{(contract.total_value / 1000000000).toFixed(2)}B</span>
+                    <span className="text-[10px] text-muted-foreground font-medium">Hồng: {contract.agreed_commission_rate}%</span>
                   </div>
                 </td>
                 <td className="px-6 py-4">

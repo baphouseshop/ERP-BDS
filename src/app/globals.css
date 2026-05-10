@@ -40,25 +40,25 @@
 @layer base {
   :root {
     --background: hsl(240 10% 4%);
-    --foreground: hsl(0 0% 100%);
+    --foreground: hsl(0 0% 98%);
     --card: hsl(240 10% 6%);
-    --card-foreground: hsl(0 0% 100%);
+    --card-foreground: hsl(0 0% 98%);
     --popover: hsl(240 10% 6%);
-    --popover-foreground: hsl(0 0% 100%);
-    --primary: hsl(142 76% 50%);
-    --primary-foreground: hsl(240 5.9% 10%);
-    --secondary: hsl(240 3.7% 15%);
-    --secondary-foreground: hsl(0 0% 100%);
-    --muted: hsl(240 3.7% 20%);
-    --muted-foreground: hsl(240 5% 85%);
-    --accent: hsl(217 91% 65%);
+    --popover-foreground: hsl(0 0% 98%);
+    --primary: hsl(158 64% 48%); /* More professional emerald green */
+    --primary-foreground: hsl(240 10% 4%);
+    --secondary: hsl(240 5% 12%);
+    --secondary-foreground: hsl(0 0% 98%);
+    --muted: hsl(240 5% 15%);
+    --muted-foreground: hsl(240 4% 70%); /* Actually muted now */
+    --accent: hsl(217 91% 60%);
     --accent-foreground: hsl(0 0% 100%);
     --destructive: hsl(0 84% 60%);
     --destructive-foreground: hsl(0 0% 98%);
-    --border: hsl(240 3.7% 25%);
-    --input: hsl(240 3.7% 20%);
-    --ring: hsl(142 76% 50%);
-    --radius: 1.25rem;
+    --border: hsl(240 5% 18%);
+    --input: hsl(240 5% 15%);
+    --ring: hsl(158 64% 48%);
+    --radius: 1rem;
   }
 }
 
@@ -69,6 +69,19 @@
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20;
     font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight font-semibold text-foreground/95;
+  }
+  
+  p, span, div {
+    @apply font-normal leading-relaxed;
+  }
+
+  .text-balance {
+    text-wrap: balance;
   }
 }
 

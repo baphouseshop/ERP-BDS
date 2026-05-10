@@ -124,7 +124,7 @@ export function BookingsClient({ initialBookings }: BookingsClientProps) {
               <select 
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
-                className="pl-9 pr-8 py-2 bg-secondary/50 border border-border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none font-bold cursor-pointer min-w-[140px]"
+                className="pl-9 pr-8 py-2 bg-secondary/50 border border-border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none font-semibold cursor-pointer min-w-[150px]"
               >
                 <option value="all">Tất cả trạng thái</option>
                 <option value="active">Đang hiệu lực</option>
@@ -140,8 +140,8 @@ export function BookingsClient({ initialBookings }: BookingsClientProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredBookings.map((booking) => (
           <div key={booking.id} className="glass-card rounded-2xl border border-border/50 p-6 space-y-4 hover:border-primary/50 transition-all group relative overflow-hidden">
-            <div className={cn("absolute top-0 right-0 px-4 py-1 text-[10px] font-bold rounded-bl-xl", 
-              booking.status === 'active' ? "bg-emerald-500/10 text-emerald-500" : "bg-secondary text-muted-foreground"
+            <div className={cn("absolute top-0 right-0 px-4 py-1.5 text-[10px] font-semibold rounded-bl-xl tracking-wider uppercase", 
+              booking.status === 'active' ? "bg-primary/10 text-primary" : "bg-muted/50 text-muted-foreground"
             )}>
               {statusConfig[booking.status]?.label || booking.status}
             </div>
@@ -150,24 +150,24 @@ export function BookingsClient({ initialBookings }: BookingsClientProps) {
               <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all">
                 <CreditCard size={24} />
               </div>
-              <div className="flex flex-col">
-                <span className="font-bold text-lg group-hover:text-primary transition-colors">{booking.booking_number}</span>
-                <span className="text-xs text-muted-foreground">Căn: <span className="font-bold text-foreground">{booking.units?.code}</span></span>
+              <div className="flex flex-col gap-0.5">
+                <span className="font-semibold text-lg text-foreground group-hover:text-primary transition-colors">{booking.booking_number}</span>
+                <span className="text-xs text-muted-foreground font-medium">Căn: <span className="font-semibold text-primary">{booking.units?.code}</span></span>
               </div>
             </div>
 
-            <div className="space-y-2 pt-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground flex items-center gap-2"><User size={14} /> Khách hàng</span>
-                <span className="font-bold">{booking.customers?.full_name}</span>
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between text-[13px]">
+                <span className="text-muted-foreground flex items-center gap-2"><User size={14} className="opacity-50" /> Khách hàng</span>
+                <span className="font-semibold text-foreground">{booking.customers?.full_name}</span>
               </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground flex items-center gap-2"><DollarSign size={14} /> Tiền cọc</span>
+              <div className="flex items-center justify-between text-[13px]">
+                <span className="text-muted-foreground flex items-center gap-2"><DollarSign size={14} className="opacity-50" /> Tiền cọc</span>
                 <span className="font-bold text-primary">{(booking.booking_amount).toLocaleString('vi-VN')} VND</span>
               </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground flex items-center gap-2"><Calendar size={14} /> Hết hạn</span>
-                <span className="font-medium">{new Date(booking.expiry_date).toLocaleDateString('vi-VN')}</span>
+              <div className="flex items-center justify-between text-[13px]">
+                <span className="text-muted-foreground flex items-center gap-2"><Calendar size={14} className="opacity-50" /> Hết hạn</span>
+                <span className="font-medium text-foreground/70">{new Date(booking.expiry_date).toLocaleDateString('vi-VN')}</span>
               </div>
             </div>
 
