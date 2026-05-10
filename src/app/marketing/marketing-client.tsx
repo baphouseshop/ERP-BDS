@@ -56,7 +56,7 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
   
   const [form, setForm] = useState({
     expense_date: new Date().toISOString().split('T')[0],
-    category: "marketing",
+    category: "MARKETING",
     description: "",
     amount: "",
     project_id: projects[0]?.id || "",
@@ -206,14 +206,14 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
         <div className="flex items-center gap-3">
           <button 
             onClick={() => alert("Tính năng 'Xuất báo cáo Marketing' đang được khởi tạo... Vui lòng kiểm tra lại sau.")}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary hover:bg-secondary/80 transition-all font-semibold text-sm"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-secondary hover:bg-secondary/80 transition-all font-bold text-xs uppercase tracking-wider"
           >
             <FileDown size={18} />
             <span>Xuất Excel</span>
           </button>
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-all font-semibold text-sm shadow-lg shadow-primary/20"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground hover:brightness-110 transition-all font-bold text-xs uppercase tracking-wider shadow-[0_8px_30px_rgb(var(--primary-rgb),0.3)] border border-primary/20"
           >
             <Plus size={18} />
             <span>Nhập chi phí</span>
@@ -264,11 +264,11 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
               className="w-full bg-secondary border border-white/5 rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary/20 cursor-pointer outline-none"
             >
               <option value="all">Tất cả loại</option>
-              <option value="marketing">Marketing & Quảng cáo</option>
-              <option value="event">Sự kiện mở bán</option>
-              <option value="office">Văn phòng & Nhà mẫu</option>
-              <option value="salary">Lương & Thưởng</option>
-              <option value="other">Chi phí khác</option>
+              <option value="MARKETING">Marketing & Quảng cáo</option>
+              <option value="EVENT_OPEN_SALE">Sự kiện mở bán</option>
+              <option value="OFFICE_RENT">Văn phòng & Nhà mẫu</option>
+              <option value="SALARY_BONUS">Lương & Thưởng</option>
+              <option value="OTHER">Chi phí khác</option>
             </select>
           </div>
         </div>
@@ -414,7 +414,7 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
                               className="fixed inset-0 z-10" 
                               onClick={() => setActiveMenu(null)}
                             />
-                            <div className="absolute right-6 top-12 w-48 bg-background border border-border rounded-2xl shadow-2xl z-20 py-2 animate-in fade-in zoom-in duration-200">
+                            <div className="absolute right-0 top-full mt-2 w-48 bg-card border border-border rounded-2xl shadow-2xl z-30 py-2 animate-in fade-in slide-in-from-top-2 duration-200">
                               <button 
                                 onClick={() => {
                                   alert("Tính năng Sửa đang được phát triển.");

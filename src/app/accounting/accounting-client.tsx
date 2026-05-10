@@ -47,6 +47,7 @@ export function AccountingClient({
 
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
 
   // Sample data fallback if empty
   const internalData = internalCommissions.length > 0 ? internalCommissions : [
@@ -154,6 +155,22 @@ export function AccountingClient({
     }
   };
 
+  const handleDeleteRecord = async (id: string) => {
+    if (!confirm("Bạn có chắc chắn muốn xóa bản ghi hoa hồng này?")) return;
+    const { error } = await supabase.from('commission_records').delete().eq('id', id);
+    if (error) alert(error.message);
+    else router.refresh();
+    setActiveMenu(null);
+  };
+
+  const handleDeleteInternal = async (id: string) => {
+    if (!confirm("Bạn có chắc chắn muốn xóa bản ghi hoa hồng nội bộ này?")) return;
+    const { error } = await supabase.from('internal_commissions').delete().eq('id', id);
+    if (error) alert(error.message);
+    else router.refresh();
+    setActiveMenu(null);
+  };
+
   const filteredInternal = internalData.filter(i => {
     const matchesSearch = 
       (i.sale_contracts?.contract_number || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -234,9 +251,31 @@ export function AccountingClient({
                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{record.projects?.name}</span>
                   <h3 className="font-bold text-lg group-hover:text-primary transition-colors">HĐ: {record.sale_contracts?.contract_number}</h3>
                 </div>
-                <Badge variant={record.status === 'received' ? 'success' : 'secondary'}>
-                  {record.status === 'received' ? 'Đã thu' : 'Chờ CĐT'}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant={record.status === 'received' ? 'success' : 'secondary'}>
+                    {record.status === 'received' ? 'Đã thu' : 'Chờ CĐT'}
+                  </Badge>
+                  <div className="relative">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveMenu(activeMenu === record.id ? null : record.id);
+                      }}
+                      className="p-1 rounded-lg hover:bg-secondary transition-colors"
+                    >
+                      <MoreVertical size={14} className="text-muted-foreground" />
+                    </button>
+                    {activeMenu === record.id && (
+                      <>
+                        <div className="fixed inset-0 z-10" onClick={() => setActiveMenu(null)} />
+                        <div className="absolute right-0 top-full mt-2 w-32 bg-card border border-border rounded-xl shadow-2xl z-20 py-1">
+                          <button onClick={() => alert("Sửa...")} className="w-full px-3 py-1.5 text-left text-xs hover:bg-secondary flex items-center gap-2"><FileText size={12} /> Sửa</button>
+                          <button onClick={() => handleDeleteRecord(record.id)} className="w-full px-3 py-1.5 text-left text-xs hover:bg-rose-500/10 text-rose-500 flex items-center gap-2"><XCircle size={12} /> Xóa</button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
 
               <div className="p-4 rounded-2xl bg-secondary/20 space-y-3">
@@ -319,19 +358,37 @@ export function AccountingClient({
                       {item.status === 'paid' ? 'Đã chi' : 'Chờ duyệt'}
                     </Badge>
                   </td>
-                  <td className="px-8 py-6 text-right">
-                    <button 
-                      onClick={() => handleApproveInternal(item.id)}
-                      disabled={item.status === 'paid' || loadingId === item.id}
-                      className={cn(
-                        "px-4 py-2 rounded-xl text-[10px] font-bold transition-all",
-                        item.status === 'paid'
-                          ? "bg-emerald-500/10 text-emerald-500 cursor-default"
-                          : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"
+                  <td className="px-8 py-6 text-right relative">
+                    <div className="flex items-center justify-end gap-3">
+                      <button 
+                        onClick={() => handleApproveInternal(item.id)}
+                        disabled={item.status === 'paid' || loadingId === item.id}
+                        className={cn(
+                          "px-4 py-2 rounded-xl text-[10px] font-bold transition-all",
+                          item.status === 'paid'
+                            ? "bg-emerald-500/10 text-emerald-500 cursor-default"
+                            : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"
+                        )}
+                      >
+                        {item.status === 'paid' ? 'Đã duyệt' : 'Duyệt chi'}
+                      </button>
+                      <button 
+                        onClick={() => setActiveMenu(activeMenu === item.id ? null : item.id)}
+                        className="p-2 rounded-lg hover:bg-secondary transition-colors"
+                      >
+                        <MoreVertical size={14} className="text-muted-foreground" />
+                      </button>
+                      
+                      {activeMenu === item.id && (
+                        <>
+                          <div className="fixed inset-0 z-10" onClick={() => setActiveMenu(null)} />
+                          <div className="absolute right-8 top-12 w-32 bg-card border border-border rounded-xl shadow-2xl z-20 py-1">
+                            <button onClick={() => alert("Sửa...")} className="w-full px-3 py-1.5 text-left text-xs hover:bg-secondary flex items-center gap-2"><FileText size={12} /> Sửa</button>
+                            <button onClick={() => handleDeleteInternal(item.id)} className="w-full px-3 py-1.5 text-left text-xs hover:bg-rose-500/10 text-rose-500 flex items-center gap-2"><XCircle size={12} /> Xóa</button>
+                          </div>
+                        </>
                       )}
-                    >
-                      {item.status === 'paid' ? 'Đã duyệt' : 'Duyệt chi'}
-                    </button>
+                    </div>
                   </td>
                 </tr>
               ))}

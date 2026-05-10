@@ -68,7 +68,8 @@ export function DashboardClient({
   // Prepare chart data
   const chartData = revenueGrowth.map(item => ({
     name: new Date(item.month).toLocaleDateString('vi-VN', { month: 'short' }),
-    current: Number(item.current_revenue) / 1000000, // To Millions
+    current: Number(item.current_revenue) / 1000000, // To Millions (Expected)
+    received: Number(item.current_received || 0) / 1000000, // To Millions (Actual)
     previous: Number(item.prev_year_revenue) / 1000000,
     growth: item.yoy_growth_rate * 100
   }));
@@ -179,7 +180,11 @@ export function DashboardClient({
             <div className="flex gap-4">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-primary" />
-                <span className="text-[10px] font-bold text-muted-foreground">Năm nay</span>
+                <span className="text-[10px] font-bold text-muted-foreground">Phí dự kiến</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-emerald-500" />
+                <span className="text-[10px] font-bold text-muted-foreground">Thực thu</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-muted" />
@@ -195,6 +200,10 @@ export function DashboardClient({
                   <linearGradient id="colorCurrent" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3}/>
                     <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorReceived" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
@@ -216,14 +225,21 @@ export function DashboardClient({
                           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest border-b border-border/50 pb-1">
                             Tháng {label}
                           </p>
-                          {payload.map((entry: any, index: number) => (
-                            <div key={index} className="flex items-center justify-between gap-4">
-                              <span className="text-[10px] font-medium text-muted-foreground">{entry.name === 'current' ? 'Năm nay' : 'Năm trước'}</span>
-                              <span className="text-xs font-bold" style={{ color: entry.stroke }}>
-                                {entry.value.toFixed(1)}Tr
-                              </span>
-                            </div>
-                          ))}
+                          {payload.map((entry: any, index: number) => {
+                            let labelStr = "";
+                            if (entry.dataKey === 'current') labelStr = "Phí dự kiến";
+                            else if (entry.dataKey === 'received') labelStr = "Thực thu";
+                            else if (entry.dataKey === 'previous') labelStr = "Năm trước";
+                            
+                            return (
+                              <div key={index} className="flex items-center justify-between gap-4">
+                                <span className="text-[10px] font-medium text-muted-foreground">{labelStr}</span>
+                                <span className="text-xs font-bold" style={{ color: entry.stroke }}>
+                                  {entry.value.toFixed(1)}Tr
+                                </span>
+                              </div>
+                            );
+                          })}
                         </div>
                       );
                     }
@@ -233,6 +249,7 @@ export function DashboardClient({
                 <Area 
                   type="monotone" 
                   dataKey="current" 
+                  name="current"
                   stroke="var(--primary)" 
                   strokeWidth={4}
                   fillOpacity={1} 
@@ -241,7 +258,18 @@ export function DashboardClient({
                 />
                 <Area 
                   type="monotone" 
+                  dataKey="received" 
+                  name="received"
+                  stroke="#10b981" 
+                  strokeWidth={4}
+                  fillOpacity={1} 
+                  fill="url(#colorReceived)" 
+                  animationDuration={2000}
+                />
+                <Area 
+                  type="monotone" 
                   dataKey="previous" 
+                  name="previous"
                   stroke="#ffffff15" 
                   strokeWidth={2}
                   fill="transparent"
