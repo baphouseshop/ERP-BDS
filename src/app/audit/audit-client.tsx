@@ -185,31 +185,33 @@ export function AuditClient() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Tổng sự kiện", value: stats.total, icon: Activity, color: "from-blue-500/20 to-blue-600/5", iconColor: "text-blue-400", border: "border-blue-500/20" },
-          { label: "Tạo mới (INSERT)", value: stats.inserts, icon: CheckCircle2, color: "from-emerald-500/20 to-emerald-600/5", iconColor: "text-emerald-400", border: "border-emerald-500/20" },
-          { label: "Cập nhật (UPDATE)", value: stats.updates, icon: RefreshCcw, color: "from-amber-500/20 to-amber-600/5", iconColor: "text-amber-400", border: "border-amber-500/20" },
-          { label: "Xóa (DELETE)", value: stats.deletes, icon: XCircle, color: "from-rose-500/20 to-rose-600/5", iconColor: "text-rose-400", border: "border-rose-500/20" },
+          { label: "Tổng sự kiện", value: stats.total, icon: Activity, color: "text-blue-400", bg: "bg-blue-500/5", badge: "Ổn định" },
+          { label: "Tạo mới (INSERT)", value: stats.inserts, icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-500/5", badge: "Realtime" },
+          { label: "Cập nhật (UPDATE)", value: stats.updates, icon: RefreshCcw, color: "text-amber-400", bg: "bg-amber-500/5", badge: "+100.0%" },
+          { label: "Xóa (DELETE)", value: stats.deletes, icon: XCircle, color: "text-rose-400", bg: "bg-rose-500/5", badge: "0%" },
         ].map((stat, i) => (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
             key={stat.label}
-            className={cn(
-              "p-6 rounded-3xl bg-gradient-to-br border shadow-2xl backdrop-blur-md transition-all group hover:-translate-y-1 hover:shadow-primary/5",
-              stat.color,
-              stat.border
-            )}
+            className="p-6 rounded-[32px] bg-[#0A0A0A] border border-white/5 shadow-2xl backdrop-blur-xl transition-all group hover:border-white/10"
           >
-            <div className="flex items-center justify-between">
-              <div className={cn("p-3 rounded-2xl bg-black/20 backdrop-blur-xl border border-white/5", stat.iconColor)}>
-                <stat.icon size={24} />
+            <div className="flex items-start justify-between">
+              <div className={cn("p-4 rounded-2xl bg-white/5 border border-white/5", stat.color)}>
+                <stat.icon size={22} />
               </div>
-              <span className="text-4xl font-black tracking-tighter tabular-nums">{stat.value}</span>
+              <div className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-1.5">
+                <div className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">↑ {stat.badge}</span>
+              </div>
             </div>
-            <div className="mt-4 flex items-center justify-between">
-              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.2em]">{stat.label}</p>
-              <div className={cn("h-1 w-12 rounded-full bg-current opacity-30", stat.iconColor)} />
+            
+            <div className="mt-8 space-y-1">
+              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.15em]">{stat.label}</p>
+              <h3 className="text-4xl font-black tracking-tighter text-white tabular-nums">
+                {stat.value}
+              </h3>
             </div>
           </motion.div>
         ))}
