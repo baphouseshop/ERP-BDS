@@ -17,7 +17,10 @@ import {
   Building2,
   Tag,
   Loader2,
-  CheckCircle2
+  CheckCircle2,
+  Edit2,
+  Trash2,
+  PrinterIcon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Modal } from "@/components/ui/modal";
@@ -47,6 +50,7 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
   const [selectedPeriod, setSelectedPeriod] = useState("all");
   const [selectedProject, setSelectedProject] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
@@ -89,6 +93,18 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
       router.refresh();
     }
     setIsLoading(false);
+  };
+
+  const handleDeleteExpense = async (id: string, description: string) => {
+    if (!confirm(`Bạn có chắc chắn muốn xóa khoản chi: "${description}"? Hành động này không thể hoàn tác.`)) return;
+    
+    const { error } = await supabase.from("expenses").delete().eq("id", id);
+    if (error) {
+      alert(error.message);
+    } else {
+      router.refresh();
+    }
+    setActiveMenu(null);
   };
 
   const currentMonth = new Date().getMonth() + 1;
@@ -371,7 +387,7 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
                       <td className="py-5 px-6 text-right font-bold text-base">{fmt(expense.amount)}</td>
                       <td className="py-5 px-6 text-center">
                         <span className={cn(
-                          "px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border",
+                          "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border whitespace-nowrap inline-block",
                           expense.payment_status === "paid" 
                             ? "bg-emerald-500/5 text-emerald-500 border-emerald-500/20" 
                             : "bg-orange-500/5 text-orange-500 border-orange-500/20"
@@ -379,13 +395,55 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
                           {expense.payment_status === "paid" ? "Đã TT" : "Chờ TT"}
                         </span>
                       </td>
-                      <td className="py-5 px-6 text-right">
+                      <td className="py-5 px-6 text-right relative">
                         <button 
-                          onClick={() => alert(`Menu thao tác cho khoản chi: ${expense.description}. \nBao gồm: Sửa, Xóa, In phiếu chi.`)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveMenu(activeMenu === expense.id ? null : expense.id);
+                          }}
                           className="p-2 rounded-lg hover:bg-secondary transition-colors text-muted-foreground"
                         >
                           <MoreVertical size={16} />
                         </button>
+                        
+                        {activeMenu === expense.id && (
+                          <>
+                            <div 
+                              className="fixed inset-0 z-10" 
+                              onClick={() => setActiveMenu(null)}
+                            />
+                            <div className="absolute right-6 top-12 w-48 bg-background border border-border rounded-2xl shadow-2xl z-20 py-2 animate-in fade-in zoom-in duration-200">
+                              <button 
+                                onClick={() => {
+                                  alert("Tính năng Sửa đang được phát triển.");
+                                  setActiveMenu(null);
+                                }}
+                                className="w-full px-4 py-2 text-left text-sm font-semibold hover:bg-secondary flex items-center gap-2 transition-colors"
+                              >
+                                <Edit2 size={14} className="text-blue-500" />
+                                <span>Sửa chi phí</span>
+                              </button>
+                              <button 
+                                onClick={() => {
+                                  alert("Tính năng In phiếu đang được phát triển.");
+                                  setActiveMenu(null);
+                                }}
+                                className="w-full px-4 py-2 text-left text-sm font-semibold hover:bg-secondary flex items-center gap-2 transition-colors"
+                              >
+                                <PrinterIcon size={14} className="text-emerald-500" />
+                                <span>In phiếu chi</span>
+                              </button>
+                              <div className="my-1 border-t border-border" />
+                              <button 
+                                onClick={() => handleDeleteExpense(expense.id, expense.description)}
+                                className="w-full px-4 py-2 text-left text-sm font-semibold hover:bg-rose-500/10 text-rose-500 flex items-center gap-2 transition-colors"
+                              >
+                                <Trash2 size={14} />
+                                <span>Xóa khoản chi</span>
+                              </button>
+                            </div>
+                          </>
+                        )}
                       </td>
                     </tr>
                   ))}
