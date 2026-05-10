@@ -169,17 +169,17 @@ export function DashboardClient({
         <div className="lg:col-span-2 glass-card rounded-[2.5rem] p-8 border border-white/10 shadow-2xl space-y-6">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <h2 className="text-2xl font-bold tracking-tight text-white">Xu hướng Doanh thu</h2>
-              <p className="text-xs text-white/40 font-semibold uppercase tracking-widest italic">Phân tích tăng trưởng theo tháng (MoM)</p>
+              <h2 className="text-2xl font-semibold tracking-tight text-foreground">Xu hướng Doanh thu</h2>
+              <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest italic">Phân tích tăng trưởng theo tháng (MoM)</p>
             </div>
             <div className="flex gap-4">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-primary" />
-                <span className="text-[10px] font-bold text-white/60">Năm nay</span>
+                <span className="text-[10px] font-bold text-muted-foreground">Năm nay</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-white/20" />
-                <span className="text-[10px] font-bold text-white/60">Năm trước</span>
+                <div className="w-3 h-3 rounded-full bg-muted" />
+                <span className="text-[10px] font-bold text-muted-foreground">Năm trước</span>
               </div>
             </div>
           </div>
@@ -198,7 +198,7 @@ export function DashboardClient({
                   dataKey="name" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{fill: '#ffffff40', fontSize: 10, fontWeight: 'bold'}}
+                  tick={{fill: 'var(--muted-foreground)', fontSize: 10, fontWeight: '500'}}
                   dy={10}
                 />
                 <YAxis 
