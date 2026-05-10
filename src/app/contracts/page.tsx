@@ -22,7 +22,10 @@ export default async function ContractsPage() {
         <p className="text-muted-foreground font-medium">Quản lý danh sách hợp đồng và tiến độ thanh toán.</p>
       </div>
 
-      <ContractsClient initialContracts={contracts || []} />
+      <ContractsClient initialContracts={contracts?.map(c => ({
+        ...c,
+        agreed_commission_rate: (c.agreed_commission_rate || 0) * 100
+      })) || []} />
     </div>
   );
 }

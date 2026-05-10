@@ -59,10 +59,12 @@ export function BookingsClient({ initialBookings }: BookingsClientProps) {
 
   const openContractModal = (booking: any) => {
     setSelectedBooking(booking);
+    // Convert decimal to percentage for display (e.g. 0.035 -> 3.5)
+    const rate = booking.units?.projects?.default_commission_rate || 0.03;
     setContractForm({
       signed_date: new Date().toISOString().split('T')[0],
       total_value: booking.agreed_price?.toString() || "",
-      agreed_commission_rate: booking.units?.projects?.default_commission_rate?.toString() || "3"
+      agreed_commission_rate: (rate * 100).toString()
     });
     setIsContractModalOpen(true);
   };
