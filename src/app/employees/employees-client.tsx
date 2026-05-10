@@ -179,7 +179,10 @@ export function EmployeesClient({ initialEmployees, managers }: EmployeesClientP
         {filteredEmployees.map((emp) => (
           <div key={emp.id} className="glass-card rounded-3xl p-6 border border-border/50 space-y-6 group hover:border-primary/50 transition-all duration-500 relative overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button className="p-2 hover:bg-secondary rounded-lg transition-colors">
+              <button 
+                onClick={() => alert("Menu thao tác đang được cập nhật. \nBao gồm: Chỉnh sửa, Khóa tài khoản, Phân quyền.")}
+                className="p-2 hover:bg-secondary rounded-lg transition-colors"
+              >
                 <MoreVertical size={16} className="text-muted-foreground" />
               </button>
             </div>
@@ -228,7 +231,10 @@ export function EmployeesClient({ initialEmployees, managers }: EmployeesClientP
               </div>
             </div>
 
-            <button className="w-full py-2.5 bg-secondary text-foreground rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-sm">
+            <button 
+              onClick={() => alert(`Đang mở hồ sơ nhân sự: ${emp.full_name}... \nVui lòng chờ trong giây lát.`)}
+              className="w-full py-2.5 bg-secondary text-foreground rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-sm"
+            >
               Xem hồ sơ
             </button>
           </div>

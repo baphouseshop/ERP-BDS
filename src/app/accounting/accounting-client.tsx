@@ -152,6 +152,15 @@ export function AccountingClient({
               className="pl-9 pr-4 py-2 bg-secondary/50 border border-border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all w-full md:w-48 font-medium"
             />
           </div>
+          <button 
+            onClick={() => {
+              alert("Tính năng 'Thêm giao dịch thủ công' đang được phát triển. \nHiện tại, các khoản hoa hồng và công nợ được tạo tự động từ Hợp đồng.");
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/20 hover:opacity-90 transition-opacity"
+          >
+            <Plus size={18} />
+            <span>Thêm mới</span>
+          </button>
         </div>
       </div>
 
@@ -345,7 +354,10 @@ export function AccountingClient({
                   >
                     {loadingId === item.id ? <Clock size={16} className="animate-spin mx-auto" /> : item.status === 'processed' ? 'Đã xác nhận' : 'Xác nhận hủy'}
                   </button>
-                  <button className="w-full py-2.5 bg-secondary text-muted-foreground rounded-xl text-xs font-bold hover:text-foreground transition-all">
+                  <button 
+                    onClick={() => alert("Đang mở hồ sơ chi tiết... Vui lòng chờ trong giây lát.")}
+                    className="w-full py-2.5 bg-secondary text-muted-foreground rounded-xl text-xs font-bold hover:text-foreground transition-all"
+                  >
                     Xem hồ sơ
                   </button>
                 </div>

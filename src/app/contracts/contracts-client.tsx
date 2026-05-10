@@ -206,11 +206,20 @@ export function ContractsClient({ initialContracts }: ContractsClientProps) {
 
             {/* Actions */}
             <div className="flex gap-3">
-              <button className="flex-1 py-3 bg-secondary hover:bg-secondary/80 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-colors">
+              <button 
+                onClick={() => window.print()}
+                className="flex-1 py-3 bg-secondary hover:bg-secondary/80 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-colors"
+              >
                 <Printer size={16} />
                 <span>In hợp đồng</span>
               </button>
-              <button className="flex-1 py-3 bg-primary text-primary-foreground rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity">
+              <button 
+                onClick={() => {
+                  alert("Đang khởi tạo file PDF... Vui lòng chờ trong giây lát.");
+                  window.print();
+                }}
+                className="flex-1 py-3 bg-primary text-primary-foreground rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity"
+              >
                 <Download size={16} />
                 <span>Tải File PDF</span>
               </button>

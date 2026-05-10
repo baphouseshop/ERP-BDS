@@ -131,25 +131,36 @@ export function UnitsClient({ initialUnits, projectId, customers, employees }: U
           </select>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button 
-            onClick={() => setViewMode("grid")}
-            className={cn(
-              "p-2 rounded-lg transition-all",
-              viewMode === "grid" ? "bg-primary text-primary-foreground shadow-lg" : "hover:bg-secondary text-muted-foreground"
-            )}
+            onClick={() => {
+              alert("Vui lòng sử dụng tính năng 'Import Giỏ hàng' từ trang dự án để thêm sản phẩm hàng loạt. \nTính năng thêm lẻ từng căn đang được phát triển.");
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/20 hover:opacity-90 transition-opacity"
           >
-            <LayoutGrid size={20} />
+            <Plus size={18} />
+            <span>Thêm sản phẩm</span>
           </button>
-          <button 
-            onClick={() => setViewMode("list")}
-            className={cn(
-              "p-2 rounded-lg transition-all",
-              viewMode === "list" ? "bg-primary text-primary-foreground shadow-lg" : "hover:bg-secondary text-muted-foreground"
-            )}
-          >
-            <ListIcon size={20} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setViewMode("grid")}
+              className={cn(
+                "p-2 rounded-lg transition-all",
+                viewMode === "grid" ? "bg-primary text-primary-foreground shadow-lg" : "hover:bg-secondary text-muted-foreground"
+              )}
+            >
+              <LayoutGrid size={20} />
+            </button>
+            <button 
+              onClick={() => setViewMode("list")}
+              className={cn(
+                "p-2 rounded-lg transition-all",
+                viewMode === "list" ? "bg-primary text-primary-foreground shadow-lg" : "hover:bg-secondary text-muted-foreground"
+              )}
+            >
+              <ListIcon size={20} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -192,6 +203,14 @@ export function UnitsClient({ initialUnits, projectId, customers, employees }: U
                   </p>
                 </div>
                 <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (unit.status === 'available') {
+                      handleOpenBooking(unit);
+                    } else {
+                      alert(`Căn ${unit.code} đang ở trạng thái ${statusConfig[unit.status]?.label}. \nVui lòng chọn căn khác hoặc liên hệ Admin để kiểm tra.`);
+                    }
+                  }}
                   className="w-full py-1 bg-primary text-primary-foreground text-[10px] font-bold rounded-lg hover:opacity-90 transition-opacity"
                 >
                   {unit.status === 'available' ? 'Đặt chỗ ngay' : 'Chi tiết'}

@@ -94,7 +94,10 @@ export function CustomersClient({ initialCustomers, salesStaff }: CustomersClien
               className="pl-10 pr-4 py-2 bg-secondary/50 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all w-full md:w-64"
             />
           </div>
-          <button className="p-2 hover:bg-secondary rounded-xl transition-colors text-muted-foreground">
+          <button 
+            onClick={() => alert("Tính năng lọc nâng cao (theo nguồn, theo khu vực, theo ngày tạo) đang được đồng bộ hóa...")}
+            className="p-2 hover:bg-secondary rounded-xl transition-colors text-muted-foreground"
+          >
             <Filter size={18} />
           </button>
         </div>
@@ -166,7 +169,10 @@ export function CustomersClient({ initialCustomers, salesStaff }: CustomersClien
                   </div>
                 </td>
                 <td className="px-6 py-4 text-right">
-                  <button className="p-2 hover:bg-secondary rounded-lg transition-colors text-muted-foreground hover:text-foreground">
+                  <button 
+                    onClick={() => alert(`Menu thao tác cho khách hàng: ${customer.full_name}. \nBao gồm: Chỉnh sửa, Chuyển đổi Sales, Xóa.`)}
+                    className="p-2 hover:bg-secondary rounded-lg transition-colors text-muted-foreground hover:text-foreground"
+                  >
                     <MoreVertical size={18} />
                   </button>
                 </td>

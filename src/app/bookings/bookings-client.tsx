@@ -183,7 +183,23 @@ export function BookingsClient({ initialBookings }: BookingsClientProps) {
                 <FileSignature size={14} />
                 Lập Hợp đồng
               </button>
-              <button className="p-2.5 bg-secondary hover:bg-secondary/80 rounded-xl transition-colors">
+              <button 
+                onClick={async () => {
+                  if (booking.status !== 'active') return;
+                  if (!confirm("Bạn có chắc chắn muốn HỦY phiếu đặt chỗ này? \nMã căn sẽ được giải phóng về trạng thái Trống.")) return;
+                  
+                  const { error } = await supabase
+                    .from('bookings')
+                    .update({ status: 'cancelled' })
+                    .eq('id', booking.id);
+                  
+                  if (!error) router.refresh();
+                  else alert(error.message);
+                }}
+                disabled={booking.status !== 'active'}
+                className="p-2.5 bg-secondary hover:bg-secondary/80 rounded-xl transition-colors disabled:opacity-30"
+                title="Hủy đặt chỗ"
+              >
                 <XCircle size={14} className="text-muted-foreground" />
               </button>
             </div>

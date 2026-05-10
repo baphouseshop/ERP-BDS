@@ -150,7 +150,10 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary hover:bg-secondary/80 transition-all font-semibold text-sm">
+          <button 
+            onClick={() => alert("Tính năng 'Xuất báo cáo Marketing' đang được khởi tạo... Vui lòng kiểm tra lại sau.")}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary hover:bg-secondary/80 transition-all font-semibold text-sm"
+          >
             <FileDown size={18} />
             <span>Xuất Excel</span>
           </button>
@@ -333,7 +336,10 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
                         </span>
                       </td>
                       <td className="py-5 px-6 text-right">
-                        <button className="p-2 rounded-lg hover:bg-secondary transition-colors text-muted-foreground">
+                        <button 
+                          onClick={() => alert(`Menu thao tác cho khoản chi: ${expense.description}. \nBao gồm: Sửa, Xóa, In phiếu chi.`)}
+                          className="p-2 rounded-lg hover:bg-secondary transition-colors text-muted-foreground"
+                        >
                           <MoreVertical size={16} />
                         </button>
                       </td>
