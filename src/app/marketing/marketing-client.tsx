@@ -173,7 +173,7 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
           <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1">Kỳ</label>
           <div className="relative">
             <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-            <select className="w-full bg-secondary/50 border-none rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary/20 appearance-none">
+            <select className="w-full bg-secondary border border-white/5 rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary/20 cursor-pointer outline-none">
               <option>Tháng này</option>
               <option>Tháng trước</option>
               <option>Quý này</option>
@@ -184,7 +184,7 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
           <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1">Dự án</label>
           <div className="relative">
             <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-            <select className="w-full bg-secondary/50 border-none rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary/20 appearance-none">
+            <select className="w-full bg-secondary border border-white/5 rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary/20 cursor-pointer outline-none">
               <option>Tất cả dự án</option>
               {projects.map(p => (
                 <option key={p.id} value={p.id}>{p.name}</option>
@@ -196,7 +196,7 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
           <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1">Loại</label>
           <div className="relative">
             <Tag className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-            <select className="w-full bg-secondary/50 border-none rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary/20 appearance-none">
+            <select className="w-full bg-secondary border border-white/5 rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary/20 cursor-pointer outline-none">
               <option>Tất cả loại</option>
               <option value="marketing">Marketing & Quảng cáo</option>
               <option value="event">Sự kiện mở bán</option>
@@ -373,7 +373,7 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
             <div className="space-y-2">
               <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">Loại chi phí</label>
               <select 
-                className="w-full bg-secondary/50 border border-white/5 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary/20"
+                className="w-full bg-secondary border border-white/5 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary/20 cursor-pointer outline-none"
                 value={form.category}
                 onChange={e => setForm({...form, category: e.target.value})}
               >
@@ -389,7 +389,7 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">Dự án áp dụng</label>
             <select 
-              className="w-full bg-secondary/50 border border-white/5 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary/20"
+              className="w-full bg-secondary border border-white/5 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary/20 cursor-pointer outline-none"
               value={form.project_id}
               onChange={e => setForm({...form, project_id: e.target.value})}
             >
@@ -428,7 +428,7 @@ export function MarketingClient({ initialExpenses, projects, analysis }: Marketi
             <div className="space-y-2">
               <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">Trạng thái</label>
               <select 
-                className="w-full bg-secondary/50 border border-white/5 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary/20"
+                className="w-full bg-secondary border border-white/5 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary/20 cursor-pointer outline-none"
                 value={form.payment_status}
                 onChange={e => setForm({...form, payment_status: e.target.value})}
               >

@@ -127,7 +127,7 @@ export function BookingsClient({ initialBookings }: BookingsClientProps) {
               <select 
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
-                className="pl-9 pr-8 py-2 bg-secondary/50 border border-border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none font-semibold cursor-pointer min-w-[150px]"
+                className="pl-9 pr-8 py-2 bg-secondary border border-border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 font-semibold cursor-pointer min-w-[150px]"
               >
                 <option value="all">Tất cả trạng thái</option>
                 <option value="active">Đang hiệu lực</option>

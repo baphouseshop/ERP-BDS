@@ -39,6 +39,7 @@
 
 @layer base {
   :root {
+    color-scheme: dark;
     --background: hsl(240 10% 4%);
     --foreground: hsl(0 0% 98%);
     --card: hsl(240 10% 6%);
@@ -59,6 +60,11 @@
     --input: hsl(240 5% 15%);
     --ring: hsl(158 64% 48%);
     --radius: 1rem;
+  }
+
+  select option {
+    background-color: #1a1a1a;
+    color: white;
   }
 }
 

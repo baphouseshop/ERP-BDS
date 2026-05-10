@@ -175,7 +175,7 @@ export function UnitsClient({ initialUnits, projectId, customers, employees }: U
             />
           </div>
           <select 
-            className="bg-secondary/30 border border-border rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 outline-none"
+            className="bg-secondary border border-border rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 outline-none cursor-pointer"
             value={selectedBlock}
             onChange={(e) => setSelectedBlock(e.target.value)}
           >
@@ -358,7 +358,7 @@ export function UnitsClient({ initialUnits, projectId, customers, employees }: U
             <label className="text-xs font-bold text-muted-foreground uppercase">Khách hàng</label>
             <select 
               required
-              className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20"
+              className="w-full bg-secondary border border-border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none cursor-pointer"
               value={bookingForm.customer_id}
               onChange={e => setBookingForm({...bookingForm, customer_id: e.target.value})}
             >
@@ -373,7 +373,7 @@ export function UnitsClient({ initialUnits, projectId, customers, employees }: U
             <label className="text-xs font-bold text-muted-foreground uppercase">Nhân viên Sales</label>
             <select 
               required
-              className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20"
+              className="w-full bg-secondary border border-border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none cursor-pointer"
               value={bookingForm.sales_id}
               onChange={e => setBookingForm({...bookingForm, sales_id: e.target.value})}
             >
@@ -503,7 +503,7 @@ export function UnitsClient({ initialUnits, projectId, customers, employees }: U
             <div className="space-y-2">
               <label className="text-xs font-bold text-muted-foreground uppercase">Loại căn</label>
               <select 
-                className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20"
+                className="w-full bg-secondary border border-border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none cursor-pointer"
                 value={unitForm.unit_type}
                 onChange={e => setUnitForm({...unitForm, unit_type: e.target.value})}
               >

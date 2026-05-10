@@ -244,7 +244,7 @@ export function CustomersClient({ initialCustomers, salesStaff }: CustomersClien
           <div className="space-y-2">
             <label className="text-xs font-bold text-muted-foreground uppercase">Phân bổ Sales</label>
             <select 
-              className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20"
+              className="w-full bg-secondary border border-border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none cursor-pointer"
               value={form.assigned_sales_id}
               onChange={e => setForm({...form, assigned_sales_id: e.target.value})}
             >

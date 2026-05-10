@@ -34,6 +34,8 @@ export function EmployeesClient({ initialEmployees, managers }: EmployeesClientP
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [showFilters, setShowFilters] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -232,7 +234,10 @@ export function EmployeesClient({ initialEmployees, managers }: EmployeesClientP
             </div>
 
             <button 
-              onClick={() => alert(`Đang mở hồ sơ nhân sự: ${emp.full_name}... \nVui lòng chờ trong giây lát.`)}
+              onClick={() => {
+                setSelectedEmployee(emp);
+                setIsDetailModalOpen(true);
+              }}
               className="w-full py-2.5 bg-secondary text-foreground rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-sm"
             >
               Xem hồ sơ
@@ -285,7 +290,7 @@ export function EmployeesClient({ initialEmployees, managers }: EmployeesClientP
             <div className="space-y-2.5">
               <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Chức vụ</label>
               <select 
-                className="w-full bg-secondary/30 border border-border/50 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all appearance-none"
+                className="w-full bg-secondary border border-border/50 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all cursor-pointer"
                 value={formData.role}
                 onChange={e => setFormData({...formData, role: e.target.value})}
               >
@@ -301,7 +306,7 @@ export function EmployeesClient({ initialEmployees, managers }: EmployeesClientP
             <div className="space-y-2.5">
               <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Người quản lý trực tiếp</label>
               <select 
-                className="w-full bg-secondary/30 border border-border/50 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all appearance-none"
+                className="w-full bg-secondary border border-border/50 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all cursor-pointer"
                 value={formData.manager_id}
                 onChange={e => setFormData({...formData, manager_id: e.target.value})}
               >
@@ -335,6 +340,84 @@ export function EmployeesClient({ initialEmployees, managers }: EmployeesClientP
             Hoàn tất thêm nhân sự
           </button>
         </form>
+      </Modal>
+      
+      {/* Detail Modal */}
+      <Modal
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        title="Hồ sơ nhân sự"
+      >
+        {selectedEmployee && (
+          <div className="space-y-6">
+            <div className="flex items-center gap-6">
+              <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center text-primary">
+                <UserCircle size={48} />
+              </div>
+              <div>
+                <span className="text-xs font-black text-muted-foreground uppercase tracking-widest">{selectedEmployee.code}</span>
+                <h3 className="text-2xl font-black">{selectedEmployee.full_name}</h3>
+                <Badge className="mt-1" variant={selectedEmployee.role === 'admin' ? 'destructive' : 'default'}>
+                  {selectedEmployee.role === 'admin' ? 'Quản trị' : 
+                   selectedEmployee.role === 'sales_manager' ? 'Quản lý' : 
+                   selectedEmployee.role === 'accountant' ? 'Kế toán' : 'Kinh doanh'}
+                </Badge>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-secondary/30 rounded-2xl border border-border/50">
+                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block mb-1">Email</label>
+                <div className="text-sm font-bold truncate">{selectedEmployee.email}</div>
+              </div>
+              <div className="p-4 bg-secondary/30 rounded-2xl border border-border/50">
+                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block mb-1">Số điện thoại</label>
+                <div className="text-sm font-bold">{selectedEmployee.phone}</div>
+              </div>
+              <div className="p-4 bg-secondary/30 rounded-2xl border border-border/50">
+                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block mb-1">Quản lý trực tiếp</label>
+                <div className="text-sm font-bold">{selectedEmployee.manager?.full_name || 'Hệ thống'}</div>
+              </div>
+              <div className="p-4 bg-secondary/30 rounded-2xl border border-border/50">
+                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block mb-1">Tỷ lệ hoa hồng</label>
+                <div className="text-sm font-bold text-primary">{selectedEmployee.base_commission_rate}%</div>
+              </div>
+            </div>
+
+            <div className="p-6 bg-primary/5 border border-primary/20 rounded-2xl">
+              <h4 className="text-xs font-black uppercase tracking-widest mb-4">Thống kê hiệu suất</h4>
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <div className="text-xl font-black">0</div>
+                  <div className="text-[10px] text-muted-foreground font-bold uppercase">Hợp đồng</div>
+                </div>
+                <div>
+                  <div className="text-xl font-black">0đ</div>
+                  <div className="text-[10px] text-muted-foreground font-bold uppercase">Doanh số</div>
+                </div>
+                <div>
+                  <div className="text-xl font-black text-primary">0đ</div>
+                  <div className="text-[10px] text-muted-foreground font-bold uppercase">Hoa hồng</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button 
+                onClick={() => alert("Tính năng chỉnh sửa hồ sơ đang được phát triển.")}
+                className="flex-1 py-3 bg-primary text-primary-foreground rounded-xl font-bold hover:opacity-90 transition-all"
+              >
+                Chỉnh sửa hồ sơ
+              </button>
+              <button 
+                onClick={() => setIsDetailModalOpen(false)}
+                className="flex-1 py-3 bg-secondary text-foreground rounded-xl font-bold hover:bg-secondary/80 transition-all"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );
