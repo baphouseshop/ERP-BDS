@@ -39,13 +39,19 @@
 - **Confirmation Safeguards:** Tích hợp popup xác nhận (`confirm()`) cho 100% các thao tác thay đổi dữ liệu quan trọng: duyệt chi, xác nhận thu tiền, chuyển đổi hợp đồng, lưu chi phí marketing, đảm bảo người dùng không vô tình thực hiện các thao tác sai lầm không thể hoàn tác.
 - **Funnel Analytics:** Nâng cấp biểu đồ phễu bán hàng (Booking -> Contract) giúp phản ánh chính xác hiệu suất chuyển đổi thực tế của toàn hệ thống thay vì liệt kê dữ liệu rời rạc.
 
-## 7. Kết luận & Hướng phát triển
-Hệ thống hiện đã đạt trạng thái **Operational Excellence**. Không chỉ đẹp về mặt thị giác, hệ thống đã thực sự "thông minh" và an toàn trong các thao tác nghiệp vụ tài chính thực tế.
+## 7. Ổn định Dòng tiền & Trải nghiệm Dashboard (Cashflow Stability & Dashboard UX)
+- **Dual-Metric Revenue Engine:** Tích hợp hệ thống tính toán doanh thu kép (Expected vs Received) từ cấp Database lên UI, cho phép theo dõi đồng thời dòng tiền lý thuyết và dòng tiền thực thu.
+- **Visual Differentiation:** Chuẩn hóa bảng màu biểu đồ mới (Electric Blue cho Thực thu & Emerald Green cho Dự kiến), giúp BOD phân biệt nhanh các chỉ số mà không cần đọc chú thích.
+- **Tooltip Escape System:** Vá lỗi hiển thị số liệu khi hover (Tooltip clipping) trên toàn bộ Dashboard, đảm bảo trải nghiệm phân tích dữ liệu mượt mà và chuyên nghiệp.
+- **Unified Action Menus:** Triển khai hệ thống Menu thao tác (MoreVertical) đồng nhất trên module Marketing và Kế toán, hỗ trợ Sửa/Xóa nhanh bản ghi để tối ưu hóa thời gian vận hành.
+
+## 8. Kết luận & Hướng phát triển
+Hệ thống hiện đã đạt trạng thái **Production Stability**. Toàn bộ luồng dữ liệu từ lúc ký hợp đồng đến khi thu tiền CĐT và chi hoa hồng nội bộ đã được khép kín, chính xác và có giao diện trực quan cao cấp.
 
 ### Bước tiếp theo:
-1.  **Realtime Notifications:** Tích hợp thông báo đẩy khi có khoản thu mới đến hạn.
+1.  **Mobile App Integration:** Tối ưu hóa UI cho các thiết bị di động để lãnh đạo theo dõi mọi lúc mọi nơi.
 2.  **Audit History UI:** Xây dựng màn hình xem chi tiết lịch sử thay đổi (Audit Log) cho Admin.
 3.  **Advanced Reports:** Phát triển thêm các biểu đồ phân tích sâu về hiệu quả Marketing (CPA/ROAS).
 
 ---
-*Updated by Antigravity AI Agent - 2026-05-10 17:38 (ICT)*
+*Updated by Antigravity AI Agent - 2026-05-10 21:40 (ICT)*

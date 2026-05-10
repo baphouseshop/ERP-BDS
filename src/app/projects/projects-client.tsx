@@ -35,7 +35,16 @@ export function ProjectsClient({ initialDevelopers, initialProjects }: ProjectsC
 
   // Form states
   const [devForm, setDevForm] = useState({ name: "", code: "", contact_email: "", contact_phone: "" });
-  const [projForm, setProjForm] = useState({ name: "", code: "", developer_id: "", default_commission_rate: "3", address: "", image_url: "" });
+  const [projForm, setProjForm] = useState({ 
+    name: "", 
+    code: "", 
+    developer_id: "", 
+    default_commission_rate: "3", 
+    address: "", 
+    image_url: "",
+    total_units: "0",
+    min_price: "0"
+  });
 
   const handleAddDeveloper = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +71,16 @@ export function ProjectsClient({ initialDevelopers, initialProjects }: ProjectsC
     }]);
     if (!error) {
       setIsModalOpen(false);
-      setProjForm({ name: "", code: "", developer_id: "", default_commission_rate: "3", address: "", image_url: "" });
+      setProjForm({ 
+        name: "", 
+        code: "", 
+        developer_id: "", 
+        default_commission_rate: "3", 
+        address: "", 
+        image_url: "",
+        total_units: "0",
+        min_price: "0"
+      });
       router.refresh();
     } else {
       alert(error.message);
@@ -171,6 +189,31 @@ export function ProjectsClient({ initialDevelopers, initialProjects }: ProjectsC
                 value={projForm.name}
                 onChange={e => setProjForm({...projForm, name: e.target.value})}
               />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-muted-foreground uppercase">Giỏ hàng (Căn)</label>
+                <input 
+                  required
+                  type="number"
+                  placeholder="100"
+                  className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20"
+                  value={projForm.total_units}
+                  onChange={e => setProjForm({...projForm, total_units: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-muted-foreground uppercase">Giá bán từ (Tỷ)</label>
+                <input 
+                  required
+                  type="number"
+                  step="0.01"
+                  placeholder="2.5"
+                  className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20"
+                  value={projForm.min_price}
+                  onChange={e => setProjForm({...projForm, min_price: e.target.value})}
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <label className="text-xs font-bold text-muted-foreground uppercase">Ảnh bìa (URL)</label>
@@ -303,6 +346,16 @@ export function ProjectsClient({ initialDevelopers, initialProjects }: ProjectsC
                   <span className="line-clamp-1">{project.address || "Chưa cập nhật địa chỉ"}</span>
                 </div>
                 <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border/50">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Giỏ hàng</p>
+                    <p className="text-sm font-semibold mt-0.5">{project.total_units || 0} căn</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Giá từ</p>
+                    <p className="text-sm font-semibold mt-0.5 text-primary">~{project.min_price || 0} tỷ</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4 pt-2">
                   <div>
                     <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Mã dự án</p>
                     <p className="text-sm font-semibold mt-0.5">{project.code}</p>
