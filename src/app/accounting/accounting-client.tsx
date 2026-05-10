@@ -19,7 +19,8 @@ import {
   User,
   XCircle,
   FileWarning,
-  Building2
+  Building2,
+  Plus
 } from "lucide-react";
 
 interface AccountingClientProps {
