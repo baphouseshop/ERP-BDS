@@ -8,7 +8,8 @@ export default async function DashboardPage() {
     { data: revenueOverview },
     { data: recentContracts },
     { data: recentExpenses },
-    { data: projects }
+    { data: projects },
+    { data: revenueGrowth }
   ] = await Promise.all([
     supabase.from("view_revenue_overview").select("*"),
     supabase.from("sale_contracts")
@@ -19,7 +20,8 @@ export default async function DashboardPage() {
       .select("*")
       .order("expense_date", { ascending: false })
       .limit(5),
-    supabase.from("projects").select("*, units(status)")
+    supabase.from("projects").select("*, units(status)"),
+    supabase.from("v_revenue_growth_yoy").select("*").order("month", { ascending: true })
   ]);
 
   // Aggregate stats from view_revenue_overview
@@ -54,6 +56,7 @@ export default async function DashboardPage() {
         recentExpenses={recentExpenses || []}
         projects={projects || []}
         revenueOverview={revenueOverview || []}
+        revenueGrowth={revenueGrowth || []}
       />
     </div>
   );

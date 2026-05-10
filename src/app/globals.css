@@ -39,26 +39,26 @@
 
 @layer base {
   :root {
-    --background: hsl(240 10% 3.9%);
-    --foreground: hsl(0 0% 98%);
+    --background: hsl(240 10% 2%);
+    --foreground: hsl(0 0% 100%);
     --card: hsl(240 10% 3.9%);
-    --card-foreground: hsl(0 0% 98%);
+    --card-foreground: hsl(0 0% 100%);
     --popover: hsl(240 10% 3.9%);
-    --popover-foreground: hsl(0 0% 98%);
-    --primary: hsl(0 0% 98%);
+    --popover-foreground: hsl(0 0% 100%);
+    --primary: hsl(142 76% 45%);
     --primary-foreground: hsl(240 5.9% 10%);
-    --secondary: hsl(240 3.7% 15.9%);
-    --secondary-foreground: hsl(0 0% 98%);
+    --secondary: hsl(240 3.7% 12%);
+    --secondary-foreground: hsl(0 0% 100%);
     --muted: hsl(240 3.7% 15.9%);
-    --muted-foreground: hsl(240 5% 64.9%);
-    --accent: hsl(240 3.7% 15.9%);
-    --accent-foreground: hsl(0 0% 98%);
-    --destructive: hsl(0 62.8% 30.6%);
+    --muted-foreground: hsl(240 5% 75%);
+    --accent: hsl(217 91% 60%);
+    --accent-foreground: hsl(0 0% 100%);
+    --destructive: hsl(0 84% 60%);
     --destructive-foreground: hsl(0 0% 98%);
-    --border: hsl(240 3.7% 15.9%);
+    --border: hsl(240 3.7% 20%);
     --input: hsl(240 3.7% 15.9%);
-    --ring: hsl(240 4.9% 83.9%);
-    --radius: 0.75rem;
+    --ring: hsl(142 76% 45%);
+    --radius: 1.25rem;
   }
 }
 
@@ -78,7 +78,7 @@
 }
 
 .glass-card {
-  @apply bg-secondary/30 backdrop-blur-sm border border-white/5;
+  @apply bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.8)];
 }
 
 /* Scrollbar styling */
