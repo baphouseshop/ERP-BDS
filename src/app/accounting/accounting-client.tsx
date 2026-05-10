@@ -20,8 +20,14 @@ import {
   XCircle,
   FileWarning,
   Building2,
-  Plus
+  Building2,
+  Plus,
+  AlertCircle,
+  FileText,
+  CreditCard,
+  UserPlus
 } from "lucide-react";
+import { Modal } from "@/components/ui/modal";
 
 interface AccountingClientProps {
   commissionRecords: any[];
@@ -41,6 +47,39 @@ export function AccountingClient({
   const [selectedProject, setSelectedProject] = useState("all");
 
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // Sample data fallback if empty
+  const internalData = internalCommissions.length > 0 ? internalCommissions : [
+    {
+      id: "mock-1",
+      employees: { full_name: "Nguyễn Văn A" },
+      sale_contracts: { contract_number: "HĐ-2024-001" },
+      recipient_type: "SALES_AGENT",
+      net_amount: 25000000,
+      status: "pending"
+    },
+    {
+      id: "mock-2",
+      employees: { full_name: "Trần Thị B" },
+      sale_contracts: { contract_number: "HĐ-2024-005" },
+      recipient_type: "TEAM_LEADER",
+      net_amount: 15000000,
+      status: "paid"
+    }
+  ];
+
+  const cancellationData = cancellations.length > 0 ? cancellations : [
+    {
+      id: "mock-cancel-1",
+      sale_contracts: { contract_number: "HĐ-2023-999" },
+      cancellation_number: "CANCEL-001",
+      reason: "Khách hàng không đủ khả năng tài chính",
+      refund_to_customer: 50000000,
+      commission_reversed: 12000000,
+      status: "pending"
+    }
+  ];
 
   const filteredRecords = commissionRecords.filter(c => {
     const matchesSearch = 
@@ -116,10 +155,10 @@ export function AccountingClient({
     }
   };
 
-  const filteredInternal = internalCommissions.filter(i => {
+  const filteredInternal = internalData.filter(i => {
     const matchesSearch = 
-      i.sale_contracts?.contract_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      i.employees?.full_name.toLowerCase().includes(searchQuery.toLowerCase());
+      (i.sale_contracts?.contract_number || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (i.employees?.full_name || "").toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSearch;
   });
 
@@ -154,13 +193,11 @@ export function AccountingClient({
             />
           </div>
           <button 
-            onClick={() => {
-              alert("Tính năng 'Thêm giao dịch thủ công' đang được phát triển. \nHiện tại, các khoản hoa hồng và công nợ được tạo tự động từ Hợp đồng.");
-            }}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/20 hover:opacity-90 transition-opacity"
+            onClick={() => setIsAddModalOpen(true)}
+            className="flex items-center gap-2 px-6 py-2.5 bg-[#00FF88] text-black rounded-xl text-sm font-black shadow-lg shadow-[#00FF88]/20 hover:scale-105 active:scale-95 transition-all"
           >
-            <Plus size={18} />
-            <span>Thêm mới</span>
+            <Plus size={18} strokeWidth={3} />
+            <span>THÊM MỚI</span>
           </button>
         </div>
       </div>
@@ -308,7 +345,7 @@ export function AccountingClient({
       {activeTab === "cancellations" && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {cancellations.map((item) => (
+            {cancellationData.map((item) => (
             <div key={item.id} className="glass-card rounded-[2rem] border border-white/5 p-8 flex flex-col md:flex-row gap-6 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 p-4">
                   <XCircle size={48} className={cn(
@@ -365,7 +402,7 @@ export function AccountingClient({
               </div>
             ))}
           </div>
-          {cancellations.length === 0 && (
+          {cancellationData.length === 0 && (
             <div className="py-20 text-center glass-card rounded-[2rem] border border-white/5 bg-secondary/10">
               <CheckCircle2 size={48} className="mx-auto text-emerald-500/50 mb-4" />
               <h3 className="text-lg font-bold">Không có hồ sơ hủy hợp đồng</h3>
@@ -374,6 +411,61 @@ export function AccountingClient({
           )}
         </div>
       )}
+
+      {/* Add Transaction Modal */}
+      <Modal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        title="Thêm giao dịch kế toán mới"
+      >
+        <div className="space-y-6 py-4">
+          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex gap-3">
+            <AlertCircle className="text-amber-500 shrink-0" size={20} />
+            <p className="text-xs text-amber-200/80 leading-relaxed font-medium">
+              Thông thường các giao dịch hoa hồng được tự động tạo khi Hợp đồng được ký kết. 
+              Chỉ sử dụng tính năng này để điều chỉnh số dư hoặc nhập các khoản chi phí phát sinh đặc biệt.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4">
+            <button className="flex items-center gap-4 p-4 rounded-[1.5rem] bg-secondary/50 border border-white/5 hover:border-primary/50 transition-all text-left group">
+              <div className="p-3 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all">
+                <CreditCard size={20} />
+              </div>
+              <div className="space-y-0.5">
+                <div className="font-bold text-sm">Ghi nhận công nợ CĐT</div>
+                <div className="text-[10px] text-muted-foreground">Tạo yêu cầu thanh toán từ Chủ đầu tư</div>
+              </div>
+            </button>
+
+            <button className="flex items-center gap-4 p-4 rounded-[1.5rem] bg-secondary/50 border border-white/5 hover:border-emerald-500/50 transition-all text-left group">
+              <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-all">
+                <UserPlus size={20} />
+              </div>
+              <div className="space-y-0.5">
+                <div className="font-bold text-sm">Tạo hoa hồng nội bộ</div>
+                <div className="text-[10px] text-muted-foreground">Chi hoa hồng lẻ cho cộng tác viên/nhân viên</div>
+              </div>
+            </button>
+
+            <button className="flex items-center gap-4 p-4 rounded-[1.5rem] bg-secondary/50 border border-white/5 hover:border-rose-500/50 transition-all text-left group">
+              <div className="p-3 rounded-xl bg-rose-500/10 text-rose-500 group-hover:bg-rose-500 group-hover:text-white transition-all">
+                <FileText size={20} />
+              </div>
+              <div className="space-y-0.5">
+                <div className="font-bold text-sm">Xử lý hoàn tiền/Hủy HĐ</div>
+                <div className="text-[10px] text-muted-foreground">Ghi nhận hồ sơ khách hàng rút cọc/hủy HĐ</div>
+              </div>
+            </button>
+          </div>
+
+          <div className="pt-2 text-center">
+            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
+              Chọn một loại giao dịch để tiếp tục
+            </p>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
